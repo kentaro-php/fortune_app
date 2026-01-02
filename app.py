@@ -257,9 +257,10 @@ def create_pdf(name, birth_year, birth_month, birth_day):
 # 6. アプリUI (Stripe対応版)
 # ==========================================
 
-# CSSで見栄えを良くする
+# CSSで見栄えを良くする（不要なボタン非表示設定を追加）
 st.markdown("""
     <style>
+    /* タイトル周りのデザイン */
     .title-container {
         text-align: center;
         padding-bottom: 20px;
@@ -289,6 +290,28 @@ st.markdown("""
         padding: 10px 20px;
         border-radius: 10px;
     }
+    
+    /* ▼▼▼ ここが追加：Streamlitの標準パーツを消す設定 ▼▼▼ */
+    
+    /* 右下の「Manage app」ボタンなどを消す */
+    .stDeployButton {
+        display: none;
+    }
+    
+    /* 右上の「ハンバーガーメニュー（三本線）」を消す */
+    #MainMenu {
+        visibility: hidden;
+    }
+    
+    /* 下部の「Made with Streamlit」フッターを消す */
+    footer {
+        visibility: hidden;
+    }
+    
+    /* 上部のヘッダーバーを消す */
+    header {
+        visibility: hidden;
+    }
     </style>
     
     <div class="title-container">
@@ -297,53 +320,7 @@ st.markdown("""
         <div style="color: #cccccc;">Designed for your special year</div>
     </div>
     """, unsafe_allow_html=True)
-
-if not os.path.exists(FONT_PATH):
-    download_font()
-
-# クエリパラメータ取得
-query_params = st.query_params
-is_paid = query_params.get("paid") == "true"
-
-# -------------------------------------------
-# パターンA：未払い（LPページ）
-# -------------------------------------------
-if not is_paid:
-    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
     
-    with st.form("preview_form"):
-        st.write("### 🔮 無料プレビュー")
-        st.caption("お名前と生年月日を入力してください")
-        name = st.text_input("お名前", placeholder="山田 花子")
-        col1, col2, col3 = st.columns(3)
-        with col1: st.number_input("年", 1900, 2024, 2000)
-        with col2: st.number_input("月", 1, 12, 1)
-        with col3: st.number_input("日", 1, 31, 1)
-        
-        submitted = st.form_submit_button("鑑定結果の一部を見る")
-    
-    if submitted:
-        st.warning("🔒 詳しい結果を見るには「完全版」の購入が必要です。")
-        st.markdown(f"""
-        **{name}** 様の運勢の鍵となる「ライフパスナンバー」や、
-        **2026年の月別詳細運勢**、**金運・健康運**などを網羅した
-        全2ページの鑑定書を発行します。
-        """)
-
-    st.markdown("---")
-    st.header("💎 完全版鑑定書 (PDF)")
-    st.write("2026年を最高の一年にするための、あなただけのガイドブックです。")
-    
-    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
-    stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k"  # ←ここを書き換える
-    
-    st.link_button(
-        label="👉 500円で鑑定書を発行する", 
-        url=stripe_url, 
-        type="primary", 
-        use_container_width=True
-    )
-
 # -------------------------------------------
 # パターンB：支払い完了（発行ページ）
 # -------------------------------------------
