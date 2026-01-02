@@ -25,7 +25,7 @@ def download_font():
         os.makedirs(FONT_DIR)
     
     if not os.path.exists(FONT_PATH):
-        font_url = "https://moji.or.jp/wp-content/ipafont/IPAexfont/ipaexm.ttf"
+        font_url = "https://raw.githubusercontent.com/making/demo-jasper-report-ja/master/src/main/resources/fonts/ipaexm/ipaexm.ttf"
         try:
             urllib.request.urlretrieve(font_url, FONT_PATH)
             st.success("フォントをダウンロードしました")
