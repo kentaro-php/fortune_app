@@ -11,7 +11,6 @@ from datetime import datetime
 # ページ設定
 st.set_page_config(
     page_title="2026年運勢鑑定書",
-    page_icon="🔮",
     layout="centered"
 )
 
