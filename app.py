@@ -27,7 +27,7 @@ def download_font():
         font_url = "https://raw.githubusercontent.com/making/demo-jasper-report-ja/master/src/main/resources/fonts/ipaexm/ipaexm.ttf"
         try:
             urllib.request.urlretrieve(font_url, FONT_PATH)
-            st.success("フォントをダウンロードしました")
+            # st.success("フォントをダウンロードしました") # 毎回出ると邪魔なのでコメントアウト
         except Exception as e:
             st.error(f"フォントのダウンロードに失敗しました: {e}")
             return False
@@ -45,7 +45,7 @@ def register_font():
     return False
 
 # ==========================================
-# 【重要】日本語対応の折り返し関数
+# 日本語対応の折り返し関数
 # ==========================================
 def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_height, color=HexColor("#333333")):
     """長い日本語テキストを指定幅で折り返して描画し、書き終わったY座標を返す"""
@@ -55,30 +55,23 @@ def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_heigh
     lines = []
     current_line = ""
     
-    # 1文字ずつ幅をチェックしていく
     for char in text:
-        # 今の行にこの文字を足しても幅に収まるか？
         if c.stringWidth(current_line + char, font_name, font_size) <= max_width:
             current_line += char
         else:
-            # 収まらないなら今の行を保存して、新しい行にする
             lines.append(current_line)
             current_line = char
-    
-    # 最後の行を追加
     if current_line:
         lines.append(current_line)
     
-    # 描画処理
     for line in lines:
-        if y < 50: break # ページ下端チェック
+        if y < 50: break
         c.drawString(x, y, line)
         y -= line_height
-    
     return y
 
 # -------------------------------------------------
-# 運勢ロジック（変更なし）
+# 運勢ロジック
 # -------------------------------------------------
 def calculate_life_path_number(year, month, day):
     def sum_digits(n):
@@ -280,25 +273,87 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c.save()
     return filename
 
-# UI部分
+# ==========================================
+# Stripe決済対応のUI
+# ==========================================
 st.title("2026年 運勢鑑定書発行アプリ")
 st.markdown("---")
+
 if not os.path.exists(FONT_PATH):
     download_font()
 
-with st.form("fortune_form"):
-    name = st.text_input("お名前", placeholder="山田 花子")
-    col1, col2, col3 = st.columns(3)
-    with col1: birth_year = st.number_input("年", 1900, 2024, 2000)
-    with col2: birth_month = st.number_input("月", 1, 12, 1)
-    with col3: birth_day = st.number_input("日", 1, 31, 1)
-    submitted = st.form_submit_button("鑑定書を発行する", use_container_width=True)
+# -------------------------------------------
+# 決済状態のチェック
+# -------------------------------------------
+# URLに "?paid=true" がついているか確認
+query_params = st.query_params
+is_paid = query_params.get("paid") == "true"
 
-if submitted and name:
-    with st.spinner("鑑定書を生成中..."):
-        try:
-            pdf_file = create_pdf(name, birth_year, birth_month, birth_day)
-            with open(pdf_file, "rb") as f:
-                st.download_button("📥 PDFをダウンロード", f, file_name=pdf_file, mime="application/pdf")
-        except Exception as e:
-            st.error(f"エラー: {e}")
+# -------------------------------------------
+# パターンA：まだ支払っていない場合
+# -------------------------------------------
+if not is_paid:
+    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
+    
+    # 無料版の入力フォーム（雰囲気だけ）
+    with st.form("preview_form"):
+        st.write("### 🔮 無料プレビュー入力")
+        st.caption("名前を入力して「鑑定結果の一部を見る」を押してください")
+        name = st.text_input("お名前", placeholder="山田 花子")
+        col1, col2, col3 = st.columns(3)
+        with col1: st.number_input("年", 1900, 2024, 2000)
+        with col2: st.number_input("月", 1, 12, 1)
+        with col3: st.number_input("日", 1, 31, 1)
+        
+        submitted = st.form_submit_button("鑑定結果の一部を見る")
+    
+    if submitted:
+        st.warning("🔒 ここから先は「完全版」の購入が必要です。")
+        st.markdown(f"**{name}** 様の「ライフパスナンバー」や「2026年の詳細な運勢」を知るには、鑑定書を発行してください。")
+
+    st.markdown("---")
+    st.header("💎 完全版鑑定書 (PDF)")
+    st.write("2026年の総合運、恋愛運、仕事運、ラッキーカラーなどを網羅したあなただけの鑑定書を発行します。")
+    
+    # ▼▼▼【重要】ここにStripeのURLを貼り付けてください！▼▼▼
+    stripe_url = "https://buy.stripe.com/test_eVq9AT1BwaGu813acfcfK03" 
+    
+    st.link_button(
+        label="👉 500円で鑑定書を発行する", 
+        url=stripe_url, 
+        type="primary", 
+        use_container_width=True
+    )
+
+# -------------------------------------------
+# パターンB：支払い完了後（鑑定書発行画面）
+# -------------------------------------------
+else:
+    st.success("✅ ご購入ありがとうございます！鑑定書を発行できます。")
+    
+    with st.form("fortune_form"):
+        st.write("### 📄 鑑定書発行フォーム")
+        st.write("もう一度、正確な情報を入力してください。")
+        name = st.text_input("お名前", placeholder="山田 花子")
+        col1, col2, col3 = st.columns(3)
+        with col1: birth_year = st.number_input("年", 1900, 2024, 2000)
+        with col2: birth_month = st.number_input("月", 1, 12, 1)
+        with col3: birth_day = st.number_input("日", 1, 31, 1)
+        
+        submitted = st.form_submit_button("鑑定書PDFをダウンロードする", use_container_width=True)
+
+    if submitted and name:
+        with st.spinner("鑑定書を生成中..."):
+            try:
+                pdf_file = create_pdf(name, birth_year, birth_month, birth_day)
+                with open(pdf_file, "rb") as f:
+                    st.download_button(
+                        label="📥 PDFをダウンロード", 
+                        data=f, 
+                        file_name=pdf_file, 
+                        mime="application/pdf",
+                        type="primary"
+                    )
+                st.balloons()
+            except Exception as e:
+                st.error(f"エラーが発生しました: {e}")
