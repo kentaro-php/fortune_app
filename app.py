@@ -237,10 +237,9 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     return filename
 
 # ==========================================
-# 6. アプリUI (Stripe & ボタン非表示対応)
+# 6. アプリUI (Stripe & 強制非表示CSS対応)
 # ==========================================
 
-# CSSで見栄えを良くする＆不要ボタンを隠す
 st.markdown("""
     <style>
     /* タイトルデザイン */
@@ -264,6 +263,7 @@ st.markdown("""
         color: #C0A060;
         font-weight: bold;
     }
+    
     /* ボタンデザイン */
     div.stButton > button {
         background-color: #C71585;
@@ -273,11 +273,25 @@ st.markdown("""
         padding: 10px 20px;
         border-radius: 10px;
     }
-    /* 管理用ボタン非表示設定 */
+    
+    /* --- 管理用ボタン・メニューの非表示設定 --- */
+    
+    /* 右上のハンバーガーメニュー、フッター、ヘッダーを消す */
     .stDeployButton { display: none; }
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
     header { visibility: hidden; }
+
+    /* 右下のツールバー（王冠アイコン等）を強制的に消す */
+    div[data-testid="stToolbar"] {
+        display: none !important;
+    }
+    div[data-testid="stDecoration"] {
+        display: none !important;
+    }
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+    }
     </style>
     
     <div class="title-container">

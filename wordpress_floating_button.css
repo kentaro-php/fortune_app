@@ -1,0 +1,144 @@
+/* WordPress用フローティングボタン - 追加CSS用 */
+/* このコードを「外観」→「カスタマイズ」→「追加CSS」に追加してください */
+
+#fortune-floating-button {
+  position: fixed;
+  right: 20px;
+  bottom: 100px; /* チャットボタン（bottom: 20px）の上に配置 */
+  width: 75px;
+  height: 75px;
+  z-index: 9999; /* 他の要素の上に表示 */
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#fortune-floating-button:hover {
+  transform: scale(1.1);
+}
+
+#fortune-floating-button a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #C5A059 0%, #E8B4B8 50%, #FFB6C1 100%);
+  box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+/* キラキラエフェクト */
+#fortune-floating-button a::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+.fortune-button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.fortune-text {
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  display: block;
+}
+
+.fortune-icon {
+  font-size: 18px;
+  display: none; /* デフォルトでは非表示（テキストを表示） */
+  animation: sparkle 2s infinite;
+}
+
+/* アイコン表示モード用（テキストの代わりにアイコンを表示したい場合） */
+#fortune-floating-button.icon-mode .fortune-text {
+  display: none;
+}
+
+#fortune-floating-button.icon-mode .fortune-icon {
+  display: block;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* プルンと揺れるアニメーション（3秒おき） */
+@keyframes bounce {
+  0%, 90%, 100% {
+    transform: translateY(0);
+  }
+  92% {
+    transform: translateY(-8px);
+  }
+  94% {
+    transform: translateY(0);
+  }
+  96% {
+    transform: translateY(-5px);
+  }
+  98% {
+    transform: translateY(0);
+  }
+}
+
+#fortune-floating-button {
+  animation: bounce 3s infinite;
+}
+
+/* レスポンシブ対応（スマホでは少し小さく） */
+@media (max-width: 768px) {
+  #fortune-floating-button {
+    width: 65px;
+    height: 65px;
+    right: 15px;
+    bottom: 90px;
+  }
+  
+  .fortune-text {
+    font-size: 11px;
+  }
+  
+  .fortune-icon {
+    font-size: 16px;
+  }
+}
+
