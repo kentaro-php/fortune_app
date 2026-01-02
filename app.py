@@ -70,7 +70,7 @@ def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_heigh
         lines.append(current_line)
     
     for line in lines:
-        if y < 30: # ページ下端に来たら中断（改ページ処理は簡易的に省略）
+        if y < 30: # ページ下端に来たら中断
             break
         c.drawString(x, y, line)
         y -= line_height
@@ -92,7 +92,6 @@ def calculate_life_path_number(year, month, day):
 
 def get_fortune_data(life_path):
     """ライフパスナンバーに基づく運勢データを一括取得"""
-    # 簡易データ（本来はもっと長文を入れると価値が上がります）
     data = {
         "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
         "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
@@ -104,7 +103,6 @@ def get_fortune_data(life_path):
         "color": "ゴールド",
         "item": "手帳"
     }
-    # ナンバーごとのカスタマイズ（例として一部変化させています）
     if life_path % 2 == 0:
         data["color"] = "シルバー"
         data["overall"] = ("中吉", "2026年は基盤を固める年。焦らず着実に進むことで、揺るぎない成果を手に入れます。")
@@ -112,7 +110,6 @@ def get_fortune_data(life_path):
 
 def get_monthly_fortunes(life_path):
     """1月〜12月の運勢リストを返す"""
-    # サンプルデータ（実際はLPごとに変えるロジックを入れる）
     return [
         "1月: 新しいことを始めるのに最適な時期です。",
         "2月: 周囲との協力を大切にしましょう。",
@@ -159,13 +156,11 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     content_width = width - (margin * 2) 
     current_y = height - 60 
 
-    # タイトル
     c.setFillColor(title_color)
     c.setFont(font_name, 26)
     c.drawCentredString(width/2, current_y, "2026年 運勢鑑定書")
     current_y -= 40
     
-    # 名前・基本情報
     c.setFillColor(accent_color)
     c.setFont(font_name, 22)
     c.drawCentredString(width/2, current_y, f"{name} 様")
@@ -176,7 +171,6 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c.drawCentredString(width/2, current_y, f"生年月日: {birth_year}年{birth_month}月{birth_day}日  (LP: {life_path})")
     current_y -= 40
 
-    # 性格
     c.setFillColor(title_color)
     c.setFont(font_name, 14)
     c.drawString(margin, current_y, "【あなたの本質】")
@@ -184,17 +178,15 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     current_y = draw_wrapped_text(c, data["personality"], margin, current_y, content_width, font_name, 11, 18, text_color)
     current_y -= 25
 
-    # 総合運
     c.setFillColor(title_color)
     c.setFont(font_name, 14)
     c.drawString(margin, current_y, "【2026年の総合運】")
     c.setFillColor(accent_color)
-    c.drawString(margin + 150, current_y, data["overall"][0]) # 大吉など
+    c.drawString(margin + 150, current_y, data["overall"][0])
     current_y -= 20
     current_y = draw_wrapped_text(c, data["overall"][1], margin, current_y, content_width, font_name, 11, 18, text_color)
     current_y -= 25
 
-    # 各種運勢（グリッドっぽく配置）
     topics = [
         ("恋愛運", data["love"]),
         ("仕事運", data["work"]),
@@ -207,17 +199,13 @@ def create_pdf(name, birth_year, birth_month, birth_day):
         c.setFillColor(title_color)
         c.setFont(font_name, 14)
         c.drawString(margin, current_y, f"【{title}】")
-        
-        # ★表示
         c.setFillColor(accent_color)
         star_str = "★" * stars + "☆" * (5 - stars)
         c.drawString(margin + 100, current_y, star_str)
         current_y -= 20
-        
         current_y = draw_wrapped_text(c, text, margin, current_y, content_width, font_name, 11, 18, text_color)
-        current_y -= 20 # 行間
+        current_y -= 20
 
-    # ラッキーアイテム
     current_y -= 10
     c.setFillColor(title_color)
     c.setFont(font_name, 14)
@@ -225,8 +213,6 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     
     # --- 2ページ目（月別運勢） ---
     c.showPage()
-    
-    # 背景
     c.setFillColor(bg_color)
     c.rect(0, 0, width, height, fill=1)
     
@@ -236,16 +222,13 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c.drawCentredString(width/2, current_y, "2026年 月別運勢カレンダー")
     current_y -= 50
     
-    # リスト表示
     c.setFillColor(text_color)
     c.setFont(font_name, 12)
     
     for month_text in monthly_data:
-        # 月の部分だけ色を変えたり太字にしたいが、シンプルに描画
         current_y = draw_wrapped_text(c, month_text, margin, current_y, content_width, font_name, 12, 25, text_color)
-        current_y -= 15 # 各月の間隔
+        current_y -= 15
 
-    # フッター
     c.setFillColor(HexColor("#999999"))
     c.setFont(font_name, 9)
     c.drawCentredString(width/2, 30, "Mizary Fortune Telling - 2026 Special Report")
@@ -254,13 +237,13 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     return filename
 
 # ==========================================
-# 6. アプリUI (Stripe対応版)
+# 6. アプリUI (Stripe & ボタン非表示対応)
 # ==========================================
 
-# CSSで見栄えを良くする（不要なボタン非表示設定を追加）
+# CSSで見栄えを良くする＆不要ボタンを隠す
 st.markdown("""
     <style>
-    /* タイトル周りのデザイン */
+    /* タイトルデザイン */
     .title-container {
         text-align: center;
         padding-bottom: 20px;
@@ -281,7 +264,7 @@ st.markdown("""
         color: #C0A060;
         font-weight: bold;
     }
-    /* ボタンのカスタマイズ */
+    /* ボタンデザイン */
     div.stButton > button {
         background-color: #C71585;
         color: white;
@@ -290,28 +273,11 @@ st.markdown("""
         padding: 10px 20px;
         border-radius: 10px;
     }
-    
-    /* ▼▼▼ ここが追加：Streamlitの標準パーツを消す設定 ▼▼▼ */
-    
-    /* 右下の「Manage app」ボタンなどを消す */
-    .stDeployButton {
-        display: none;
-    }
-    
-    /* 右上の「ハンバーガーメニュー（三本線）」を消す */
-    #MainMenu {
-        visibility: hidden;
-    }
-    
-    /* 下部の「Made with Streamlit」フッターを消す */
-    footer {
-        visibility: hidden;
-    }
-    
-    /* 上部のヘッダーバーを消す */
-    header {
-        visibility: hidden;
-    }
+    /* 管理用ボタン非表示設定 */
+    .stDeployButton { display: none; }
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    header { visibility: hidden; }
     </style>
     
     <div class="title-container">
@@ -320,7 +286,55 @@ st.markdown("""
         <div style="color: #cccccc;">Designed for your special year</div>
     </div>
     """, unsafe_allow_html=True)
+
+if not os.path.exists(FONT_PATH):
+    download_font()
+
+# -------------------------------------------
+# 決済状態のチェック
+# -------------------------------------------
+query_params = st.query_params
+is_paid = query_params.get("paid") == "true"
+
+# -------------------------------------------
+# パターンA：未払い（LPページ）
+# -------------------------------------------
+if not is_paid:
+    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
     
+    with st.form("preview_form"):
+        st.write("### 🔮 無料プレビュー")
+        st.caption("お名前と生年月日を入力してください")
+        name = st.text_input("お名前", placeholder="山田 花子")
+        col1, col2, col3 = st.columns(3)
+        with col1: st.number_input("年", 1900, 2024, 2000)
+        with col2: st.number_input("月", 1, 12, 1)
+        with col3: st.number_input("日", 1, 31, 1)
+        
+        submitted = st.form_submit_button("鑑定結果の一部を見る")
+    
+    if submitted:
+        st.warning("🔒 詳しい結果を見るには「完全版」の購入が必要です。")
+        st.markdown(f"""
+        **{name}** 様の運勢の鍵となる「ライフパスナンバー」や、
+        **2026年の月別詳細運勢**、**金運・健康運**などを網羅した
+        全2ページの鑑定書を発行します。
+        """)
+
+    st.markdown("---")
+    st.header("💎 完全版鑑定書 (PDF)")
+    st.write("2026年を最高の一年にするための、あなただけのガイドブックです。")
+    
+    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
+    stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k" 
+    
+    st.link_button(
+        label="👉 500円で鑑定書を発行する", 
+        url=stripe_url, 
+        type="primary", 
+        use_container_width=True
+    )
+
 # -------------------------------------------
 # パターンB：支払い完了（発行ページ）
 # -------------------------------------------
