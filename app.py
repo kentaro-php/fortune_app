@@ -4,7 +4,6 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import HexColor
-from reportlab.lib.utils import simpleSplit
 import os
 import urllib.request
 from datetime import datetime
@@ -46,27 +45,40 @@ def register_font():
     return False
 
 # ==========================================
-# 文章折り返し用の便利関数
+# 【重要】日本語対応の折り返し関数
 # ==========================================
 def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_height, color=HexColor("#333333")):
-    """長いテキストを指定幅で折り返して描画し、書き終わったY座標を返す"""
+    """長い日本語テキストを指定幅で折り返して描画し、書き終わったY座標を返す"""
     c.setFillColor(color)
     c.setFont(font_name, font_size)
     
-    # テキストを折り返す
-    lines = simpleSplit(text, font_name, font_size, max_width)
+    lines = []
+    current_line = ""
     
+    # 1文字ずつ幅をチェックしていく
+    for char in text:
+        # 今の行にこの文字を足しても幅に収まるか？
+        if c.stringWidth(current_line + char, font_name, font_size) <= max_width:
+            current_line += char
+        else:
+            # 収まらないなら今の行を保存して、新しい行にする
+            lines.append(current_line)
+            current_line = char
+    
+    # 最後の行を追加
+    if current_line:
+        lines.append(current_line)
+    
+    # 描画処理
     for line in lines:
-        # ページ下端を超えたら本当は改ページが必要だが、今回は簡易的にそのまま書くか止める
-        if y < 50: 
-            break
+        if y < 50: break # ページ下端チェック
         c.drawString(x, y, line)
         y -= line_height
     
     return y
 
 # -------------------------------------------------
-# ここから下は変更なし（計算ロジックなど）
+# 運勢ロジック（変更なし）
 # -------------------------------------------------
 def calculate_life_path_number(year, month, day):
     def sum_digits(n):
@@ -97,34 +109,61 @@ def get_personality(life_path):
 
 def get_fortune(life_path):
     fortunes = {
-        1: ("大吉", "新しいスタートの年となる傾向があります。積極的に行動されることで、大きな成果が期待できるでしょう。"),
-        2: ("中吉", "協力関係が特に重要となる年となりそうです。パートナーシップを大切にされることで、運気が上昇していく傾向があります。"),
-        3: ("大吉", "創造性が開花する年となる傾向があります。表現活動やコミュニケーションを通じて、成功のチャンスが訪れる可能性が高いでしょう。"),
-        4: ("中吉", "着実な成長の年となりそうです。努力を積み重ねることで、安定した成果を得られる傾向があります。"),
-        5: ("小吉", "変化と自由の年となる傾向があります。新しい環境や経験が、あなたの運気を高める可能性が高いでしょう。"),
-        6: ("中吉", "愛情と調和の年となりそうです。人間関係が深まり、心の豊かさが増していく傾向があります。"),
-        7: ("小吉", "内面の探求の年となる傾向があります。静かな時間を大切にしながら、自分自身と向き合うことで、新たな気づきが訪れることでしょう。"),
-        8: ("大吉", "成功と達成の年となる傾向があります。ビジネスやキャリアにおいて、大きな飛躍が期待できるでしょう。"),
-        9: ("中吉", "完成と新たな始まりの年となる傾向があります。これまでの努力が実を結び、次のステップへと進む準備が整う可能性が高いでしょう。"),
-        11: ("大吉", "直感とインスピレーションが強く働く年となる傾向があります。内なる声に耳を傾けながら、その導きに従って行動されると良いでしょう。"),
-        22: ("大吉", "大きなビジョン実現の年となる傾向があります。理想を現実化する力が最大限に発揮される可能性が高いでしょう。"),
-        33: ("大吉", "慈愛と癒しの年となる傾向があります。あなたの優しさと知恵が、周囲の人々に希望と勇気を与える力となっていくことでしょう。")
+        1: ("大吉", "2026年は、あなたにとって新しいスタートの年となる傾向があります。積極的に行動されることで、大きな成果が期待できるでしょう。"),
+        2: ("中吉", "2026年は、協力関係が特に重要となる年となりそうです。パートナーシップを大切にされることで、運気が上昇していく傾向があります。"),
+        3: ("大吉", "2026年は、あなたの創造性が開花する年となる傾向があります。表現活動やコミュニケーションを通じて、成功のチャンスが訪れる可能性が高いでしょう。"),
+        4: ("中吉", "2026年は、着実な成長の年となりそうです。努力を積み重ねることで、安定した成果を得られる傾向があります。焦らず、一歩ずつ進まれることで、確かな実りが待っていることでしょう。"),
+        5: ("小吉", "2026年は、変化と自由の年となる傾向があります。新しい環境や経験が、あなたの運気を高める可能性が高いでしょう。"),
+        6: ("中吉", "2026年は、愛情と調和の年となりそうです。人間関係が深まり、心の豊かさが増していく傾向があります。"),
+        7: ("小吉", "2026年は、内面の探求の年となる傾向があります。スピリチュアルな成長と深い洞察が得られる可能性が高いでしょう。"),
+        8: ("大吉", "2026年は、成功と達成の年となる傾向があります。ビジネスやキャリアにおいて、大きな飛躍が期待できるでしょう。"),
+        9: ("中吉", "2026年は、完成と新たな始まりの年となる傾向があります。これまでの努力が実を結び、次のステップへと進む準備が整う可能性が高いでしょう。"),
+        11: ("大吉", "2026年は、直感とインスピレーションが強く働く年となる傾向があります。スピリチュアルな導きが、あなたの人生をより良い方向へと導いてくれる可能性が高いでしょう。"),
+        22: ("大吉", "2026年は、大きなビジョン実現の年となる傾向があります。理想を現実化する力が最大限に発揮される可能性が高いでしょう。"),
+        33: ("大吉", "2026年は、慈愛と癒しの年となる傾向があります。多くの人々に影響を与える特別な年となりそうです。")
     }
-    return fortunes.get(life_path, ("中吉", "バランスの取れた一年となる傾向があります。"))
+    return fortunes.get(life_path, ("中吉", "2026年は、バランスの取れた一年となる傾向があります。"))
 
 def get_love_fortune(life_path):
-    # 簡略化のため★数とテキストだけ定義
-    return (4, "誠実さと信頼が、あなたの恋愛運を高めていく可能性が高いでしょう。")
+    love_fortunes = {
+        1: (4, "2026年は、積極的なアプローチが成功の鍵となる傾向があります。新しい出会いを求めて行動されることで、素晴らしい出会いが訪れる可能性が高いでしょう。"),
+        2: (5, "2026年は、パートナーシップが深まる年となる傾向があります。相手の気持ちに寄り添うことで、関係がより深く発展していく可能性が高いでしょう。"),
+        3: (5, "2026年は、コミュニケーションが特に重要となる年となりそうです。楽しい会話を通じて、関係が深まっていく傾向があります。"),
+        4: (3, "2026年は、安定した関係を築く年となる傾向があります。誠実さと信頼が、あなたの恋愛運を高めていく可能性が高いでしょう。"),
+        5: (4, "2026年は、新しい出会いのチャンスが訪れる年となりそうです。自由な心で恋愛を楽しまれることで、素晴らしい出会いが待っている可能性が高いでしょう。"),
+        6: (5, "2026年は、愛情が深まる年となる傾向があります。家族やパートナーとの絆が、より強く深くなっていく可能性が高いでしょう。"),
+        7: (3, "2026年は、内面の成長が恋愛運を高める年となりそうです。深いつながりを求められることで、真のパートナーシップが築かれる可能性が高いでしょう。"),
+        8: (4, "2026年は、魅力的なあなたに注目が集まる年となる傾向があります。自信を持って行動されることで、素晴らしい出会いが訪れる可能性が高いでしょう。"),
+        9: (4, "2026年は、理想のパートナーとの出会いの可能性が高い年となりそうです。広い視野で探されることで、心から理解し合える相手と出会える可能性があります。"),
+        11: (5, "2026年は、直感に従うことで素晴らしい出会いが訪れる年となる傾向があります。内なる声を信じて行動されることで、運命的な出会いが待っている可能性が高いでしょう。"),
+        22: (5, "2026年は、理想的なパートナーシップが実現する可能性が高い年となりそうです。これまでに描いてきた理想の関係が、現実のものとなる可能性があります。"),
+        33: (5, "2026年は、深い愛情と理解に満ちた関係が築かれる年となる傾向があります。あなたの優しさと慈愛が、パートナーとの絆をより深くしていく可能性が高いでしょう。")
+    }
+    return love_fortunes.get(life_path, (3, "2026年は、バランスの取れた恋愛運となる傾向があります。"))
 
 def get_work_fortune(life_path):
-    return (4, "着実な努力が認められる年となりそうです。責任ある立場での活躍が期待できる傾向があります。")
+    work_fortunes = {
+        1: (5, "2026年は、リーダーシップを発揮する年となる傾向があります。新しいプロジェクトで成功を収められる可能性が高いでしょう。"),
+        2: (4, "2026年は、チームワークが特に重要となる年となりそうです。協力関係を大切にされることで、成果が上がっていく傾向があります。"),
+        3: (5, "2026年は、創造的な仕事で評価される年となる傾向があります。アイデアが次々と実現していく可能性が高いでしょう。"),
+        4: (4, "2026年は、着実な努力が認められる年となりそうです。責任ある立場での活躍が期待できる傾向があります。"),
+        5: (3, "2026年は、変化とチャレンジの年となる傾向があります。新しい分野への挑戦が、あなたの運気を高めていく可能性が高いでしょう。"),
+        6: (4, "2026年は、サービス精神が評価される年となる傾向があります。人のために働くことで、成果が得られていく可能性が高いでしょう。"),
+        7: (4, "2026年は、分析力と研究が光る年となりそうです。専門性を高めることで、評価が上がっていく傾向があります。"),
+        8: (5, "2026年は、ビジネスで大きな成功を収める年となる傾向があります。権威や地位が向上していく可能性が高いでしょう。"),
+        9: (4, "2026年は、理想を実現する年となる傾向があります。社会貢献につながる仕事で、成果を上げられる可能性が高いでしょう。"),
+        11: (5, "2026年は、インスピレーションが仕事を導く年となる傾向があります。直感を信じて行動されることで、素晴らしい成果が得られる可能性が高いでしょう。"),
+        22: (5, "2026年は、大きなプロジェクトの成功が期待できる年となりそうです。理想を現実化する力が、最大限に発揮される傾向があります。"),
+        33: (5, "2026年は、多くの人々に影響を与える仕事で成功する年となる傾向があります。あなたの慈愛と知恵が、仕事を通じて多くの人々に希望と勇気を与えていくことでしょう。")
+    }
+    return work_fortunes.get(life_path, (3, "2026年は、バランスの取れた仕事運となる傾向があります。"))
 
 def get_lucky_color(life_path):
-    colors = {1:"ゴールド", 2:"ピンク", 3:"イエロー", 4:"エメラルドグリーン", 5:"ターコイズ", 6:"ローズ", 7:"パープル", 8:"シルバー", 9:"ブルー", 11:"クリスタル", 22:"プラチナ", 33:"レインボー"}
+    colors = {1:"ゴールド", 2:"ピンク", 3:"イエロー", 4:"エメラルドグリーン", 5:"ターコイズブルー", 6:"ローズピンク", 7:"パープル", 8:"シルバー", 9:"ロイヤルブルー", 11:"クリスタル", 22:"プラチナ", 33:"レインボー"}
     return colors.get(life_path, "ピンク")
 
 def get_lucky_item(life_path):
-    items = {1:"ペンダント", 2:"アクセサリー", 3:"アート", 4:"バッグ", 5:"旅行グッズ", 6:"写真", 7:"クリスタル", 8:"時計", 9:"記念品", 11:"お守り", 22:"手帳", 33:"アロマ"}
+    items = {1:"ペンダント", 2:"ハート型のアクセサリー", 3:"アート作品", 4:"実用的なバッグ", 5:"旅行グッズ", 6:"家族の写真", 7:"クリスタル", 8:"高級時計", 9:"記念品", 11:"スピリチュアルなアイテム", 22:"ビジョンボード", 33:"癒しのアイテム"}
     return items.get(life_path, "お守り")
 
 def create_pdf(name, birth_year, birth_month, birth_day):
@@ -139,61 +178,51 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     
     filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     
-    # PDFキャンバス作成
     c = canvas.Canvas(filename, pagesize=A4)
-    width, height = A4 # A4 = 595.27 x 841.89
+    width, height = A4 
     
-    # 色定義
-    bg_color = HexColor("#FFFBF0") # 非常に薄いクリーム色
-    text_color = HexColor("#333333") # 濃いグレー（読みやすい黒）
-    accent_color = HexColor("#C0A060") # ゴールド
-    title_color = HexColor("#C71585") # 濃いピンク
+    bg_color = HexColor("#FFFBF0")
+    text_color = HexColor("#333333")
+    accent_color = HexColor("#C0A060")
+    title_color = HexColor("#C71585")
 
-    # 背景
     c.setFillColor(bg_color)
     c.rect(0, 0, width, height, fill=1)
     
-    # フォント設定
     if register_font():
         font_name = 'IPAexMincho'
     else:
         font_name = 'Helvetica'
     
-    # レイアウト設定
-    margin = 50          # 左右の余白
-    content_width = width - (margin * 2) # 文章が入る幅
-    current_y = height - 60 # 書き始めの高さ
+    margin = 50          
+    content_width = width - (margin * 2) 
+    current_y = height - 60 
 
-    # --- タイトル（中央揃え） ---
     c.setFillColor(title_color)
     c.setFont(font_name, 26)
     c.drawCentredString(width/2, current_y, "2026年 運勢鑑定書")
     current_y -= 40
     
-    # --- 名前（中央揃え） ---
     c.setFillColor(accent_color)
     c.setFont(font_name, 22)
     c.drawCentredString(width/2, current_y, f"{name} 様")
     current_y -= 30
     
-    # --- 生年月日（中央揃え） ---
     c.setFillColor(text_color)
     c.setFont(font_name, 12)
     c.drawCentredString(width/2, current_y, f"生年月日: {birth_year}年{birth_month}月{birth_day}日")
     current_y -= 40
 
-    # --- ライフパスナンバー（中央揃え） ---
     c.setFillColor(title_color)
     c.setFont(font_name, 18)
     c.drawCentredString(width/2, current_y, f"ライフパスナンバー：{life_path}")
     current_y -= 40
 
-    # --- 性格（左揃え・自動折り返し） ---
-    # ここで文章が長くても自動で折り返されます
+    # 性格（自動折り返し）
     current_y = draw_wrapped_text(c, personality, margin, current_y, content_width, font_name, 11, 18, text_color)
-    current_y -= 30 # 余白
+    current_y -= 30 
 
-    # --- 総合運 ---
+    # 総合運
     c.setFillColor(title_color)
     c.setFont(font_name, 16)
     c.drawString(margin, current_y, "【総合運】")
@@ -201,13 +230,13 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     
     c.setFillColor(accent_color)
     c.setFont(font_name, 20)
-    c.drawString(margin, current_y, overall_fortune) # 大吉など
+    c.drawString(margin, current_y, overall_fortune)
     current_y -= 25
     
     current_y = draw_wrapped_text(c, fortune_desc, margin, current_y, content_width, font_name, 11, 18, text_color)
     current_y -= 30
 
-    # --- 恋愛運 ---
+    # 恋愛運
     c.setFillColor(title_color)
     c.setFont(font_name, 16)
     c.drawString(margin, current_y, "【恋愛運】")
@@ -222,7 +251,7 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     current_y = draw_wrapped_text(c, love_advice, margin, current_y, content_width, font_name, 11, 18, text_color)
     current_y -= 30
 
-    # --- 仕事運 ---
+    # 仕事運
     c.setFillColor(title_color)
     c.setFont(font_name, 16)
     c.drawString(margin, current_y, "【仕事運】")
@@ -237,14 +266,13 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     current_y = draw_wrapped_text(c, work_advice, margin, current_y, content_width, font_name, 11, 18, text_color)
     current_y -= 30
 
-    # --- ラッキーアイテムなど ---
+    # ラッキーアイテムなど
     c.setFillColor(title_color)
     c.setFont(font_name, 14)
     c.drawString(margin, current_y, f"ラッキーカラー： {lucky_color}")
     current_y -= 25
     c.drawString(margin, current_y, f"ラッキーアイテム： {lucky_item}")
 
-    # フッター
     c.setFillColor(HexColor("#999999"))
     c.setFont(font_name, 9)
     c.drawCentredString(width/2, 30, "この鑑定書は数秘術に基づいて作成されました。")
