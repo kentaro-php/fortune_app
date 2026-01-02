@@ -11,7 +11,7 @@ from datetime import datetime
 # ページ設定
 st.set_page_config(
     page_title="2026年運勢鑑定書",
-    page_icon="🔮",
+    page_icon="�",
     layout="centered"
 )
 
@@ -328,7 +328,7 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     return filename
 
 # Streamlit UI
-st.title("🔮 2026年運勢鑑定書発行アプリ")
+st.title("� 2026年運勢鑑定書発行アプリ")
 st.markdown("---")
 
 # フォントのダウンロード
@@ -347,7 +347,7 @@ with st.form("fortune_form"):
     with col3:
         birth_day = st.number_input("生まれた日", min_value=1, max_value=31, value=1)
     
-    submitted = st.form_submit_button("🔮 鑑定書を発行する", use_container_width=True)
+    submitted = st.form_submit_button("� 鑑定書を発行する", use_container_width=True)
 
 if submitted:
     if not name:
