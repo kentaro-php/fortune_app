@@ -4,6 +4,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import HexColor
+from reportlab.lib.utils import simpleSplit
 import os
 import urllib.request
 from datetime import datetime
@@ -168,6 +169,40 @@ def get_lucky_item(life_path):
     }
     return items.get(life_path, "お守り")
 
+def draw_wrapped_text(canvas, text, x, y, width, font_name, font_size, color, line_height=None):
+    """
+    指定した幅でテキストを自動改行して描画するヘルパー関数
+    
+    Args:
+        canvas: ReportLabのCanvasオブジェクト
+        text: 描画するテキスト
+        x: 開始X座標
+        y: 開始Y座標
+        width: テキストの最大幅
+        font_name: フォント名
+        font_size: フォントサイズ
+        color: 文字色
+        line_height: 行間（Noneの場合はフォントサイズの1.3倍）
+    
+    Returns:
+        次のY座標（最後の行の下）
+    """
+    if line_height is None:
+        line_height = font_size * 1.3
+    
+    canvas.setFillColor(color)
+    canvas.setFont(font_name, font_size)
+    
+    # simpleSplitを使用してテキストを自動改行
+    lines = simpleSplit(text, font_name, font_size, width)
+    
+    current_y = y
+    for line in lines:
+        canvas.drawString(x, current_y, line)
+        current_y -= line_height
+    
+    return current_y
+
 def create_pdf(name, birth_year, birth_month, birth_day):
     """PDFを生成する"""
     # ライフパスナンバーを計算
@@ -188,13 +223,19 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c = canvas.Canvas(filename, pagesize=A4)
     width, height = A4
     
+    # マージン設定
+    margin_left = 50
+    margin_right = 50
+    text_width = width - margin_left - margin_right
+    
     # 色の定義
     pink = HexColor("#FFB6C1")
-    gold = HexColor("#C0A060")  # 落ち着いたゴールドに変更
+    gold = HexColor("#C0A060")  # 落ち着いたゴールド
     dark_pink = HexColor("#C71585")
     light_gold = HexColor("#FFF8DC")
+    text_color = HexColor("#333333")
     
-    # 背景の装飾（薄いピンク）
+    # 背景の装飾（薄いクリーム色）
     c.setFillColor(light_gold)
     c.rect(0, 0, width, height, fill=1)
     
@@ -204,119 +245,136 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     else:
         font_name = 'Helvetica'
     
-    # タイトル
+    # Y座標の初期位置
+    y_pos = height - 50
+    
+    # タイトル（中央揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 28)
-    title = f"2026年 運勢鑑定書"
+    title = "2026年 運勢鑑定書"
     title_width = c.stringWidth(title, font_name, 28)
-    c.drawString((width - title_width) / 2, height - 50, title)
+    c.drawString((width - title_width) / 2, y_pos, title)
+    y_pos -= 50
     
-    # 名前
+    # 名前（中央揃え）
     c.setFillColor(gold)
     c.setFont(font_name, 24)
     name_text = f"{name} 様"
     name_width = c.stringWidth(name_text, font_name, 24)
-    c.drawString((width - name_width) / 2, height - 90, name_text)
+    c.drawString((width - name_width) / 2, y_pos, name_text)
+    y_pos -= 40
     
-    # 生年月日
+    # 生年月日（中央揃え）
     c.setFillColor(HexColor("#666666"))
     c.setFont(font_name, 14)
     birth_text = f"生年月日: {birth_year}年{birth_month}月{birth_day}日"
     birth_width = c.stringWidth(birth_text, font_name, 14)
-    c.drawString((width - birth_width) / 2, height - 120, birth_text)
+    c.drawString((width - birth_width) / 2, y_pos, birth_text)
+    y_pos -= 40
     
-    # ライフパスナンバー
+    # ライフパスナンバー（中央揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 18)
     path_text = f"ライフパスナンバー: {life_path}"
     path_width = c.stringWidth(path_text, font_name, 18)
-    c.drawString((width - path_width) / 2, height - 160, path_text)
+    c.drawString((width - path_width) / 2, y_pos, path_text)
+    y_pos -= 50
     
-    # 性格
-    y_pos = height - 200
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
+    # 性格（左揃え、自動改行）
+    c.setFillColor(dark_pink)
+    c.setFont(font_name, 16)
+    c.drawString(margin_left, y_pos, "【あなたの性格】")
+    y_pos -= 35
     
-    # テキストを折り返して表示
-    words = personality.split('。')
-    for word in words:
-        if word:
-            c.drawString(50, y_pos, word + '。')
-            y_pos -= 25
+    y_pos = draw_wrapped_text(
+        c, personality, margin_left, y_pos, 
+        text_width, font_name, 10.5, text_color
+    )
+    y_pos -= 30
     
-    # 総合運
-    y_pos -= 20
+    # 総合運（左揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 18)
-    c.drawString(50, y_pos, "【総合運】")
+    c.drawString(margin_left, y_pos, "【総合運】")
+    y_pos -= 35
     
-    y_pos -= 30
+    # 総合運の結果（中央揃え）
     c.setFillColor(gold)
     c.setFont(font_name, 24)
-    c.drawString(50, y_pos, overall_fortune)
+    fortune_width = c.stringWidth(overall_fortune, font_name, 24)
+    c.drawString((width - fortune_width) / 2, y_pos, overall_fortune)
+    y_pos -= 40
     
-    y_pos -= 30
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, fortune_desc)
+    # 総合運の説明（左揃え、自動改行）
+    y_pos = draw_wrapped_text(
+        c, fortune_desc, margin_left, y_pos,
+        text_width, font_name, 10.5, text_color
+    )
+    y_pos -= 40
     
-    # 恋愛運
-    y_pos -= 50
+    # 恋愛運（左揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 18)
-    c.drawString(50, y_pos, "【恋愛運】")
+    c.drawString(margin_left, y_pos, "【恋愛運】")
+    y_pos -= 35
     
-    y_pos -= 30
+    # 恋愛運の星（左揃え）
     c.setFillColor(gold)
     c.setFont(font_name, 16)
     stars = "★" * love_stars + "☆" * (5 - love_stars)
-    c.drawString(50, y_pos, stars)
+    c.drawString(margin_left, y_pos, stars)
+    y_pos -= 30
     
-    y_pos -= 25
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, love_advice)
+    # 恋愛運の説明（左揃え、自動改行）
+    y_pos = draw_wrapped_text(
+        c, love_advice, margin_left, y_pos,
+        text_width, font_name, 10.5, text_color
+    )
+    y_pos -= 40
     
-    # 仕事運
-    y_pos -= 50
+    # 仕事運（左揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 18)
-    c.drawString(50, y_pos, "【仕事運】")
+    c.drawString(margin_left, y_pos, "【仕事運】")
+    y_pos -= 35
     
-    y_pos -= 30
+    # 仕事運の星（左揃え）
     c.setFillColor(gold)
     c.setFont(font_name, 16)
     stars = "★" * work_stars + "☆" * (5 - work_stars)
-    c.drawString(50, y_pos, stars)
+    c.drawString(margin_left, y_pos, stars)
+    y_pos -= 30
     
-    y_pos -= 25
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, work_advice)
+    # 仕事運の説明（左揃え、自動改行）
+    y_pos = draw_wrapped_text(
+        c, work_advice, margin_left, y_pos,
+        text_width, font_name, 10.5, text_color
+    )
+    y_pos -= 40
     
-    # ラッキーカラー
-    y_pos -= 50
+    # ラッキーカラー（左揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 18)
-    c.drawString(50, y_pos, "【ラッキーカラー】")
+    c.drawString(margin_left, y_pos, "【ラッキーカラー】")
+    y_pos -= 35
     
-    y_pos -= 30
     c.setFillColor(gold)
     c.setFont(font_name, 16)
-    c.drawString(50, y_pos, lucky_color)
+    c.drawString(margin_left, y_pos, lucky_color)
+    y_pos -= 40
     
-    # ラッキーアイテム
-    y_pos -= 50
+    # ラッキーアイテム（左揃え）
     c.setFillColor(dark_pink)
     c.setFont(font_name, 18)
-    c.drawString(50, y_pos, "【ラッキーアイテム】")
+    c.drawString(margin_left, y_pos, "【ラッキーアイテム】")
+    y_pos -= 35
     
-    y_pos -= 30
     c.setFillColor(gold)
     c.setFont(font_name, 16)
-    c.drawString(50, y_pos, lucky_item)
+    c.drawString(margin_left, y_pos, lucky_item)
+    y_pos -= 40
     
-    # フッター
+    # フッター（中央揃え）
     c.setFillColor(HexColor("#999999"))
     c.setFont(font_name, 10)
     footer = "この鑑定書は数秘術に基づいて作成されました。"
