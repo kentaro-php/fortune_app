@@ -299,6 +299,53 @@ st.markdown("""
         display: none !important;
     }
     
+    /* 右下のユーザープロフィール画像とツールバーボタンを完全に非表示 */
+    div[data-testid="stToolbar"] > * {
+        display: none !important;
+    }
+    button[title="Manage app"] {
+        display: none !important;
+    }
+    button[kind="header"] {
+        display: none !important;
+    }
+    /* Streamlit Cloudのユーザーアバター */
+    div[data-testid="stHeader"] {
+        display: none !important;
+    }
+    /* 右下に固定されるすべての要素 */
+    div[style*="position: fixed"][style*="bottom"] {
+        display: none !important;
+    }
+    /* より具体的なセレクタで右下の要素を非表示 */
+    .stApp > div:last-child > div:last-child {
+        display: none !important;
+    }
+    /* ツールバー関連のすべての要素 */
+    [class*="stToolbar"],
+    [class*="toolbar"],
+    [data-testid*="toolbar"],
+    [data-testid*="Toolbar"] {
+        display: none !important;
+    }
+    /* Streamlit Cloudのユーザーアバターとボタン */
+    div[data-testid="stHeader"] button,
+    div[data-testid="stHeader"] img,
+    div[data-testid="stHeader"] a {
+        display: none !important;
+    }
+    /* 右下に固定されるすべてのボタンと画像 */
+    button[style*="position: fixed"],
+    img[style*="position: fixed"],
+    a[style*="position: fixed"] {
+        display: none !important;
+    }
+    /* より包括的な非表示設定 */
+    iframe[title*="streamlit"],
+    iframe[src*="streamlit"] {
+        display: none !important;
+    }
+    
     /* カスタムフッターのスタイル */
     .custom-footer {
         text-align: center;
@@ -417,8 +464,8 @@ else:
 st.markdown("""
     <div class="custom-footer">
         <div>
-            <a href="#">特定商取引法に基づく表記</a> | 
-            <a href="#">プライバシーポリシー</a>
+            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
+            <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
         </div>
         <div class="copyright">© 2026 占いミザリー</div>
     </div>
