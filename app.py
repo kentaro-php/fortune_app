@@ -8,9 +8,11 @@ import os
 import urllib.request
 from datetime import datetime
 import io
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # ==========================================
-# 1. ページ設定（必ず最初に記述）
+# 1. ページ設定
 # ==========================================
 st.set_page_config(
     page_title="2026年運勢鑑定書 | 占いミザリー",
@@ -18,27 +20,45 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- UI完全削除（埋め込みモードのフッター対策強化版） ---
+# ==========================================
+# UI完全削除（右下のアイコン・ツールバー・ヘッダー・フッター）
+# ==========================================
 hide_st_style = """
     <style>
-    header {visibility: hidden !important; display: none !important;}
-    footer {visibility: hidden !important; display: none !important; height: 0px !important;}
+    /* 1. ヘッダー領域全体を消す */
+    header {visibility: hidden !important; height: 0px !important;}
     [data-testid="stHeader"] {display: none !important;}
+    
+    /* 2. フッターを消す */
+    footer {visibility: hidden !important; height: 0px !important;}
     [data-testid="stFooter"] {display: none !important;}
-    .stApp > footer {display: none !important;}
+    
+    /* 3. ★最重要★ 右下のツールバー（王冠・アバター）をクラス名の部分一致で強制消去 */
+    /* "viewerBadge" という文字が含まれる要素はすべて消す */
     div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
+    /* ツールバー自体も消す */
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    #MainMenu {display: none !important;}
+    
+    /* 4. 上部の虹色の線を消す */
     [data-testid="stDecoration"] {display: none !important;}
+    
+    /* 5. 余白を詰める */
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
     }
-    [style*="position: fixed"][style*="bottom"] {
+    
+    /* 6. 万が一残る場合の強力な上書き */
+    .stApp > header {display: none !important;}
+    
+    /* 7. 右下に固定されているすべての要素を非表示 */
+    [style*="position: fixed"][style*="right"][style*="bottom"],
+    [style*="position:fixed"][style*="right"][style*="bottom"] {
         display: none !important;
         visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
-    a[href*="streamlit.io"] {display: none !important;}
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
@@ -351,13 +371,24 @@ if not is_paid:
     st.header("💎 完全版鑑定書 (PDF)")
     
     # 決済ボタン（支払いリンクへ飛ばす）
-    # ※ここにあなたのStripeリンクを入れてください
     stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k"
     
+    # ▼▼▼ 修正箇所：target="_blank" に変更しました ▼▼▼
     st.markdown(f"""
     <div style="text-align: center; margin: 20px 0;">
-        <a href="{stripe_url}" target="_self">
-            <button style="background-color: #C71585; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <a href="{stripe_url}" target="_blank" rel="noopener noreferrer">
+            <button style="
+                background-color: #C71585; 
+                color: white; 
+                border: none; 
+                padding: 15px 40px; 
+                font-size: 18px; 
+                font-weight: bold; 
+                border-radius: 30px; 
+                cursor: pointer; 
+                box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                transition: 0.3s;
+            ">
                 👉 500円で鑑定書を発行する
             </button>
         </a>
