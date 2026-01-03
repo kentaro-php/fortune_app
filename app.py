@@ -274,9 +274,7 @@ if not is_paid:
             <span class="question">「来年はどんな年になる？」</span>
             <span class="question">「恋愛や仕事の転機はいつ？」</span>
             <br>
-            数秘術では、人生は9年周期で巡ると言われています。<br>
-            あなたの生年月日から導き出される特別な数字で、<br>
-            <strong>2026年の運勢バイオリズム</strong>を読み解きましょう。
+            あなたの生年月日から導き出される特別な数字で、<strong>2026年の運勢バイオリズム</strong>を読み解きましょう。
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -328,7 +326,7 @@ if not is_paid:
     st.markdown("---")
     # アンカー用のIDを追加
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
-    st.markdown('<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">💎 完全版鑑定書 (PDF)</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 style="white-space: nowrap;">💎 完全版鑑定書 <small style="font-size: 0.7em;">(PDF)</small></h2>', unsafe_allow_html=True)
     with st.form("pay"):
         name = st.text_input("お名前", key="p_name")
         c1, c2, c3 = st.columns(3)
