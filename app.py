@@ -312,14 +312,23 @@ if not is_paid:
     st.info("👋 まずは無料プレビューで、あなたの「数字」を知ってください。")
     
     with st.form("preview"):
-        name_pre = st.text_input("お名前")
+        # セッションステートから値を取得（既に入力済みの場合は自動反映）
+        name_pre = st.text_input("お名前", value=st.session_state.user_name if st.session_state.user_name else "")
         c1, c2, c3 = st.columns(3)
-        y_pre = c1.number_input("年", 1900, 2025, 2000)
-        m_pre = c2.number_input("月", 1, 12, 1)
-        d_pre = c3.number_input("日", 1, 31, 1)
+        y_pre = c1.number_input("年", 1900, 2025, st.session_state.birth_year if st.session_state.birth_year else 2000)
+        m_pre = c2.number_input("月", 1, 12, st.session_state.birth_month if st.session_state.birth_month else 1)
+        d_pre = c3.number_input("日", 1, 31, st.session_state.birth_day if st.session_state.birth_day else 1)
         
         if st.form_submit_button("鑑定結果の一部を見る"):
             if name_pre:
+                # セッションステートに保存（完全版鑑定書フォームに自動反映される）
+                st.session_state.update({
+                    'user_name': name_pre,
+                    'birth_year': y_pre,
+                    'birth_month': m_pre,
+                    'birth_day': d_pre
+                })
+                
                 lp = calculate_life_path_number(y_pre, m_pre, d_pre)
                 preview_data = get_fortune_data(lp)
                 
@@ -358,11 +367,12 @@ if not is_paid:
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
     st.markdown('<h2 style="white-space: nowrap;">💎 完全版鑑定書 <small style="font-size: 0.7em;">(PDF)</small></h2>', unsafe_allow_html=True)
     with st.form("pay"):
-        name = st.text_input("お名前", key="p_name")
+        # 無料プレビューで入力した情報を自動的に反映
+        name = st.text_input("お名前", value=st.session_state.user_name if st.session_state.user_name else "", key="p_name")
         c1, c2, c3 = st.columns(3)
-        y = c1.number_input("年", 1900, 2025, 2000, key="p_y")
-        m = c2.number_input("月", 1, 12, 1, key="p_m")
-        d = c3.number_input("日", 1, 31, 1, key="p_d")
+        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year if st.session_state.birth_year else 2000, key="p_y")
+        m = c2.number_input("月", 1, 12, st.session_state.birth_month if st.session_state.birth_month else 1, key="p_m")
+        d = c3.number_input("日", 1, 31, st.session_state.birth_day if st.session_state.birth_day else 1, key="p_d")
         if st.form_submit_button("情報を保存して決済へ"):
             st.session_state.update({'user_name': name, 'birth_year': y, 'birth_month': m, 'birth_day': d})
             st.success("✅ 保存しました。下のボタンから決済してください。")
