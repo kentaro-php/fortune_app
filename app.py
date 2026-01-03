@@ -7,6 +7,7 @@ from reportlab.lib.colors import HexColor
 import os
 import urllib.request
 from datetime import datetime
+import io
 
 # ==========================================
 # 1. ページ設定
@@ -45,37 +46,63 @@ hide_st_style = """
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
-# フォントファイルのパス設定
+# フォントファイルのパス設定（プロジェクトルートから読み込み）
+FONT_PATH_ROOT = "ipaexg.ttf"  # プロジェクトルートのフォントファイル
 FONT_DIR = "fonts"
-FONT_PATH = os.path.join(FONT_DIR, "ipaexm.ttf")
+FONT_PATH_FALLBACK = os.path.join(FONT_DIR, "ipaexm.ttf")
 
 # ==========================================
 # 2. フォント準備・登録関数
 # ==========================================
+def get_font_path():
+    """フォントファイルのパスを取得（プロジェクトルート優先）"""
+    # プロジェクトルートのフォントファイルを優先
+    if os.path.exists(FONT_PATH_ROOT):
+        return FONT_PATH_ROOT
+    # フォールバック：fontsディレクトリ
+    elif os.path.exists(FONT_PATH_FALLBACK):
+        return FONT_PATH_FALLBACK
+    return None
+
 def download_font():
-    """IPAex明朝フォントをダウンロードする"""
+    """IPAex明朝フォントをダウンロードする（フォールバック用）"""
     if not os.path.exists(FONT_DIR):
         os.makedirs(FONT_DIR)
     
-    if not os.path.exists(FONT_PATH):
+    if not os.path.exists(FONT_PATH_FALLBACK):
         font_url = "https://raw.githubusercontent.com/making/demo-jasper-report-ja/master/src/main/resources/fonts/ipaexm/ipaexm.ttf"
         try:
-            urllib.request.urlretrieve(font_url, FONT_PATH)
+            urllib.request.urlretrieve(font_url, FONT_PATH_FALLBACK)
         except Exception as e:
             st.error(f"フォントのダウンロードに失敗しました: {e}")
             return False
     return True
 
 def register_font():
-    """フォントをReportLabに登録する"""
-    if os.path.exists(FONT_PATH):
+    """フォントをReportLabに登録する（プロジェクトルートのフォントを優先）"""
+    font_path = get_font_path()
+    if font_path and os.path.exists(font_path):
         try:
-            pdfmetrics.registerFont(TTFont('IPAexMincho', FONT_PATH))
-            return True
+            # フォント名はファイル名に基づいて決定
+            if "ipaexg" in font_path.lower():
+                font_name = 'IPAexGothic'
+            else:
+                font_name = 'IPAexMincho'
+            pdfmetrics.registerFont(TTFont(font_name, font_path))
+            return font_name
         except Exception as e:
             st.error(f"フォントの登録に失敗しました: {e}")
-            return False
-    return False
+            return None
+    # フォントが見つからない場合はダウンロードを試みる
+    if download_font():
+        font_path = get_font_path()
+        if font_path:
+            try:
+                pdfmetrics.registerFont(TTFont('IPAexMincho', font_path))
+                return 'IPAexMincho'
+            except Exception as e:
+                st.error(f"フォントの登録に失敗しました: {e}")
+    return None
 
 # ==========================================
 # 3. PDF描画用ヘルパー関数（日本語折り返し対応）
@@ -154,15 +181,17 @@ def get_monthly_fortunes(life_path):
     ]
 
 # ==========================================
-# 5. PDF生成関数（2ページ構成）
+# 5. PDF生成関数（2ページ構成、メモリ上で生成）
 # ==========================================
 def create_pdf(name, birth_year, birth_month, birth_day):
+    """PDFをメモリ上で生成してBytesIOオブジェクトを返す"""
     life_path = calculate_life_path_number(birth_year, birth_month, birth_day)
     data = get_fortune_data(life_path)
     monthly_data = get_monthly_fortunes(life_path)
     
-    filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-    c = canvas.Canvas(filename, pagesize=A4)
+    # メモリ上でPDFを生成
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4 
     
     # 色定義
@@ -171,10 +200,11 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     accent_color = HexColor("#C0A060")
     title_color = HexColor("#C71585")
     
-    if register_font():
-        font_name = 'IPAexMincho'
-    else:
+    # フォント登録（プロジェクトルートのフォントを優先）
+    font_name = register_font()
+    if not font_name:
         font_name = 'Helvetica'
+        st.warning("⚠️ 日本語フォントが見つかりません。日本語が正しく表示されない可能性があります。")
 
     # --- 1ページ目 ---
     c.setFillColor(bg_color)
@@ -262,7 +292,10 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c.drawCentredString(width/2, 30, "Mizary Fortune Telling - 2026 Special Report")
 
     c.save()
-    return filename
+    
+    # バッファの位置を先頭に戻す
+    buffer.seek(0)
+    return buffer
 
 # ==========================================
 # 6. アプリUI (Stripe & 強制非表示CSS対応)
@@ -334,14 +367,30 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-if not os.path.exists(FONT_PATH):
+# フォントの初期化（存在確認）
+font_path = get_font_path()
+if not font_path:
     download_font()
 
 # -------------------------------------------
 # 決済状態のチェック
 # -------------------------------------------
 query_params = st.query_params
-is_paid = query_params.get("paid") == "true"
+is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
+
+# セッション状態の初期化
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = ""
+if 'birth_year' not in st.session_state:
+    st.session_state.birth_year = 2000
+if 'birth_month' not in st.session_state:
+    st.session_state.birth_month = 1
+if 'birth_day' not in st.session_state:
+    st.session_state.birth_day = 1
+if 'pdf_data' not in st.session_state:
+    st.session_state.pdf_data = None
+if 'pdf_filename' not in st.session_state:
+    st.session_state.pdf_filename = None
 
 # -------------------------------------------
 # パターンA：未払い（LPページ）
@@ -372,9 +421,31 @@ if not is_paid:
     st.header("💎 完全版鑑定書 (PDF)")
     st.write("2026年を最高の一年にするための、あなただけのガイドブックです。")
     
-    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
-    stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k" 
+    # 入力データをセッションに保存（Stripe決済前に保存）
+    with st.form("payment_form"):
+        st.write("### 📝 お客様情報")
+        st.caption("決済前に情報を入力してください（決済後も保持されます）")
+        payment_name = st.text_input("お名前", value=st.session_state.user_name, placeholder="山田 花子", key="payment_name")
+        col1, col2, col3 = st.columns(3)
+        with col1: 
+            payment_year = st.number_input("年", 1900, 2024, st.session_state.birth_year, key="payment_year")
+        with col2: 
+            payment_month = st.number_input("月", 1, 12, st.session_state.birth_month, key="payment_month")
+        with col3: 
+            payment_day = st.number_input("日", 1, 31, st.session_state.birth_day, key="payment_day")
+        
+        # フォーム送信時にセッションに保存
+        if st.form_submit_button("情報を保存して決済へ進む"):
+            st.session_state.user_name = payment_name
+            st.session_state.birth_year = payment_year
+            st.session_state.birth_month = payment_month
+            st.session_state.birth_day = payment_day
+            st.success("✅ 情報を保存しました。決済ボタンをクリックしてください。")
     
+    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
+    stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k"
+    
+    # Stripe決済URLにリダイレクト（セッションデータは保持される）
     st.link_button(
         label="👉 500円で鑑定書を発行する", 
         url=stripe_url, 
@@ -391,29 +462,58 @@ else:
     with st.form("fortune_form"):
         st.write("### 📄 鑑定書発行フォーム")
         st.write("正確な情報を入力して、PDFを生成してください。")
-        name = st.text_input("お名前", placeholder="山田 花子")
+        
+        # セッションからデータを復元（入力欄が空の場合）
+        default_name = st.session_state.user_name if st.session_state.user_name else ""
+        default_year = st.session_state.birth_year if st.session_state.birth_year else 2000
+        default_month = st.session_state.birth_month if st.session_state.birth_month else 1
+        default_day = st.session_state.birth_day if st.session_state.birth_day else 1
+        
+        name = st.text_input("お名前", value=default_name, placeholder="山田 花子", key="form_name")
         col1, col2, col3 = st.columns(3)
-        with col1: birth_year = st.number_input("年", 1900, 2024, 2000)
-        with col2: birth_month = st.number_input("月", 1, 12, 1)
-        with col3: birth_day = st.number_input("日", 1, 31, 1)
+        with col1: 
+            birth_year = st.number_input("年", 1900, 2024, default_year, key="form_year")
+        with col2: 
+            birth_month = st.number_input("月", 1, 12, default_month, key="form_month")
+        with col3: 
+            birth_day = st.number_input("日", 1, 31, default_day, key="form_day")
         
         submitted = st.form_submit_button("✨ 鑑定書PDFをダウンロードする", use_container_width=True)
 
     if submitted and name:
+        # セッションに最新のデータを保存
+        st.session_state.user_name = name
+        st.session_state.birth_year = birth_year
+        st.session_state.birth_month = birth_month
+        st.session_state.birth_day = birth_day
+        
         with st.spinner("鑑定書を生成中..."):
             try:
-                pdf_file = create_pdf(name, birth_year, birth_month, birth_day)
-                with open(pdf_file, "rb") as f:
-                    st.download_button(
-                        label="📥 PDFをダウンロード", 
-                        data=f, 
-                        file_name=pdf_file, 
-                        mime="application/pdf",
-                        type="primary"
-                    )
+                # PDFをメモリ上で生成
+                pdf_buffer = create_pdf(name, birth_year, birth_month, birth_day)
+                pdf_data = pdf_buffer.getvalue()
+                
+                # セッションにPDFデータをキャッシュ
+                st.session_state.pdf_data = pdf_data
+                filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                st.session_state.pdf_filename = filename
+                
+                st.success("✅ PDFの生成が完了しました！")
                 st.balloons()
             except Exception as e:
                 st.error(f"エラーが発生しました: {e}")
+                st.exception(e)
+    
+    # PDFが生成済みの場合はダウンロードボタンを表示（リロード後も表示）
+    if st.session_state.pdf_data:
+        st.download_button(
+            label="📥 PDFをダウンロード", 
+            data=st.session_state.pdf_data, 
+            file_name=st.session_state.pdf_filename, 
+            mime="application/pdf",
+            type="primary",
+            use_container_width=True
+        )
 
 # -------------------------------------------
 # フッター（著作権表示）
