@@ -114,7 +114,21 @@ def get_fortune_data(lp):
     return data
 
 def get_monthly_fortunes(lp):
-    return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)] # 簡略化（実際は元のテキストを使用）
+    """1月〜12月の運勢リストを返す"""
+    return [
+        "1月: 新しいことを始めるのに最適な時期です。",
+        "2月: 周囲との協力を大切にしましょう。",
+        "3月: アイデアが湧き出るクリエイティブな月。",
+        "4月: 足元を固める慎重さが必要です。",
+        "5月: 変化を楽しむことで運気が上がります。",
+        "6月: 愛情運が最高潮。家族との時間を大切に。",
+        "7月: 自分の内面と向き合う静かな時間を持って。",
+        "8月: パワフルに行動できる月。目標達成のチャンス。",
+        "9月: 一つの区切りがつき、次の準備を始めるとき。",
+        "10月: 新たなスタート。直感を信じて。",
+        "11月: 人との繋がりが幸運を運びます。",
+        "12月: 一年の総仕上げ。感謝の気持ちを伝えて。"
+    ]
 
 # ==========================================
 # 5. スプレッドシート保存関数（Heroku対応版）
@@ -156,34 +170,138 @@ def save_to_gsheet(name, year, month, day, life_path):
 # 6. PDF生成
 # ==========================================
 def create_pdf(name, y, m, d):
+    """PDFをメモリ上で生成してBytesIOオブジェクトを返す"""
     lp = calculate_life_path_number(y, m, d)
     data = get_fortune_data(lp)
-    monthly = get_monthly_fortunes(lp)
+    monthly_data = get_monthly_fortunes(lp)
     
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
-    font_name = register_font() or 'Helvetica'
     
-    # ページ1
-    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 26); c.drawCentredString(width/2, height-60, "2026年 運勢鑑定書")
-    c.setFillColor(HexColor("#C0A060")); c.setFont(font_name, 22); c.drawCentredString(width/2, height-100, f"{name} 様")
-    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日 (LP: {lp})")
+    bg_color = HexColor("#FFFBF0")
+    text_color = HexColor("#333333")
+    accent_color = HexColor("#C0A060")
+    title_color = HexColor("#C71585")
     
-    # 本文（簡略化して描画）
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 14); c.drawString(50, height-180, "【あなたの本質】")
-    draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
+    font_name = register_font()
+    if not font_name:
+        font_name = 'Helvetica'
+
+    # --- 1ページ目 ---
+    c.setFillColor(bg_color)
+    c.rect(0, 0, width, height, fill=1)
     
-    # ページ2
+    margin = 50          
+    content_width = width - (margin * 2) 
+    current_y = height - 60 
+
+    c.setFillColor(title_color)
+    c.setFont(font_name, 26)
+    c.drawCentredString(width/2, current_y, "2026年 運勢鑑定書")
+    current_y -= 40
+    
+    c.setFillColor(accent_color)
+    c.setFont(font_name, 22)
+    c.drawCentredString(width/2, current_y, f"{name} 様")
+    current_y -= 30
+    
+    c.setFillColor(text_color)
+    c.setFont(font_name, 12)
+    c.drawCentredString(width/2, current_y, f"生年月日: {y}年{m}月{d}日  (LP: {lp})")
+    current_y -= 40
+
+    c.setFillColor(title_color)
+    c.setFont(font_name, 14)
+    c.drawString(margin, current_y, "【あなたの本質】")
+    current_y -= 20
+    current_y = draw_wrapped_text(c, data["personality"], margin, current_y, content_width, font_name, 11, 18, text_color)
+    current_y -= 25
+
+    c.setFillColor(title_color)
+    c.setFont(font_name, 14)
+    c.drawString(margin, current_y, "【2026年の総合運】")
+    c.setFillColor(accent_color)
+    c.drawString(margin + 150, current_y, data["overall"][0])
+    current_y -= 20
+    current_y = draw_wrapped_text(c, data["overall"][1], margin, current_y, content_width, font_name, 11, 18, text_color)
+    current_y -= 25
+
+    topics = [
+        ("恋愛運", data["love"]),
+        ("仕事運", data["work"]),
+        ("金運", data["money"]),
+        ("健康運", data["health"]),
+        ("対人運", data["interpersonal"]),
+    ]
+    
+    for title, (stars, text) in topics:
+        c.setFillColor(title_color)
+        c.setFont(font_name, 14)
+        c.drawString(margin, current_y, f"【{title}】")
+        c.setFillColor(accent_color)
+        star_str = "★" * stars + "☆" * (5 - stars)
+        c.drawString(margin + 100, current_y, star_str)
+        current_y -= 20
+        current_y = draw_wrapped_text(c, text, margin, current_y, content_width, font_name, 11, 18, text_color)
+        current_y -= 20
+
+    current_y -= 10
+    c.setFillColor(title_color)
+    c.setFont(font_name, 14)
+    c.drawString(margin, current_y, f"ラッキーカラー： {data['color']}   /   ラッキーアイテム： {data['item']}")
+    
+    # --- 2ページ目（月別運勢） ---
     c.showPage()
-    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 20); c.drawCentredString(width/2, height-60, "月別運勢カレンダー")
+    c.setFillColor(bg_color)
+    c.rect(0, 0, width, height, fill=1)
     
-    y_pos = height-100
-    for txt in monthly:
-        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 25) - 15
-        
+    current_y = height - 60
+    c.setFillColor(title_color)
+    c.setFont(font_name, 20)
+    c.drawCentredString(width/2, current_y, "2026年 月別運勢カレンダー")
+    current_y -= 50
+    
+    c.setFillColor(text_color)
+    c.setFont(font_name, 12)
+    
+    for month_text in monthly_data:
+        current_y = draw_wrapped_text(c, month_text, margin, current_y, content_width, font_name, 12, 25, text_color)
+        current_y -= 15
+
+    # アップセル（電話占いへの誘導）セクション
+    current_y -= 30
+    c.setFillColor(title_color)
+    c.setFont(font_name, 16)
+    c.drawCentredString(width/2, current_y, "より深い悩みは電話占いへ")
+    current_y -= 25
+    
+    c.setFillColor(text_color)
+    c.setFont(font_name, 11)
+    upsell_text = "恋愛・仕事・人間関係など、もっと詳しく知りたい方は\n電話占いでプロの占い師に直接ご相談ください。\n初回限定：2,980円～"
+    current_y = draw_wrapped_text(c, upsell_text, margin, current_y, content_width, font_name, 11, 20, text_color)
+    current_y -= 20
+    
+    # 電話占いのURL（クリック可能なリンクとして追加）
+    c.setFillColor(HexColor("#D81B60"))
+    c.setFont(font_name, 10)
+    phone_fortune_url = "https://mizary.com/"
+    url_text_y = current_y
+    c.drawCentredString(width/2, url_text_y, phone_fortune_url)
+    
+    # リンクを追加（ReportLabのlinkURLを使用）
+    link_left = width/2 - 120
+    link_right = width/2 + 120
+    link_bottom = url_text_y - 5
+    link_top = url_text_y + 10
+    c.linkURL(phone_fortune_url, (link_left, link_bottom, link_right, link_top), relative=0)
+
+    # フッター
+    current_y = 50
+    c.setFillColor(HexColor("#999999"))
+    c.setFont(font_name, 9)
+    c.drawCentredString(width/2, current_y, "Mizary Fortune Telling - 2026 Special Report")
+
     c.save()
     buffer.seek(0)
     return buffer
