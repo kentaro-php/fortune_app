@@ -9,10 +9,6 @@ import urllib.request
 from datetime import datetime
 import io
 
-# ▼▼▼【追加】スプレッドシート連携用ライブラリ ▼▼▼
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
 # ==========================================
 # 1. ページ設定（必ず最初に記述）
 # ==========================================
@@ -25,39 +21,23 @@ st.set_page_config(
 # --- UI完全削除（埋め込みモードのフッター対策強化版） ---
 hide_st_style = """
     <style>
-    /* 1. ヘッダー・フッターの徹底削除 */
     header {visibility: hidden !important; display: none !important;}
     footer {visibility: hidden !important; display: none !important; height: 0px !important;}
-    
-    /* 2. Streamlitの特定要素IDに対する非表示 */
     [data-testid="stHeader"] {display: none !important;}
     [data-testid="stFooter"] {display: none !important;}
-    
-    /* 3. embed=true 時の下部バー対策 */
-    /* 通常のfooterタグだけでなく、アプリ直下のfooter要素もターゲットにする */
     .stApp > footer {display: none !important;}
-    
-    /* 4. ツールバー・ビューワーバッジの削除 */
     div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    
-    /* 5. ハンバーガーメニューとデコレーションラインの削除 */
     #MainMenu {display: none !important;}
     [data-testid="stDecoration"] {display: none !important;}
-    
-    /* 6. 余白調整 */
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
     }
-    
-    /* 7. 右下の固定要素を包括的に非表示（念のための強力な指定） */
     [style*="position: fixed"][style*="bottom"] {
         display: none !important;
         visibility: hidden !important;
     }
-    
-    /* 8. リンク（Built with Streamlit）を含む可能性のある要素を消す */
     a[href*="streamlit.io"] {display: none !important;}
     </style>
 """
@@ -101,8 +81,8 @@ def register_font():
             pdfmetrics.registerFont(TTFont(font_name, font_path))
             return font_name
         except Exception as e:
-            st.error(f"フォントの登録に失敗しました: {e}")
-            return None
+            # 登録済みエラーなどを無視
+            return 'IPAexMincho'
     if download_font():
         font_path = get_font_path()
         if font_path:
@@ -110,7 +90,7 @@ def register_font():
                 pdfmetrics.registerFont(TTFont('IPAexMincho', font_path))
                 return 'IPAexMincho'
             except Exception as e:
-                st.error(f"フォントの登録に失敗しました: {e}")
+                pass
     return None
 
 # ==========================================
@@ -182,40 +162,7 @@ def get_monthly_fortunes(life_path):
     ]
 
 # ==========================================
-# 5. スプレッドシート保存関数
-# ==========================================
-def save_to_gsheet(name, year, month, day, life_path):
-    """スプレッドシートに行を追加する関数"""
-    try:
-        if "connections" not in st.secrets or "gsheets" not in st.secrets["connections"]:
-            st.warning("⚠️ Secretsの設定が見つかりません。ログへの記録のみ行います。")
-            print(f"【保存失敗】Secrets未設定: {name}, LP:{life_path}")
-            return False
-
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds_dict = dict(st.secrets["connections"]["gsheets"])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-
-        SPREADSHEET_NAME = "顧客リスト_2026運勢" 
-        
-        try:
-            sheet = client.open(SPREADSHEET_NAME).sheet1
-        except gspread.exceptions.SpreadsheetNotFound:
-            st.error(f"❌ スプレッドシート「{SPREADSHEET_NAME}」が見つかりません。名前を確認するか、共有設定を見直してください。")
-            return False
-
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        row = [timestamp, name, f"{year}/{month}/{day}", life_path]
-        sheet.append_row(row)
-        return True
-        
-    except Exception as e:
-        print(f"スプレッドシート保存エラー: {e}")
-        return False
-
-# ==========================================
-# 6. PDF生成関数
+# 5. PDF生成関数
 # ==========================================
 def create_pdf(name, birth_year, birth_month, birth_day):
     life_path = calculate_life_path_number(birth_year, birth_month, birth_day)
@@ -309,16 +256,46 @@ def create_pdf(name, birth_year, birth_month, birth_day):
         current_y = draw_wrapped_text(c, month_text, margin, current_y, content_width, font_name, 12, 25, text_color)
         current_y -= 15
 
+    # アップセル（電話占いへの誘導）セクション
+    current_y -= 30
+    c.setFillColor(title_color)
+    c.setFont(font_name, 16)
+    c.drawCentredString(width/2, current_y, "より深い悩みは電話占いへ")
+    current_y -= 25
+    
+    c.setFillColor(text_color)
+    c.setFont(font_name, 11)
+    upsell_text = "恋愛・仕事・人間関係など、もっと詳しく知りたい方は\n電話占いでプロの占い師に直接ご相談ください。\n初回限定：2,980円～"
+    current_y = draw_wrapped_text(c, upsell_text, margin, current_y, content_width, font_name, 11, 20, text_color)
+    current_y -= 20
+    
+    # 電話占いのURL（クリック可能なリンクとして追加）
+    c.setFillColor(HexColor("#D81B60"))
+    c.setFont(font_name, 10)
+    phone_fortune_url = "https://mizary.com/"
+    url_text_y = current_y
+    c.drawCentredString(width/2, url_text_y, phone_fortune_url)
+    
+    # リンクを追加（ReportLabのlinkURLを使用）
+    # 座標は(left, bottom, right, top)の順で指定
+    link_left = width/2 - 120
+    link_right = width/2 + 120
+    link_bottom = url_text_y - 5
+    link_top = url_text_y + 10
+    c.linkURL(phone_fortune_url, (link_left, link_bottom, link_right, link_top), relative=0)
+
+    # フッター
+    current_y = 50
     c.setFillColor(HexColor("#999999"))
     c.setFont(font_name, 9)
-    c.drawCentredString(width/2, 30, "Mizary Fortune Telling - 2026 Special Report")
+    c.drawCentredString(width/2, current_y, "Mizary Fortune Telling - 2026 Special Report")
 
     c.save()
     buffer.seek(0)
     return buffer
 
 # ==========================================
-# 7. アプリUI
+# 6. アプリUI
 # ==========================================
 
 st.markdown("""
@@ -342,12 +319,10 @@ font_path = get_font_path()
 if not font_path:
     download_font()
 
-# 決済チェック（URLパラメータ または 強制テスト用）
+# 決済チェック（URLパラメータ または Stripe成功戻り）
 query_params = st.query_params
-is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
-
-# ★テスト用：Stripeをスキップしたい場合はここを True に書き換えてください
-# is_paid = True 
+# URLに ?paid=true があるか、またはStripe標準の ?checkout_session_id があれば決済済みとみなす
+is_paid = (query_params.get("paid") == "true") or ("checkout_session_id" in query_params)
 
 # セッション初期化
 if 'user_name' not in st.session_state: st.session_state.user_name = ""
@@ -357,7 +332,7 @@ if 'birth_day' not in st.session_state: st.session_state.birth_day = 1
 if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
-# --- パターンA: 未払い ---
+# --- パターンA: 未払い（無料プレビュー） ---
 if not is_paid:
     st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
     with st.form("preview_form"):
@@ -374,44 +349,43 @@ if not is_paid:
 
     st.markdown("---")
     st.header("💎 完全版鑑定書 (PDF)")
-    with st.form("payment_form"):
-        st.write("### 📝 お客様情報")
-        payment_name = st.text_input("お名前", value=st.session_state.user_name, placeholder="山田 花子", key="payment_name")
-        col1, col2, col3 = st.columns(3)
-        with col1: payment_year = st.number_input("年", 1900, 2024, st.session_state.birth_year, key="payment_year")
-        with col2: payment_month = st.number_input("月", 1, 12, st.session_state.birth_month, key="payment_month")
-        with col3: payment_day = st.number_input("日", 1, 31, st.session_state.birth_day, key="payment_day")
-        
-        if st.form_submit_button("情報を保存して決済へ進む"):
-            st.session_state.user_name = payment_name
-            st.session_state.birth_year = payment_year
-            st.session_state.birth_month = payment_month
-            st.session_state.birth_day = payment_day
-            st.success("✅ 情報を保存しました。決済ボタンをクリックしてください。")
     
+    # 決済ボタン（支払いリンクへ飛ばす）
+    # ※ここにあなたのStripeリンクを入れてください
     stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k"
-    st.link_button(label="👉 500円で鑑定書を発行する", url=stripe_url, type="primary", use_container_width=True)
+    
+    st.markdown(f"""
+    <div style="text-align: center; margin: 20px 0;">
+        <a href="{stripe_url}" target="_self">
+            <button style="background-color: #C71585; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                👉 500円で鑑定書を発行する
+            </button>
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.write("※決済完了後、自動的に鑑定書作成画面に戻ります。")
 
-# --- パターンB: 支払い完了（発行 & シート保存） ---
+# --- パターンB: 支払い完了（発行） ---
 else:
     st.success("✅ ご購入ありがとうございます！鑑定書を発行できます。")
+    st.balloons()
     
     with st.form("fortune_form"):
         st.write("### 📄 鑑定書発行フォーム")
+        # デフォルト値をセッションから取得、なければ初期値
         default_name = st.session_state.user_name if st.session_state.user_name else ""
-        default_year = st.session_state.birth_year if st.session_state.birth_year else 2000
-        default_month = st.session_state.birth_month if st.session_state.birth_month else 1
-        default_day = st.session_state.birth_day if st.session_state.birth_day else 1
         
-        name = st.text_input("お名前", value=default_name, placeholder="山田 花子", key="form_name")
+        name = st.text_input("お名前（鑑定書に記載されます）", value=default_name, placeholder="山田 花子", key="form_name")
         col1, col2, col3 = st.columns(3)
-        with col1: birth_year = st.number_input("年", 1900, 2024, default_year, key="form_year")
-        with col2: birth_month = st.number_input("月", 1, 12, default_month, key="form_month")
-        with col3: birth_day = st.number_input("日", 1, 31, default_day, key="form_day")
+        with col1: birth_year = st.number_input("年", 1900, 2024, st.session_state.birth_year, key="form_year")
+        with col2: birth_month = st.number_input("月", 1, 12, st.session_state.birth_month, key="form_month")
+        with col3: birth_day = st.number_input("日", 1, 31, st.session_state.birth_day, key="form_day")
         
         submitted = st.form_submit_button("✨ 鑑定書PDFをダウンロードする", use_container_width=True)
 
     if submitted and name:
+        # 情報更新
         st.session_state.user_name = name
         st.session_state.birth_year = birth_year
         st.session_state.birth_month = birth_month
@@ -419,24 +393,18 @@ else:
         
         with st.spinner("鑑定書を生成中..."):
             try:
-                # 1. PDF生成
+                # PDF生成
                 pdf_buffer = create_pdf(name, birth_year, birth_month, birth_day)
                 pdf_data = pdf_buffer.getvalue()
                 
-                # 2. スプレッドシート保存（ここが追加機能）
-                life_path = calculate_life_path_number(birth_year, birth_month, birth_day)
-                save_to_gsheet(name, birth_year, birth_month, birth_day, life_path)
-
-                # 3. セッションに保存
+                # セッションに保存
                 st.session_state.pdf_data = pdf_data
-                filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d')}.pdf"
                 st.session_state.pdf_filename = filename
                 
-                st.success("✅ PDFの生成が完了しました！")
-                st.balloons()
+                st.success("✅ PDFの生成が完了しました！下のボタンからダウンロードしてください。")
             except Exception as e:
                 st.error(f"エラーが発生しました: {e}")
-                st.exception(e)
     
     if st.session_state.pdf_data:
         st.download_button(
@@ -447,6 +415,11 @@ else:
             type="primary",
             use_container_width=True
         )
+        
+    # もう一度最初からボタン
+    if st.button("トップに戻る（ログアウト）"):
+        st.query_params.clear()
+        st.rerun()
 
 st.markdown("""
     <div class="custom-footer">
