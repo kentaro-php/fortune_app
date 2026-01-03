@@ -276,12 +276,18 @@ st.markdown("""
     
     /* --- 管理用ボタン・メニューの非表示設定 --- */
     
-    /* 右上のハンバーガーメニュー、フッター、ヘッダーを消す */
-    .stDeployButton { display: none; }
+    /* 右上のハンバーガーメニューを非表示 */
     #MainMenu { visibility: hidden; }
+    .stDeployButton { display: none; }
+    
+    /* フッター（Made with Streamlit）を完全に非表示 */
     footer { visibility: hidden; }
+    footer[data-testid="stFooter"] { display: none !important; }
+    .stApp footer { display: none !important; }
+    
+    /* ヘッダーを非表示 */
     header { visibility: hidden; }
-
+    
     /* 右下のツールバー（王冠アイコン等）を強制的に消す */
     div[data-testid="stToolbar"] {
         display: none !important;
@@ -291,6 +297,29 @@ st.markdown("""
     }
     div[data-testid="stStatusWidget"] {
         display: none !important;
+    }
+    
+    /* カスタムフッターのスタイル */
+    .custom-footer {
+        text-align: center;
+        padding: 30px 20px;
+        margin-top: 50px;
+        border-top: 1px solid #E8E8E8;
+        color: #666666;
+        font-size: 0.9rem;
+    }
+    .custom-footer a {
+        color: #D81B60;
+        text-decoration: none;
+        margin: 0 10px;
+    }
+    .custom-footer a:hover {
+        text-decoration: underline;
+    }
+    .custom-footer .copyright {
+        margin-top: 10px;
+        color: #999999;
+        font-size: 0.85rem;
     }
     </style>
     
@@ -381,3 +410,16 @@ else:
                 st.balloons()
             except Exception as e:
                 st.error(f"エラーが発生しました: {e}")
+
+# -------------------------------------------
+# フッター（著作権表示）
+# -------------------------------------------
+st.markdown("""
+    <div class="custom-footer">
+        <div>
+            <a href="#">特定商取引法に基づく表記</a> | 
+            <a href="#">プライバシーポリシー</a>
+        </div>
+        <div class="copyright">© 2026 占いミザリー</div>
+    </div>
+    """, unsafe_allow_html=True)
