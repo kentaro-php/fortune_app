@@ -18,30 +18,34 @@ st.set_page_config(
     page_icon="🔮"
 )
 
-# --- UI非表示設定（ヘッダー・フッター・右下のアイコンを完全消去） ---
+# --- UI完全削除（ヘッダー・フッター・開発者ツール・赤アイコン） ---
 hide_st_style = """
     <style>
-    /* 1. ヘッダーとハンバーガーメニューを消す */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    [data-testid="stHeader"] {display: none;}
+    /* 1. ヘッダー領域全体を消す */
+    header {visibility: hidden !important; height: 0px !important;}
+    [data-testid="stHeader"] {display: none !important;}
     
-    /* 2. フッター（Made with Streamlit）を消す */
-    footer {visibility: hidden;}
-    [data-testid="stFooter"] {display: none;}
+    /* 2. フッターを消す */
+    footer {visibility: hidden !important; height: 0px !important;}
+    [data-testid="stFooter"] {display: none !important;}
     
-    /* 3. 右下の管理バー・アイコン（ViewerBadge）を強制的に消す */
-    [data-testid="stToolbar"] {display: none !important;}
-    div[class^="viewerBadge"] {display: none !important;}
+    /* 3. ★最重要★ 右下のツールバー（王冠・アバター）をクラス名の部分一致で強制消去 */
+    /* "viewerBadge" という文字が含まれる要素はすべて消す */
+    div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
+    /* ツールバー自体も消す */
+    [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
     
     /* 4. 上部の虹色の線を消す */
-    [data-testid="stDecoration"] {display: none;}
+    [data-testid="stDecoration"] {display: none !important;}
     
-    /* 5. スマホ用の余白調整（ヘッダー消失分の空白を詰める） */
+    /* 5. 余白を詰める */
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
     }
+    
+    /* 6. 万が一残る場合の強力な上書き */
+    .stApp > header {display: none !important;}
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
