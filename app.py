@@ -232,14 +232,19 @@ st.markdown("""
     }
     
     /* セクションタイトルをシンプルに */
-    h2 {
+    h2, h3 {
         font-size: 1.5rem !important;
         font-weight: 400 !important;
         color: #333333 !important;
         margin-top: 40px !important;
         margin-bottom: 20px !important;
-        border-bottom: 1px solid #f0f0f0 !important;
-        padding-bottom: 10px !important;
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
+    
+    /* 絵文字を非表示にする */
+    h2::before, h3::before {
+        content: none !important;
     }
     
     /* フォームをシンプルに */
@@ -283,7 +288,7 @@ if not is_paid:
             st.info("完全版をご購入いただくと、詳しい運勢をご覧いただけます。")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 完全版鑑定書")
+    st.markdown('<h3 style="font-size: 1.5rem; font-weight: 400; color: #333333; margin: 30px 0 15px 0;">完全版鑑定書</h3>', unsafe_allow_html=True)
     st.markdown("あなただけの運勢を詳しく鑑定したPDFをお届けします。")
     
     with st.form("pay"):
@@ -300,13 +305,14 @@ if not is_paid:
     # ▼▼▼ Stripeリンク（ボタン色#e10080） ▼▼▼
     stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
     st.markdown(f"""
-    <div style="text-align: center; margin: 30px 0;">
-        <a href="{stripe_url}" style="text-decoration: none;">
-            <button style="background-color: #e10080; color: white; border: none; padding: 15px 40px; font-size: 18px; font-weight: 500; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3); transition: all 0.3s ease;">
-                👉 500円で鑑定書を発行する
+    <div style="text-align: center; margin: 40px 0;">
+        <a href="{stripe_url}" style="text-decoration: none; display: inline-block;">
+            <button style="background-color: #e10080 !important; color: white !important; border: none !important; padding: 15px 40px !important; font-size: 18px !important; font-weight: 500 !important; border-radius: 25px !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important; transition: all 0.3s ease !important; width: auto !important;">
+                500円で鑑定書を発行する
             </button>
         </a>
     </div>
+    <p style="text-align: center; color: #666; font-size: 0.9rem; margin-top: 10px;">※決済完了後、自動的に鑑定書作成画面に戻ります。</p>
     """, unsafe_allow_html=True)
 
 else:
