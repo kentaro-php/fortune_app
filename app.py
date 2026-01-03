@@ -231,7 +231,7 @@ if not is_paid:
             st.success("✅ 保存しました。下のボタンから決済してください。")
             
     # ▼▼▼ Stripeリンク（HerokuのURLに合わせてください） ▼▼▼
-    st.link_button("👉 500円で発行する", "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k", type="primary", use_container_width=True)
+    st.link_button("👉 500円で発行する", "https://buy.stripe.com/28E00j7ZU5madln98bcfT1t", type="primary", use_container_width=True)
 
 else:
     st.success("✅ ご購入ありがとうございます！")
