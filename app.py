@@ -193,50 +193,39 @@ def create_pdf(name, y, m, d):
 # ==========================================
 st.markdown("""
     <style>
-    /* シンプルで女性好みのデザイン */
+    /* タイトルデザイン */
     .title-container {
         text-align: center;
-        padding: 30px 0;
-        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #C0A060;
+        margin-bottom: 30px;
     }
     .main-title {
-        font-family: "Helvetica", "Hiragino Sans", sans-serif;
-        font-weight: 300;
-        font-size: 2rem;
-        color: #333333;
+        font-family: "Helvetica", "Arial", sans-serif;
+        font-weight: bold;
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, #FFB6C1, #C71585);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 10px;
-        letter-spacing: 2px;
     }
     .sub-title {
-        font-size: 0.95rem;
-        color: #999999;
-        font-weight: normal;
-        margin-top: 5px;
+        font-size: 1.2rem;
+        color: #C0A060;
+        font-weight: bold;
     }
     
-    /* ボタンスタイル（#e10080） */
+    /* ボタンデザイン（#e10080） */
     div.stButton > button {
         background-color: #e10080 !important;
         color: white !important;
-        border-radius: 25px !important;
-        padding: 12px 30px !important;
+        font-weight: bold !important;
         border: none !important;
-        font-weight: 500 !important;
-        font-size: 16px !important;
-        transition: all 0.3s ease !important;
-    }
-    div.stButton > button:hover {
-        background-color: #c1006e !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important;
+        padding: 10px 20px !important;
+        border-radius: 10px !important;
     }
     
-    /* HTMLボタン（カスタムボタン）のスタイル */
-    button[style*="background-color"] {
-        background-color: #e10080 !important;
-    }
-    
-    /* カスタムボタンのスタイルを強化 */
+    /* カスタムボタン（#e10080） */
     a[href*="stripe"] button,
     div[style*="text-align: center"] button {
         background-color: #e10080 !important;
@@ -258,36 +247,36 @@ st.markdown("""
         box-shadow: 0 6px 16px rgba(225, 0, 128, 0.4) !important;
     }
     
-    /* セクションタイトルをシンプルに */
-    h2 {
-        font-size: 1.5rem !important;
-        font-weight: 400 !important;
-        color: #333333 !important;
-        margin-top: 40px !important;
-        margin-bottom: 20px !important;
-        border-bottom: 1px solid #f0f0f0 !important;
-        padding-bottom: 10px !important;
+    /* カスタムフッターのスタイル */
+    .custom-footer {
+        text-align: center;
+        padding: 30px 20px;
+        margin-top: 50px;
+        border-top: 1px solid #E8E8E8;
+        color: #666666;
+        font-size: 0.9rem;
     }
-    
-    /* フォームをシンプルに */
-    .stForm {
-        background-color: #fafafa;
-        padding: 25px;
-        border-radius: 10px;
-        margin: 20px 0;
+    .custom-footer a {
+        color: #D81B60;
+        text-decoration: none;
+        margin: 0 10px;
     }
-    
-    /* 全体的な余白調整 */
-    .block-container {
-        max-width: 700px;
-        padding: 2rem 1rem;
+    .custom-footer a:hover {
+        text-decoration: underline;
+    }
+    .custom-footer .copyright {
+        margin-top: 10px;
+        color: #999999;
+        font-size: 0.85rem;
     }
     </style>
+    
     <div class="title-container">
+        <div class="sub-title">✨ 数秘術で紐解くあなたの未来 ✨</div>
         <div class="main-title">2026年 運勢鑑定書</div>
-        <div class="sub-title">あなただけの特別な一年を</div>
+        <div style="color: #cccccc;">Designed for your special year</div>
     </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 query_params = st.query_params
 is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
@@ -303,9 +292,9 @@ if not is_paid:
         st.columns(3)[0].number_input("年", 1900, 2025, 2000)
         if st.form_submit_button("鑑定結果の一部を見る"): st.warning("🔒 完全版は購入が必要です。")
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 完全版鑑定書")
-    st.markdown("あなただけの運勢を詳しく鑑定したPDFをお届けします。")
+    st.markdown("---")
+    st.header("💎 完全版鑑定書 (PDF)")
+    st.write("2026年を最高の一年にするための、あなただけのガイドブックです。")
     
     with st.form("pay"):
         name = st.text_input("お名前", key="p_name", placeholder="山田 花子")
@@ -320,15 +309,17 @@ if not is_paid:
     st.markdown("<br>", unsafe_allow_html=True)
     # ▼▼▼ Stripeリンク（ボタン色#e10080） ▼▼▼
     stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
+    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
+    stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
+    
     st.markdown(f"""
     <div style="text-align: center; margin: 30px 0;">
         <a href="{stripe_url}" style="text-decoration: none;">
             <button style="background-color: #e10080 !important; color: white !important; border: none !important; padding: 15px 40px !important; font-size: 18px !important; font-weight: 500 !important; border-radius: 25px !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important; transition: all 0.3s ease !important;">
-                500円で鑑定書を発行する
+                👉 500円で鑑定書を発行する
             </button>
         </a>
     </div>
-    <p style="text-align: center; color: #666; font-size: 0.9rem; margin-top: 10px;">※決済完了後、自動的に鑑定書作成画面に戻ります。</p>
     """, unsafe_allow_html=True)
 
 else:
@@ -357,3 +348,16 @@ else:
 
     if st.session_state.pdf_data:
         st.download_button("📥 ダウンロード", st.session_state.pdf_data, file_name=st.session_state.pdf_filename, mime="application/pdf", type="primary", use_container_width=True)
+
+# -------------------------------------------
+# フッター（著作権表示）
+# -------------------------------------------
+st.markdown("""
+    <div class="custom-footer">
+        <div>
+            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
+            <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+        </div>
+        <div class="copyright">© 2026 占いミザリー</div>
+    </div>
+    """, unsafe_allow_html=True)
