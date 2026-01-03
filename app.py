@@ -291,6 +291,9 @@ st.markdown("""
     /* 右下のツールバー（王冠アイコン等）を強制的に消す */
     div[data-testid="stToolbar"] {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
     div[data-testid="stDecoration"] {
         display: none !important;
@@ -302,30 +305,144 @@ st.markdown("""
     /* 右下のユーザープロフィール画像とツールバーボタンを完全に非表示 */
     div[data-testid="stToolbar"] > * {
         display: none !important;
+        visibility: hidden !important;
     }
-    button[title="Manage app"] {
+    button[title="Manage app"],
+    button[title*="Manage"],
+    button[title*="manage"] {
         display: none !important;
+        visibility: hidden !important;
     }
     button[kind="header"] {
         display: none !important;
     }
-    /* Streamlit Cloudのユーザーアバター（ヘッダー全体は非表示にしない） */
+    
+    /* Streamlit Cloudのユーザーアバターとボタン（右下固定要素） */
     div[data-testid="stHeader"] button[title="Manage app"],
-    div[data-testid="stHeader"] button[kind="header"] {
+    div[data-testid="stHeader"] button[kind="header"],
+    div[data-testid="stHeader"] button {
         display: none !important;
+        visibility: hidden !important;
     }
-    /* Streamlit Cloudのツールバーとアバターのみを対象 */
+    
+    /* 右下に固定されているすべての要素を非表示（位置ベース） */
+    div[style*="position: fixed"][style*="right"],
+    div[style*="position:fixed"][style*="right"] {
+        bottom: auto !important;
+    }
+    
+    /* 右下のツールバーとアバター（より包括的） */
     div[data-testid="stToolbar"] button,
     div[data-testid="stToolbar"] img,
-    div[data-testid="stToolbar"] a {
+    div[data-testid="stToolbar"] a,
+    div[data-testid="stToolbar"] div,
+    div[data-testid="stToolbar"] span {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
+    
     /* Streamlit Cloudのユーザーアバター画像（右下の円形画像） */
+    div[data-testid="stToolbar"] img,
     div[data-testid="stToolbar"] img[alt*="user"],
     div[data-testid="stToolbar"] img[src*="avatar"],
-    div[data-testid="stToolbar"] > div:has(img) {
+    div[data-testid="stToolbar"] > div:has(img),
+    div[data-testid="stToolbar"] > div > img {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
+    
+    /* 右下に固定されているボタンとアバター（位置とz-indexベース） */
+    button[style*="right"][style*="bottom"],
+    img[style*="right"][style*="bottom"],
+    a[style*="right"][style*="bottom"],
+    div[style*="right"][style*="bottom"][style*="z-index"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    
+    /* Streamlit Cloudのツールバー全体を非表示（最後の手段） */
+    [class*="stToolbar"],
+    [class*="toolbar"],
+    [data-testid*="Toolbar"],
+    [data-testid*="toolbar"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* JavaScriptで動的に非表示にするための準備 */
+    </style>
+    <script>
+    (function() {
+        function hideToolbar() {
+            // ツールバーを非表示
+            const toolbar = document.querySelector('[data-testid="stToolbar"]');
+            if (toolbar) {
+                toolbar.style.display = 'none';
+                toolbar.style.visibility = 'hidden';
+                toolbar.style.opacity = '0';
+                toolbar.style.pointerEvents = 'none';
+            }
+            
+            // 右下に固定されているすべてのボタンと画像を非表示
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(function(el) {
+                const style = window.getComputedStyle(el);
+                if (style.position === 'fixed' && 
+                    (style.right === '0px' || style.right === '0' || parseInt(style.right) < 50) &&
+                    (style.bottom === '0px' || style.bottom === '0' || parseInt(style.bottom) < 100)) {
+                    // 右下の固定要素を非表示（ただしカスタムフッターは除外）
+                    if (!el.closest('.custom-footer') && 
+                        !el.closest('[data-testid="stApp"]') &&
+                        el.tagName !== 'SCRIPT' &&
+                        el.tagName !== 'STYLE') {
+                        el.style.display = 'none';
+                        el.style.visibility = 'hidden';
+                        el.style.opacity = '0';
+                        el.style.pointerEvents = 'none';
+                    }
+                }
+            });
+            
+            // Manage appボタンを非表示
+            const manageButtons = document.querySelectorAll('button[title*="Manage"], button[title*="manage"]');
+            manageButtons.forEach(function(btn) {
+                btn.style.display = 'none';
+                btn.style.visibility = 'hidden';
+            });
+            
+            // アバター画像を非表示
+            const avatars = document.querySelectorAll('img[alt*="user"], img[alt*="User"], img[src*="avatar"]');
+            avatars.forEach(function(img) {
+                const rect = img.getBoundingClientRect();
+                if (rect.right > window.innerWidth - 100 && rect.bottom > window.innerHeight - 100) {
+                    img.style.display = 'none';
+                    img.style.visibility = 'hidden';
+                    img.parentElement.style.display = 'none';
+                }
+            });
+        }
+        
+        // ページ読み込み時とDOM変更時に実行
+        hideToolbar();
+        document.addEventListener('DOMContentLoaded', hideToolbar);
+        
+        // MutationObserverで動的に追加される要素も監視
+        const observer = new MutationObserver(hideToolbar);
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        // 定期的にもチェック（念のため）
+        setInterval(hideToolbar, 1000);
+    })();
+    </script>
+    <style>
     
     /* カスタムフッターのスタイル */
     .custom-footer {
