@@ -269,16 +269,16 @@ def create_pdf(name, y, m, d):
         current_y = draw_wrapped_text(c, month_text, margin, current_y, content_width, font_name, 12, 25, text_color)
         current_y -= 15
 
-    # アップセル（電話占いへの誘導）セクション
+    # アップセル（占いミザリーへの誘導）セクション
     current_y -= 30
     c.setFillColor(title_color)
     c.setFont(font_name, 16)
-    c.drawCentredString(width/2, current_y, "より深い悩みは電話占いへ")
+    c.drawCentredString(width/2, current_y, "より深い悩みは占いミザリーへ")
     current_y -= 25
     
     c.setFillColor(text_color)
     c.setFont(font_name, 11)
-    upsell_text = "恋愛・仕事・人間関係など、もっと詳しく知りたい方は\n電話占いでプロの占い師に直接ご相談ください。\n初回限定：2,980円～"
+    upsell_text = "恋愛・仕事・人間関係など、もっと詳しく知りたい方は\n電話占いでプロの占い師に直接ご相談ください。\nLINE予約なら1,000円割引20分2,980円～"
     current_y = draw_wrapped_text(c, upsell_text, margin, current_y, content_width, font_name, 11, 20, text_color)
     current_y -= 20
     
