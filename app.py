@@ -25,7 +25,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# UI完全削除（CSS） + シックな黒フッター
+# UI完全削除（CSS） + シックな黒フッター + 導入エリア装飾
 # ==========================================
 hide_st_style = """
     <style>
@@ -83,6 +83,27 @@ hide_st_style = """
         font-size: 14px;
         font-weight: bold;
         letter-spacing: 0.5px;
+    }
+    
+    /* ▼▼▼ 興味付けセクションのスタイル ▼▼▼ */
+    .intro-box {
+        background-color: #fff0f5; /* 薄いピンク背景 */
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+        border: 2px solid #ffb6c1;
+    }
+    .intro-head {
+        color: #e10080;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    .intro-text {
+        color: #333;
+        font-size: 0.95rem;
+        line-height: 1.6;
     }
     </style>
 """
@@ -165,12 +186,9 @@ def get_monthly_fortunes(lp):
     return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
-# 5. スプレッドシート保存関数（ログ機能強化版）
+# 5. スプレッドシート保存関数（ログ機能）
 # ==========================================
 def save_to_gsheet(action_type, name, year, month, day, life_path):
-    """
-    action_type: '無料プレビュー' or '購入・発行'
-    """
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = None
@@ -185,6 +203,7 @@ def save_to_gsheet(action_type, name, year, month, day, life_path):
             return False
 
         client = gspread.authorize(creds)
+        # あなたのシートID
         SPREADSHEET_KEY = "1GFS4FjxcHvamWlJaFbXFTmJuL3UyTtaiT4eVxxF15vU"
         
         try:
@@ -193,7 +212,6 @@ def save_to_gsheet(action_type, name, year, month, day, life_path):
             return False
 
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # [日時, 種類, 名前, 生年月日, LP] の順で保存
         sheet.append_row([timestamp, action_type, name, f"{year}/{month}/{day}", life_path])
         return True
     except Exception as e:
@@ -257,7 +275,23 @@ if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
 if not is_paid:
-    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
+    # ▼▼▼ 復活：興味を引くコンテンツセクション ▼▼▼
+    st.markdown("""
+    <div class="intro-box">
+        <div class="intro-head">🔮 2026年、あなたを待つ運命とは？</div>
+        <div class="intro-text">
+            「来年はどんな年になる？」<br>
+            「恋愛や仕事の転機はいつ？」<br><br>
+            数秘術では、人生は9年周期で巡ると言われています。<br>
+            あなたの生年月日から導き出される特別な数字で、<br>
+            <strong>2026年の運勢バイオリズム</strong>を読み解きましょう。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    # ▲▲▲ ここまで ▲▲▲
+
+    st.info("👋 まずは無料プレビューで、あなたの「数字」を知ってください。")
+    
     with st.form("preview"):
         name_pre = st.text_input("お名前")
         c1, c2, c3 = st.columns(3)
@@ -267,10 +301,10 @@ if not is_paid:
         
         if st.form_submit_button("鑑定結果の一部を見る"):
             if name_pre:
-                # ▼▼▼ 無料プレビューのログを保存 ▼▼▼
                 lp = calculate_life_path_number(y_pre, m_pre, d_pre)
+                # ログ保存：無料プレビュー
                 save_to_gsheet("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
-                st.warning("🔒 完全版は購入が必要です。")
+                st.warning("🔒 鑑定結果の続きを見るには、完全版の購入が必要です。")
             else:
                 st.error("お名前を入力してください")
 
@@ -308,7 +342,7 @@ else:
                 st.session_state.pdf_data = pdf_bytes
                 st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
                 
-                # ▼▼▼ 購入・発行のログを保存 ▼▼▼
+                # ログ保存：購入完了
                 save_to_gsheet("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
                 
                 st.success("完了しました！下のバーからダウンロードできます。")
