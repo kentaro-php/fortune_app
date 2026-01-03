@@ -231,20 +231,42 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important;
     }
     
+    /* HTMLボタン（カスタムボタン）のスタイル */
+    button[style*="background-color"] {
+        background-color: #e10080 !important;
+    }
+    
+    /* カスタムボタンのスタイルを強化 */
+    a[href*="stripe"] button,
+    div[style*="text-align: center"] button {
+        background-color: #e10080 !important;
+        color: white !important;
+        border: none !important;
+        padding: 15px 40px !important;
+        font-size: 18px !important;
+        font-weight: 500 !important;
+        border-radius: 25px !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    a[href*="stripe"] button:hover,
+    div[style*="text-align: center"] button:hover {
+        background-color: #c1006e !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(225, 0, 128, 0.4) !important;
+    }
+    
     /* セクションタイトルをシンプルに */
-    h2, h3 {
+    h2 {
         font-size: 1.5rem !important;
         font-weight: 400 !important;
         color: #333333 !important;
         margin-top: 40px !important;
         margin-bottom: 20px !important;
-        border-bottom: none !important;
-        padding-bottom: 0 !important;
-    }
-    
-    /* 絵文字を非表示にする */
-    h2::before, h3::before {
-        content: none !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        padding-bottom: 10px !important;
     }
     
     /* フォームをシンプルに */
@@ -275,20 +297,14 @@ if 'user_name' not in st.session_state: st.session_state.update({k: v for k, v i
 if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 
 if not is_paid:
-    st.markdown("### 無料プレビュー")
-    st.markdown("まずは簡単なプレビューをご覧ください。")
-    
+    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
     with st.form("preview"):
-        st.text_input("お名前", placeholder="山田 花子")
-        cols = st.columns(3)
-        cols[0].number_input("年", 1900, 2025, 2000)
-        cols[1].number_input("月", 1, 12, 1)
-        cols[2].number_input("日", 1, 31, 1)
-        if st.form_submit_button("プレビューを見る"):
-            st.info("完全版をご購入いただくと、詳しい運勢をご覧いただけます。")
+        st.text_input("お名前")
+        st.columns(3)[0].number_input("年", 1900, 2025, 2000)
+        if st.form_submit_button("鑑定結果の一部を見る"): st.warning("🔒 完全版は購入が必要です。")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<h3 style="font-size: 1.5rem; font-weight: 400; color: #333333; margin: 30px 0 15px 0;">完全版鑑定書</h3>', unsafe_allow_html=True)
+    st.markdown("### 完全版鑑定書")
     st.markdown("あなただけの運勢を詳しく鑑定したPDFをお届けします。")
     
     with st.form("pay"):
@@ -305,9 +321,9 @@ if not is_paid:
     # ▼▼▼ Stripeリンク（ボタン色#e10080） ▼▼▼
     stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
     st.markdown(f"""
-    <div style="text-align: center; margin: 40px 0;">
-        <a href="{stripe_url}" style="text-decoration: none; display: inline-block;">
-            <button style="background-color: #e10080 !important; color: white !important; border: none !important; padding: 15px 40px !important; font-size: 18px !important; font-weight: 500 !important; border-radius: 25px !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important; transition: all 0.3s ease !important; width: auto !important;">
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{stripe_url}" style="text-decoration: none;">
+            <button style="background-color: #e10080 !important; color: white !important; border: none !important; padding: 15px 40px !important; font-size: 18px !important; font-weight: 500 !important; border-radius: 25px !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3) !important; transition: all 0.3s ease !important;">
                 500円で鑑定書を発行する
             </button>
         </a>
@@ -316,16 +332,15 @@ if not is_paid:
     """, unsafe_allow_html=True)
 
 else:
-    st.markdown("### ご購入ありがとうございます")
-    st.markdown("鑑定書を発行できます。")
-    
+    st.success("✅ ご購入ありがとうございます！")
     with st.form("final"):
-        name = st.text_input("お名前", value=st.session_state.user_name, placeholder="山田 花子")
+        st.write("### 📄 発行フォーム")
+        name = st.text_input("お名前", value=st.session_state.user_name)
         c1, c2, c3 = st.columns(3)
         y = c1.number_input("年", 1900, 2025, st.session_state.birth_year)
         m = c2.number_input("月", 1, 12, st.session_state.birth_month)
         d = c3.number_input("日", 1, 31, st.session_state.birth_day)
-        submitted = st.form_submit_button("PDFをダウンロード", use_container_width=True)
+        submitted = st.form_submit_button("✨ PDFをダウンロード", use_container_width=True)
 
     if submitted and name:
         with st.spinner("生成中..."):
