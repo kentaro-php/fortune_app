@@ -236,7 +236,7 @@ def save_data_via_gas(action_type, name, year, month, day, lp):
         with urllib.request.urlopen(req) as res:
             pass # 送信成功
     except Exception as e:
-        print(f"GAS Save Error: {e}")
+        st.error(f"⚠️ 保存エラー: {e}")
 
 # ==========================================
 # 6. PDF生成
@@ -344,9 +344,9 @@ if not is_paid:
                 
                 # 完全版へのアンカーリンク
                 st.markdown("""
-                <div style="text-align: center; margin: 20px 0;">
-                    <a href="javascript:void(0);" onclick="document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'});" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; padding: 10px 20px; background-color: #fff0f5; border-radius: 25px; border: 2px solid #e10080;">
-                        ↓ 完全版鑑定書を見る ↓
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="javascript:void(0);" onclick="document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'});" style="color: #e10080; text-decoration: underline; font-weight: bold; font-size: 1rem;">
+                        完全版鑑定書を見る
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
