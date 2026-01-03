@@ -25,7 +25,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# UI完全削除（CSS） + シックな黒フッター + 導入エリア装飾
+# UI完全削除（CSS） + シックな黒フッター
 # ==========================================
 hide_st_style = """
     <style>
@@ -45,15 +45,15 @@ hide_st_style = """
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 75px;
-        background: #1a1a1a;
+        height: 75px; /* 少し高さを出して余裕を持たせる */
+        background: #1a1a1a; /* 高級感のある黒（ダークグレー） */
         display: flex;
         justify-content: space-around;
         align-items: center;
         z-index: 99999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.3); /* 影を濃くして浮き上がらせる */
         font-family: "Helvetica", sans-serif;
-        border-top: 2px solid #e10080;
+        border-top: 2px solid #e10080; /* 上部にテーマカラーのラインを入れてブランド感を出す */
     }
     .footer-item {
         flex: 1;
@@ -63,8 +63,8 @@ hide_st_style = """
         justify-content: center;
         align-items: center;
         text-decoration: none !important;
-        color: white !important;
-        border-right: 1px solid #333;
+        color: white !important; /* 文字は白で見やすく */
+        border-right: 1px solid #333; /* 区切り線は目立たない色に */
         transition: background 0.3s;
         cursor: pointer;
     }
@@ -72,38 +72,17 @@ hide_st_style = """
         border-right: none;
     }
     .footer-item:hover {
-        background: #333;
+        background: #333; /* ホバー時は少し明るく */
     }
     .footer-icon {
         font-size: 24px;
         margin-bottom: 5px;
-        color: #e10080;
+        color: #e10080; /* アイコンにテーマカラー（ピンク）を使用 */
     }
     .footer-text {
-        font-size: 14px;
+        font-size: 14px; /* サイズアップ */
         font-weight: bold;
-        letter-spacing: 0.5px;
-    }
-    
-    /* ▼▼▼ 興味付けセクションのスタイル ▼▼▼ */
-    .intro-box {
-        background-color: #fff0f5; /* 薄いピンク背景 */
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 25px;
-        text-align: center;
-        border: 2px solid #ffb6c1;
-    }
-    .intro-head {
-        color: #e10080;
-        font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 10px;
-    }
-    .intro-text {
-        color: #333;
-        font-size: 0.95rem;
-        line-height: 1.6;
+        letter-spacing: 0.5px; /* 文字間隔を少し空けて読みやすく */
     }
     </style>
 """
@@ -186,9 +165,9 @@ def get_monthly_fortunes(lp):
     return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
-# 5. スプレッドシート保存関数（ログ機能）
+# 5. スプレッドシート保存関数
 # ==========================================
-def save_to_gsheet(action_type, name, year, month, day, life_path):
+def save_to_gsheet(name, year, month, day, life_path):
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = None
@@ -203,7 +182,6 @@ def save_to_gsheet(action_type, name, year, month, day, life_path):
             return False
 
         client = gspread.authorize(creds)
-        # あなたのシートID
         SPREADSHEET_KEY = "1GFS4FjxcHvamWlJaFbXFTmJuL3UyTtaiT4eVxxF15vU"
         
         try:
@@ -212,7 +190,7 @@ def save_to_gsheet(action_type, name, year, month, day, life_path):
             return False
 
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sheet.append_row([timestamp, action_type, name, f"{year}/{month}/{day}", life_path])
+        sheet.append_row([timestamp, name, f"{year}/{month}/{day}", life_path])
         return True
     except Exception as e:
         print(f"Spreadsheet Error: {e}")
@@ -275,38 +253,11 @@ if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
 if not is_paid:
-    # ▼▼▼ 復活：興味を引くコンテンツセクション ▼▼▼
-    st.markdown("""
-    <div class="intro-box">
-        <div class="intro-head">🔮 2026年、あなたを待つ運命とは？</div>
-        <div class="intro-text">
-            「来年はどんな年になる？」<br>
-            「恋愛や仕事の転機はいつ？」<br><br>
-            数秘術では、人生は9年周期で巡ると言われています。<br>
-            あなたの生年月日から導き出される特別な数字で、<br>
-            <strong>2026年の運勢バイオリズム</strong>を読み解きましょう。
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    # ▲▲▲ ここまで ▲▲▲
-
-    st.info("👋 まずは無料プレビューで、あなたの「数字」を知ってください。")
-    
+    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
     with st.form("preview"):
-        name_pre = st.text_input("お名前")
-        c1, c2, c3 = st.columns(3)
-        y_pre = c1.number_input("年", 1900, 2025, 2000)
-        m_pre = c2.number_input("月", 1, 12, 1)
-        d_pre = c3.number_input("日", 1, 31, 1)
-        
-        if st.form_submit_button("鑑定結果の一部を見る"):
-            if name_pre:
-                lp = calculate_life_path_number(y_pre, m_pre, d_pre)
-                # ログ保存：無料プレビュー
-                save_to_gsheet("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
-                st.warning("🔒 鑑定結果の続きを見るには、完全版の購入が必要です。")
-            else:
-                st.error("お名前を入力してください")
+        st.text_input("お名前")
+        st.columns(3)[0].number_input("年", 1900, 2025, 2000)
+        if st.form_submit_button("鑑定結果の一部を見る"): st.warning("🔒 完全版は購入が必要です。")
 
     st.markdown("---")
     st.header("💎 完全版鑑定書 (PDF)")
@@ -342,9 +293,8 @@ else:
                 st.session_state.pdf_data = pdf_bytes
                 st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
                 
-                # ログ保存：購入完了
-                save_to_gsheet("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
-                
+                # スプレッドシート保存
+                save_to_gsheet(name, y, m, d, calculate_life_path_number(y, m, d))
                 st.success("完了しました！下のバーからダウンロードできます。")
             except Exception as e:
                 st.error(f"エラー: {e}")
