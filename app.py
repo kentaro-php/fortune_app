@@ -74,7 +74,7 @@ hide_st_style = """
         font-weight: bold;
     }
     
-    /* ▼▼▼ トップへ戻るボタン ▼▼▼ */
+    /* ▼▼▼ トップへ戻るリンク ▼▼▼ */
     .top-link {
         text-align: center;
         margin: 30px 0;
@@ -82,19 +82,35 @@ hide_st_style = """
     }
     .top-link a {
         color: #e10080;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1rem;
-        display: inline-block;
-        padding: 10px 25px;
-        background-color: #fff0f5;
-        border-radius: 25px;
-        border: 2px solid #e10080;
-        transition: all 0.3s ease;
+        text-decoration: underline;
+        font-size: 0.95rem;
     }
     .top-link a:hover {
-        background-color: #e10080;
-        color: white;
+        color: #c1006e;
+    }
+    
+    /* ▼▼▼ フッター（著作権表示） ▼▼▼ */
+    .custom-footer {
+        text-align: center;
+        margin: 40px 0 20px 0;
+        padding: 20px 0;
+        border-top: 1px solid #e0e0e0;
+        color: #666;
+        font-size: 0.85rem;
+    }
+    .custom-footer a {
+        color: #666;
+        text-decoration: none;
+        margin: 0 5px;
+    }
+    .custom-footer a:hover {
+        color: #e10080;
+        text-decoration: underline;
+    }
+    .custom-footer .copyright {
+        margin-top: 10px;
+        color: #999;
+        font-size: 0.8rem;
     }
     </style>
 """
@@ -251,6 +267,25 @@ st.markdown("""
     .main-title {font-family: "Helvetica", sans-serif; font-weight: bold; font-size: 2.5rem; background: linear-gradient(45deg, #FFB6C1, #C71585); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
     .sub-title {font-size: 1.2rem; color: #C0A060; font-weight: bold;}
     div.stButton > button {background-color: #C71585; color: white; border-radius: 10px; padding: 10px 20px; border:none;}
+    /* ▼▼▼ 発行ボタンのスタイル ▼▼▼ */
+    div[data-testid="stLinkButton"] > a,
+    div[data-testid="stLinkButton"] > a button {
+        background-color: #e10080 !important;
+        color: white !important;
+        padding: 18px 30px !important;
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        border-radius: 10px !important;
+        border: none !important;
+        width: 100% !important;
+        transition: all 0.3s ease !important;
+    }
+    div[data-testid="stLinkButton"] > a:hover,
+    div[data-testid="stLinkButton"] > a button:hover {
+        background-color: #c1006e !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(225, 0, 128, 0.3) !important;
+    }
     </style>
     <div class="title-container">
         <div class="sub-title">✨ 数秘術で紐解くあなたの未来 ✨</div>
@@ -367,12 +402,20 @@ else:
                 st.error(f"エラー: {e}")
 
 # ==========================================
-# 8. トップへ戻るボタン
+# 8. トップへ戻るリンク + フッター（著作権表示）
 # ==========================================
 st.markdown("""
     <div class="top-link">
-        <a href="https://mizary.com/" target="_blank" rel="noopener noreferrer">
-            🏠 トップへ戻る
-        </a>
+        <a href="https://mizary.com/" target="_blank" rel="noopener noreferrer">トップへ戻る</a>
+    </div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+    <div class="custom-footer">
+        <div>
+            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
+            <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+        </div>
+        <div class="copyright">© 2026 占いミザリー</div>
     </div>
 """, unsafe_allow_html=True)
