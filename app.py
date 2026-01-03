@@ -555,8 +555,8 @@ if not font_path:
 query_params = st.query_params
 is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
 
-# ▼▼▼ テスト用に強制的に True（支払い済み）にする ▼▼▼
-is_paid = True
+# # ▼▼▼ テスト用に強制的に True（支払い済み）にする ▼▼▼
+# is_paid = True
 
 # セッション状態の初期化
 if 'user_name' not in st.session_state:
