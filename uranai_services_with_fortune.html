@@ -1,0 +1,132 @@
+<div id="mizary-chat-container">
+  
+  <div id="chat-intro-screen">
+    <div class="intro-card">
+        <h2 class="intro-title">【無料チャット診断】<br>彼の本気度チェック</h2>
+        <p class="intro-desc">「もしかして、私って都合のいい女？」<br>彼の行動から、あなたへの本気度を診断します。</p>
+        <div class="intro-btn-area">
+           <button class="start-main-btn" onclick="startChat()">診断をスタートする</button>
+        </div>
+        <p class="intro-note">※所要時間：約1分</p>
+    </div>
+  </div>
+
+  <div id="chat-interface" style="display:none;">
+    <div id="chat-timeline"></div>
+    <div id="typing-indicator" class="typing-indicator">占いミザリーが入力中...</div>
+    <div id="chat-options-area"></div>
+  </div>
+  
+  <div id="result-area" style="display:none;">
+    <h3 class="result-title">診断結果</h3>
+    
+    <div id="final-diagnosis-result" class="result-content">診断結果を計算中...</div>
+    
+    <div class="cta-box">
+      <p style="margin-bottom:15px;">
+        <strong>大丈夫。もう、迷わない。</strong><br>
+        <span style="font-size:0.9em;">この診断の続きと、解決のヒントは<br>LINEでお届けします。</span>
+      </p>
+      
+      <p style="color:#e10080; font-weight:bold; background:#fff0f5; display:inline-block; padding:5px 15px; border-radius:20px; margin-bottom:10px;">
+        今ならLINE予約で1,000円割引
+      </p>
+
+      <a href="https://lin.ee/QcrsY6N" class="line-btn" target="_blank">LINEでさらに詳しく</a>
+      <p style="font-size:0.8rem; margin-top:15px; color:#888;">※リピート率70%超・秘密厳守</p>
+    </div>
+    
+    <button onclick="location.reload()" style="margin-top:20px; border:none; background:none; text-decoration:underline; cursor:pointer; color:#999;">もう一度最初から診断する</button>
+  </div>
+
+</div>
+
+<div class="uranai-options-container">
+	<!-- 運勢鑑定書 -->
+	<section class="uranai-card">
+		<div class="uranai-card-image" style="background: linear-gradient(135deg, #ff6b9d 0%, #e10080 100%); height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; text-align: center;">
+			<h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">2026年運勢鑑定書</h3>
+			<p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 15px;">数秘術で紐解くあなたの未来</p>
+			<div style="background: rgba(255, 255, 255, 0.2); padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 10px;">リリース記念価格</div>
+			<div style="font-size: 1.8rem; font-weight: bold; margin-bottom: 5px;">
+				<span style="text-decoration: line-through; font-size: 0.9rem; opacity: 0.7; margin-right: 8px;">通常1,000円</span>
+				500円
+				<span style="background-color: #fff3cd; color: #e10080; padding: 3px 10px; border-radius: 15px; font-size: 0.8rem; margin-left: 8px;">50%OFF</span>
+			</div>
+			<p style="font-size: 0.8rem; opacity: 0.9;">※1月31日までの期間限定</p>
+		</div>
+		<div class="uranai-card-body">
+			<h3 class="uranai-card-title">運命のバイオリズムを知り、自分らしく輝く一年に。</h3>
+			<p class="uranai-card-description">
+				2026年という新たな一年。「恋愛」「仕事」「金運」…あなたを待ち受ける運命を、数秘術の観点から詳細に鑑定します。ワンコイン（500円）で、あなただけの鑑定書（PDF）を即時発行いたします。
+			</p>
+			<p style="font-size: 0.85rem; color: #e10080; margin-bottom: 15px; text-align: center; padding: 10px; background-color: #fff3cd; border-radius: 5px; display: none;" class="mobile-notice">
+				📱 モバイルでご覧の方は、右下の「運勢鑑定書」ボタンからもアクセスできます
+			</p>
+			<a href="https://mizary.com/2026-numerology/" class="uranai-read-more" style="background-color: #e10080; color: white; padding: 12px 30px; border-radius: 25px; text-align: center; display: inline-block; font-weight: bold; transition: all 0.3s ease;" target="_blank" rel="noopener noreferrer">今すぐ予約する</a>
+		</div>
+	</section>
+
+	<!-- 電話占い -->
+	<section class="uranai-card">
+		<img class="uranai-card-image" src="/wp-content/uploads/2025/07/denwauranai.png" alt="電話占いのイメージ画像" loading="lazy">
+		<div class="uranai-card-body">
+			<h3 class="uranai-card-title">声色で伝わる、電話占い</h3>
+			<p class="uranai-card-description">
+				誰にも顔を見られず、声だけで相談したいあなたへ。ご自宅からリラックスして、本格的な鑑定を受けられます。プライバシーを厳守し、恋愛や仕事、人間関係のお悩みも安心してご相談ください。
+			</p>
+			<a href="/tel/" class="uranai-read-more">もっと見る &gt;</a>
+		</div>
+	</section>
+
+	<!-- オンライン占い -->
+	<section class="uranai-card">
+		<img class="uranai-card-image" src="/wp-content/uploads/2023/08/online_800.png" alt="オンライン占いのイメージ画像" loading="lazy">
+		<div class="uranai-card-body">
+			<h3 class="uranai-card-title">リアルに、オンライン占い</h3>
+			<p class="uranai-card-description">
+				LINEビデオやZOOMを使い、ご自宅からじっくり相談。全国どこからでも、熟練の占い師による鑑定が受けられます。対面が苦手な方や、遠方にお住まいの方にもおすすめです。
+			</p>
+			<a href="/online/" class="uranai-read-more">もっと見る &gt;</a>
+		</div>
+	</section>
+
+	<!-- トーク占い（チャット占い） -->
+	<section class="uranai-card">
+		<img class="uranai-card-image" src="/wp-content/uploads/2025/07/chat-uranai.png" alt="LINEトーク占いのイメージ画像" loading="lazy">
+		<div class="uranai-card-body">
+			<h3 class="uranai-card-title">声を出さない、チャット占い</h3>
+			<p class="uranai-card-description">
+				電車の中や仕事の合間、深夜でも。いつでもどこでも、声を出せずに相談できるのがLINEチャット占いです。忙しいあなたの心の支えとして、新しい一歩を踏み出すきっかけを探してみませんか？
+			</p>
+			<a href="http://mizary.com/chat-uranai/" class="uranai-read-more">もっと見る &gt;</a>
+		</div>
+	</section>
+</div>
+
+<!-- モバイル用固定ボタン -->
+<a href="https://mizary.com/2026-numerology/" class="mobile-fixed-button" target="_blank" rel="noopener noreferrer" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #e10080; color: white; padding: 15px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(225, 0, 128, 0.4); transition: all 0.3s ease;">
+	運勢鑑定書
+</a>
+
+<style>
+/* モバイル対応 */
+@media (max-width: 768px) {
+	.mobile-notice {
+		display: block !important;
+	}
+	
+	.mobile-fixed-button {
+		display: block !important;
+	}
+}
+
+/* 運勢鑑定書のボタンホバー効果 */
+.uranai-read-more[style*="background-color: #e10080"]:hover {
+	background-color: #c1006e !important;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3);
+}
+</style>
+
+

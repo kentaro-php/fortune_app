@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>無料チャット診断 - 彼の本気度チェック | 占いミザリー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        #mizary-chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .intro-card {
+            text-align: center;
+        }
+
+        .intro-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .intro-desc {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .intro-btn-area {
+            margin-bottom: 15px;
+        }
+
+        .start-main-btn {
+            background-color: #e10080;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(225, 0, 128, 0.3);
+        }
+
+        .start-main-btn:hover {
+            background-color: #c1006e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(225, 0, 128, 0.4);
+        }
+
+        .intro-note {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        #chat-interface {
+            min-height: 400px;
+        }
+
+        #chat-timeline {
+            margin-bottom: 20px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .chat-message.bot {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .chat-message.user {
+            background-color: #e10080;
+            color: white;
+            text-align: right;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        #chat-options-area {
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            background-color: white;
+            border: 2px solid #e10080;
+            color: #e10080;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background-color: #e10080;
+            color: white;
+        }
+
+        #result-area {
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result-content {
+            background-color: #fff0f5;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .cta-box {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .line-btn {
+            display: inline-block;
+            background-color: #06c755;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .line-btn:hover {
+            background-color: #05b348;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div id="mizary-chat-container">
+        <div id="chat-intro-screen">
+            <div class="intro-card">
+                <h2 class="intro-title">【無料チャット診断】<br>彼の本気度チェック</h2>
+                <p class="intro-desc">「もしかして、私って都合のいい女？」<br>彼の行動から、あなたへの本気度を診断します。</p>
+                <div class="intro-btn-area">
+                    <button class="start-main-btn" onclick="startChat()">診断をスタートする</button>
+                </div>
+                <p class="intro-note">※所要時間：約1分</p>
+            </div>
+        </div>
+
+        <div id="chat-interface" style="display:none;">
+            <div id="chat-timeline"></div>
+            <div id="typing-indicator" class="typing-indicator">占いミザリーが入力中...</div>
+            <div id="chat-options-area"></div>
+        </div>
+
+        <div id="result-area" style="display:none;">
+            <h3 class="result-title">診断結果</h3>
+
+            <div id="final-diagnosis-result" class="result-content">診断結果を計算中...</div>
+
+            <div class="cta-box">
+                <p style="margin-bottom:15px;">
+                    <strong>大丈夫。もう、迷わない。</strong><br>
+                    <span style="font-size:0.9em;">この診断の続きと、解決のヒントは<br>LINEでお届けします。</span>
+                </p>
+
+                <p style="color:#e10080; font-weight:bold; background:#fff0f5; display:inline-block; padding:5px 15px; border-radius:20px; margin-bottom:10px;">
+                    今ならLINE予約で1,000円割引
+                </p>
+
+                <a href="https://lin.ee/QcrsY6N" class="line-btn" target="_blank">LINEでさらに詳しく</a>
+                <p style="font-size:0.8rem; margin-top:15px; color:#888;">※リピート率70%超・秘密厳守</p>
+            </div>
+
+            <button onclick="location.reload()" style="margin-top:20px; border:none; background:none; text-decoration:underline; cursor:pointer; color:#999;">もう一度最初から診断する</button>
+        </div>
+    </div>
+
+    <script src="chat_diagnosis.js"></script>
+</body>
+</html>
+
