@@ -217,10 +217,10 @@ def get_monthly_fortunes(lp):
 # ==========================================
 def save_data_via_gas(action_type, name, year, month, day, lp):
     # ▼▼▼ 手順1でコピーしたURLをここに貼り付け ▼▼▼
-    gas_url = "ここにGASのURLを貼り付け"
+    gas_url = "https://script.google.com/macros/s/AKfycby7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec"
     # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     
-    if gas_url == "ここにGASのURLを貼り付け":
+    if gas_url == "https://script.google.com/macros/s/AKfycby7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec":
         return # URL未設定時は何もしない
 
     data = {
