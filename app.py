@@ -25,7 +25,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# UI完全削除（CSS） + シックな黒フッター + 導入エリア装飾
+# UI完全削除（CSS） + 導入エリア装飾 + トップへ戻るボタン
 # ==========================================
 hide_st_style = """
     <style>
@@ -39,71 +39,62 @@ hide_st_style = """
     .block-container {padding-top: 0rem !important; padding-bottom: 6rem !important;}
     .stApp > header {display: none !important;}
     
-    /* ▼▼▼ 黒ベースで見やすいフッター ▼▼▼ */
-    .mobile-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 75px;
-        background: #1a1a1a;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        z-index: 99999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
-        font-family: "Helvetica", sans-serif;
-        border-top: 2px solid #e10080;
-    }
-    .footer-item {
-        flex: 1;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-decoration: none !important;
-        color: white !important;
-        border-right: 1px solid #333;
-        transition: background 0.3s;
-        cursor: pointer;
-    }
-    .footer-item:last-child {
-        border-right: none;
-    }
-    .footer-item:hover {
-        background: #333;
-    }
-    .footer-icon {
-        font-size: 24px;
-        margin-bottom: 5px;
-        color: #e10080;
-    }
-    .footer-text {
-        font-size: 14px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-    }
-    
     /* ▼▼▼ 興味付けセクションのスタイル ▼▼▼ */
     .intro-box {
-        background-color: #fff0f5; /* 薄いピンク背景 */
-        padding: 20px;
+        background-color: #fff0f5;
+        padding: 25px 20px;
         border-radius: 15px;
         margin-bottom: 25px;
         text-align: center;
         border: 2px solid #ffb6c1;
+        box-shadow: 0 2px 8px rgba(225, 0, 128, 0.1);
     }
     .intro-head {
         color: #e10080;
         font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 10px;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        line-height: 1.4;
     }
     .intro-text {
         color: #333;
         font-size: 0.95rem;
-        line-height: 1.6;
+        line-height: 1.8;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .intro-text .question {
+        color: #555;
+        font-size: 1rem;
+        margin: 8px 0;
+        display: block;
+    }
+    .intro-text strong {
+        color: #e10080;
+        font-weight: bold;
+    }
+    
+    /* ▼▼▼ トップへ戻るボタン ▼▼▼ */
+    .top-link {
+        text-align: center;
+        margin: 30px 0;
+        padding: 20px 0;
+    }
+    .top-link a {
+        color: #e10080;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1rem;
+        display: inline-block;
+        padding: 10px 25px;
+        background-color: #fff0f5;
+        border-radius: 25px;
+        border: 2px solid #e10080;
+        transition: all 0.3s ease;
+    }
+    .top-link a:hover {
+        background-color: #e10080;
+        color: white;
     }
     </style>
 """
@@ -275,13 +266,14 @@ if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
 if not is_paid:
-    # ▼▼▼ 復活：興味を引くコンテンツセクション ▼▼▼
+    # ▼▼▼ 興味を引くコンテンツセクション ▼▼▼
     st.markdown("""
     <div class="intro-box">
         <div class="intro-head">🔮 2026年、あなたを待つ運命とは？</div>
         <div class="intro-text">
-            「来年はどんな年になる？」<br>
-            「恋愛や仕事の転機はいつ？」<br><br>
+            <span class="question">「来年はどんな年になる？」</span>
+            <span class="question">「恋愛や仕事の転機はいつ？」</span>
+            <br>
             数秘術では、人生は9年周期で巡ると言われています。<br>
             あなたの生年月日から導き出される特別な数字で、<br>
             <strong>2026年の運勢バイオリズム</strong>を読み解きましょう。
@@ -336,7 +328,7 @@ if not is_paid:
     st.markdown("---")
     # アンカー用のIDを追加
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
-    st.header("💎 完全版鑑定書 (PDF)")
+    st.markdown('<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">💎 完全版鑑定書 (PDF)</h2>', unsafe_allow_html=True)
     with st.form("pay"):
         name = st.text_input("お名前", key="p_name")
         c1, c2, c3 = st.columns(3)
@@ -377,30 +369,12 @@ else:
                 st.error(f"エラー: {e}")
 
 # ==========================================
-# 8. フッター表示（黒ベース）
+# 8. トップへ戻るボタン
 # ==========================================
-if st.session_state.pdf_data:
-    b64 = base64.b64encode(st.session_state.pdf_data).decode()
-    href_right = f'data:application/pdf;base64,{b64}'
-    attr_right = f'download="{st.session_state.pdf_filename}"'
-    label_right = "2026運勢"
-else:
-    href_right = "#"
-    attr_right = ""
-    label_right = "2026運勢"
-
-href_left = "https://mizary.com/"
-
-footer_html = f"""
-    <div class="mobile-footer">
-        <a class="footer-item" href="{href_left}" target="_blank">
-            <div class="footer-icon">📅</div>
-            <div class="footer-text">鑑定予約</div>
-        </a>
-        <a class="footer-item" href="{href_right}" {attr_right}>
-            <div class="footer-icon">📄</div>
-            <div class="footer-text">{label_right}</div>
+st.markdown("""
+    <div class="top-link">
+        <a href="https://mizary.com/" target="_blank" rel="noopener noreferrer">
+            🏠 トップへ戻る
         </a>
     </div>
-"""
-st.markdown(footer_html, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
