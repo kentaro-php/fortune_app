@@ -466,10 +466,22 @@ if not is_paid:
             st.success("保存しました")
     
     st.markdown("<br>", unsafe_allow_html=True)
-    # ▼▼▼ Stripeリンク（ボタン色#e10080） ▼▼▼
+    
+    # Stripeリンク
     stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
-    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
-    stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
+    
+    # 料金表記（50%オフ）
+    st.markdown("""
+    <div style="text-align: center; margin: 20px 0;">
+        <div style="color: #e10080; font-size: 1.2rem; font-weight: bold; margin-bottom: 5px;">
+            <span style="text-decoration: line-through; color: #999; font-size: 0.9rem; margin-right: 10px;">通常1,000円</span>
+            <span style="background-color: #fff3cd; color: #e10080; padding: 3px 10px; border-radius: 5px; font-size: 0.9rem;">50%OFF</span>
+        </div>
+        <div style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">
+            ※1月31日まで
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown(f"""
     <div style="text-align: center; margin: 30px 0;">
@@ -483,30 +495,78 @@ if not is_paid:
 
 else:
     st.success("✅ ご購入ありがとうございます！")
-    with st.form("final"):
-        st.write("### 📄 発行フォーム")
-        name = st.text_input("お名前", value=st.session_state.user_name)
-        c1, c2, c3 = st.columns(3)
-        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year)
-        m = c2.number_input("月", 1, 12, st.session_state.birth_month)
-        d = c3.number_input("日", 1, 31, st.session_state.birth_day)
-        submitted = st.form_submit_button("✨ PDFをダウンロード", use_container_width=True)
-
-    if submitted and name:
-        with st.spinner("生成中..."):
+    
+    # セッションから情報を取得
+    name = st.session_state.user_name if st.session_state.user_name else ""
+    y = st.session_state.birth_year if st.session_state.birth_year else 2000
+    m = st.session_state.birth_month if st.session_state.birth_month else 1
+    d = st.session_state.birth_day if st.session_state.birth_day else 1
+    
+    # セッションに情報があれば自動的にPDFを生成
+    if name and not st.session_state.pdf_data:
+        with st.spinner("鑑定書を生成中..."):
             try:
                 pdf = create_pdf(name, y, m, d)
                 st.session_state.pdf_data = pdf.getvalue()
-                st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
+                st.session_state.pdf_filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d')}.pdf"
                 
                 # スプレッドシート保存
                 save_to_gsheet(name, y, m, d, calculate_life_path_number(y, m, d))
-                st.success("完了しました！")
+                st.success("✅ 鑑定書の準備が完了しました！")
             except Exception as e:
-                st.error(f"エラー: {e}")
-
+                st.error(f"エラーが発生しました: {e}")
+    
+    # 情報が不足している場合はフォームを表示
+    if not name:
+        st.info("お名前を入力してください。")
+        with st.form("final"):
+            st.write("### 📄 発行フォーム")
+            name = st.text_input("お名前", placeholder="山田 花子")
+            c1, c2, c3 = st.columns(3)
+            y = c1.number_input("年", 1900, 2025, y)
+            m = c2.number_input("月", 1, 12, m)
+            d = c3.number_input("日", 1, 31, d)
+            submitted = st.form_submit_button("✨ PDFをダウンロード", use_container_width=True)
+        
+        if submitted and name:
+            # セッションに保存
+            st.session_state.user_name = name
+            st.session_state.birth_year = y
+            st.session_state.birth_month = m
+            st.session_state.birth_day = d
+            
+            with st.spinner("生成中..."):
+                try:
+                    pdf = create_pdf(name, y, m, d)
+                    st.session_state.pdf_data = pdf.getvalue()
+                    st.session_state.pdf_filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d')}.pdf"
+                    
+                    # スプレッドシート保存
+                    save_to_gsheet(name, y, m, d, calculate_life_path_number(y, m, d))
+                    st.success("完了しました！")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"エラー: {e}")
+    
+    # PDFが生成済みの場合はダウンロードボタンを表示
     if st.session_state.pdf_data:
-        st.download_button("📥 ダウンロード", st.session_state.pdf_data, file_name=st.session_state.pdf_filename, mime="application/pdf", type="primary", use_container_width=True)
+        st.markdown("---")
+        st.markdown(f"### {name} 様の鑑定書")
+        st.download_button(
+            "📥 PDFをダウンロード", 
+            st.session_state.pdf_data, 
+            file_name=st.session_state.pdf_filename, 
+            mime="application/pdf", 
+            type="primary", 
+            use_container_width=True
+        )
+        
+        # もう一度最初からボタン
+        if st.button("トップに戻る"):
+            st.session_state.pdf_data = None
+            st.session_state.pdf_filename = None
+            st.query_params.clear()
+            st.rerun()
 
 # -------------------------------------------
 # フッター（著作権表示）
