@@ -25,7 +25,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# UI完全削除（CSS）
+# UI完全削除（CSS） + シックな黒フッター + 導入エリア装飾
 # ==========================================
 hide_st_style = """
     <style>
@@ -38,6 +38,73 @@ hide_st_style = """
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
     .block-container {padding-top: 0rem !important; padding-bottom: 6rem !important;}
     .stApp > header {display: none !important;}
+    
+    /* ▼▼▼ 黒ベースで見やすいフッター ▼▼▼ */
+    .mobile-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 75px;
+        background: #1a1a1a;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 99999;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+        font-family: "Helvetica", sans-serif;
+        border-top: 2px solid #e10080;
+    }
+    .footer-item {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none !important;
+        color: white !important;
+        border-right: 1px solid #333;
+        transition: background 0.3s;
+        cursor: pointer;
+    }
+    .footer-item:last-child {
+        border-right: none;
+    }
+    .footer-item:hover {
+        background: #333;
+    }
+    .footer-icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: #e10080;
+    }
+    .footer-text {
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+    }
+    
+    /* ▼▼▼ 興味付けセクションのスタイル ▼▼▼ */
+    .intro-box {
+        background-color: #fff0f5; /* 薄いピンク背景 */
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+        border: 2px solid #ffb6c1;
+    }
+    .intro-head {
+        color: #e10080;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    .intro-text {
+        color: #333;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
@@ -119,9 +186,9 @@ def get_monthly_fortunes(lp):
     return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
-# 5. スプレッドシート保存関数（Heroku対応版）
+# 5. スプレッドシート保存関数（ログ機能）
 # ==========================================
-def save_to_gsheet(name, year, month, day, life_path):
+def save_to_gsheet(action_type, name, year, month, day, life_path):
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = None
@@ -145,7 +212,7 @@ def save_to_gsheet(name, year, month, day, life_path):
             return False
 
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sheet.append_row([timestamp, name, f"{year}/{month}/{day}", life_path])
+        sheet.append_row([timestamp, action_type, name, f"{year}/{month}/{day}", life_path])
         return True
     except Exception as e:
         print(f"Spreadsheet Error: {e}")
@@ -208,53 +275,67 @@ if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
 if not is_paid:
-    st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
-    
-    preview_name = ""
-    preview_year = 2000
-    preview_month = 1
-    preview_day = 1
+    # ▼▼▼ 復活：興味を引くコンテンツセクション ▼▼▼
+    st.markdown("""
+    <div class="intro-box">
+        <div class="intro-head">🔮 2026年、あなたを待つ運命とは？</div>
+        <div class="intro-text">
+            「来年はどんな年になる？」<br>
+            「恋愛や仕事の転機はいつ？」<br><br>
+            数秘術では、人生は9年周期で巡ると言われています。<br>
+            あなたの生年月日から導き出される特別な数字で、<br>
+            <strong>2026年の運勢バイオリズム</strong>を読み解きましょう。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    # ▲▲▲ ここまで ▲▲▲
+
+    st.info("👋 まずは無料プレビューで、あなたの「数字」を知ってください。")
     
     with st.form("preview"):
-        preview_name = st.text_input("お名前", placeholder="山田 花子")
-        cols = st.columns(3)
-        preview_year = cols[0].number_input("年", 1900, 2025, 2000)
-        preview_month = cols[1].number_input("月", 1, 12, 1)
-        preview_day = cols[2].number_input("日", 1, 31, 1)
-        preview_submitted = st.form_submit_button("鑑定結果の一部を見る")
-    
-    if preview_submitted and preview_name:
-        # ライフパスナンバーを計算
-        preview_lp = calculate_life_path_number(preview_year, preview_month, preview_day)
-        preview_data = get_fortune_data(preview_lp)
+        name_pre = st.text_input("お名前")
+        c1, c2, c3 = st.columns(3)
+        y_pre = c1.number_input("年", 1900, 2025, 2000)
+        m_pre = c2.number_input("月", 1, 12, 1)
+        d_pre = c3.number_input("日", 1, 31, 1)
         
-        # 名前と見出し（興味を引く内容）を表示
-        st.markdown("---")
-        st.markdown(f"### {preview_name} 様の2026年運勢")
-        st.markdown(f"**ライフパスナンバー: {preview_lp}**")
-        
-        # 興味を引く見出しを表示
-        st.markdown("#### ✨ あなたの2026年はこんな年に！")
-        st.markdown(f"**総合運: {preview_data['overall'][0]}**")
-        st.markdown(f"{preview_data['overall'][1]}")
-        
-        st.markdown("#### 💫 気になる運勢の一部")
-        st.markdown(f"**恋愛運**: {'★' * preview_data['love'][0] + '☆' * (5 - preview_data['love'][0])}")
-        st.markdown(f"{preview_data['love'][1]}")
-        
-        st.markdown("---")
-        st.warning("🔒 詳しい結果（全運勢・月別カレンダー・ラッキーアイテムなど）をご覧になるには、完全版の購入が必要です。")
-        
-        # 完全版へのアンカーリンク
-        st.markdown("""
-        <div style="text-align: center; margin: 20px 0;">
-            <a href="#完全版鑑定書" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem;">
-                ↓ 続きは「完全版鑑定書 (PDF)」をご覧ください ↓
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.form_submit_button("鑑定結果の一部を見る"):
+            if name_pre:
+                lp = calculate_life_path_number(y_pre, m_pre, d_pre)
+                preview_data = get_fortune_data(lp)
+                # ログ保存：無料プレビュー
+                save_to_gsheet("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
+                
+                # 興味を引く見出しを表示
+                st.markdown("---")
+                st.markdown(f"### {name_pre} 様の2026年運勢")
+                st.markdown(f"**ライフパスナンバー: {lp}**")
+                
+                st.markdown("#### ✨ あなたの2026年はこんな年に！")
+                st.markdown(f"**総合運: {preview_data['overall'][0]}**")
+                st.markdown(f"{preview_data['overall'][1]}")
+                
+                st.markdown("#### 💫 気になる運勢の一部")
+                st.markdown(f"**恋愛運**: {'★' * preview_data['love'][0] + '☆' * (5 - preview_data['love'][0])}")
+                st.markdown(f"{preview_data['love'][1]}")
+                
+                st.markdown("---")
+                st.warning("🔒 詳しい結果（全運勢・月別カレンダー・ラッキーアイテムなど）をご覧になるには、完全版の購入が必要です。")
+                
+                # 完全版へのアンカーリンク
+                st.markdown("""
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="javascript:void(0);" onclick="document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'});" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; padding: 10px 20px; background-color: #fff0f5; border-radius: 25px; border: 2px solid #e10080;">
+                        ↓ 完全版鑑定書を見る ↓
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.error("お名前を入力してください")
 
     st.markdown("---")
+    # アンカー用のIDを追加
+    st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
     st.header("💎 完全版鑑定書 (PDF)")
     with st.form("pay"):
         name = st.text_input("お名前", key="p_name")
@@ -284,76 +365,42 @@ else:
         with st.spinner("生成中..."):
             try:
                 pdf = create_pdf(name, y, m, d)
-                st.session_state.pdf_data = pdf.getvalue()
-                st.session_state.pdf_filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d')}.pdf"
+                pdf_bytes = pdf.getvalue()
+                st.session_state.pdf_data = pdf_bytes
+                st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
                 
-                # スプレッドシート保存
-                save_to_gsheet(name, y, m, d, calculate_life_path_number(y, m, d))
-                st.success("✅ 鑑定書の準備が完了しました！")
+                # ログ保存：購入完了
+                save_to_gsheet("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
+                
+                st.success("完了しました！下のバーからダウンロードできます。")
             except Exception as e:
-                st.error(f"エラーが発生しました: {e}")
-    
-    # 情報が不足している場合はフォームを表示
-    if not name:
-        st.info("お名前を入力してください。")
-        with st.form("final"):
-            st.write("### 📄 発行フォーム")
-            name = st.text_input("お名前", placeholder="山田 花子")
-            c1, c2, c3 = st.columns(3)
-            y = c1.number_input("年", 1900, 2025, y)
-            m = c2.number_input("月", 1, 12, m)
-            d = c3.number_input("日", 1, 31, d)
-            submitted = st.form_submit_button("✨ PDFをダウンロード", use_container_width=True)
-        
-        if submitted and name:
-            # セッションに保存
-            st.session_state.user_name = name
-            st.session_state.birth_year = y
-            st.session_state.birth_month = m
-            st.session_state.birth_day = d
-            
-            with st.spinner("生成中..."):
-                try:
-                    pdf = create_pdf(name, y, m, d)
-                    st.session_state.pdf_data = pdf.getvalue()
-                    st.session_state.pdf_filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d')}.pdf"
-                    
-                    # スプレッドシート保存
-                    save_to_gsheet(name, y, m, d, calculate_life_path_number(y, m, d))
-                    st.success("完了しました！")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"エラー: {e}")
-    
-    # PDFが生成済みの場合はダウンロードボタンを表示
-    if st.session_state.pdf_data:
-        st.markdown("---")
-        st.markdown(f"### {name} 様の鑑定書")
-        st.download_button(
-            "📥 PDFをダウンロード", 
-            st.session_state.pdf_data, 
-            file_name=st.session_state.pdf_filename, 
-            mime="application/pdf", 
-            type="primary", 
-            use_container_width=True
-        )
-        
-        # もう一度最初からボタン
-        if st.button("トップに戻る"):
-            st.session_state.pdf_data = None
-            st.session_state.pdf_filename = None
-            st.query_params.clear()
-            st.rerun()
+                st.error(f"エラー: {e}")
 
-# -------------------------------------------
-# フッター（著作権表示）
-# -------------------------------------------
-st.markdown("""
-    <div class="custom-footer">
-        <div>
-            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
-            <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
-        </div>
-        <div class="copyright">© 2026 占いミザリー</div>
+# ==========================================
+# 8. フッター表示（黒ベース）
+# ==========================================
+if st.session_state.pdf_data:
+    b64 = base64.b64encode(st.session_state.pdf_data).decode()
+    href_right = f'data:application/pdf;base64,{b64}'
+    attr_right = f'download="{st.session_state.pdf_filename}"'
+    label_right = "2026運勢"
+else:
+    href_right = "#"
+    attr_right = ""
+    label_right = "2026運勢"
+
+href_left = "https://mizary.com/"
+
+footer_html = f"""
+    <div class="mobile-footer">
+        <a class="footer-item" href="{href_left}" target="_blank">
+            <div class="footer-icon">📅</div>
+            <div class="footer-text">鑑定予約</div>
+        </a>
+        <a class="footer-item" href="{href_right}" {attr_right}>
+            <div class="footer-icon">📄</div>
+            <div class="footer-text">{label_right}</div>
+        </a>
     </div>
-    """, unsafe_allow_html=True)
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
