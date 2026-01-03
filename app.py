@@ -405,12 +405,53 @@ if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
 
 if not is_paid:
     st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
+    
+    preview_name = ""
+    preview_year = 2000
+    preview_month = 1
+    preview_day = 1
+    
     with st.form("preview"):
-        st.text_input("お名前")
-        st.columns(3)[0].number_input("年", 1900, 2025, 2000)
-        if st.form_submit_button("鑑定結果の一部を見る"): st.warning("🔒 完全版は購入が必要です。")
+        preview_name = st.text_input("お名前", placeholder="山田 花子")
+        cols = st.columns(3)
+        preview_year = cols[0].number_input("年", 1900, 2025, 2000)
+        preview_month = cols[1].number_input("月", 1, 12, 1)
+        preview_day = cols[2].number_input("日", 1, 31, 1)
+        preview_submitted = st.form_submit_button("鑑定結果の一部を見る")
+    
+    if preview_submitted and preview_name:
+        # ライフパスナンバーを計算
+        preview_lp = calculate_life_path_number(preview_year, preview_month, preview_day)
+        preview_data = get_fortune_data(preview_lp)
+        
+        # 名前と見出し（興味を引く内容）を表示
+        st.markdown("---")
+        st.markdown(f"### {preview_name} 様の2026年運勢")
+        st.markdown(f"**ライフパスナンバー: {preview_lp}**")
+        
+        # 興味を引く見出しを表示
+        st.markdown("#### ✨ あなたの2026年はこんな年に！")
+        st.markdown(f"**総合運: {preview_data['overall'][0]}**")
+        st.markdown(f"{preview_data['overall'][1]}")
+        
+        st.markdown("#### 💫 気になる運勢の一部")
+        st.markdown(f"**恋愛運**: {'★' * preview_data['love'][0] + '☆' * (5 - preview_data['love'][0])}")
+        st.markdown(f"{preview_data['love'][1]}")
+        
+        st.markdown("---")
+        st.warning("🔒 詳しい結果（全運勢・月別カレンダー・ラッキーアイテムなど）をご覧になるには、完全版の購入が必要です。")
+        
+        # 完全版へのアンカーリンク
+        st.markdown("""
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="#完全版鑑定書" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem;">
+                ↓ 続きは「完全版鑑定書 (PDF)」をご覧ください ↓
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
+    st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
     st.header("💎 完全版鑑定書 (PDF)")
     st.write("2026年を最高の一年にするための、あなただけのガイドブックです。")
     
