@@ -14,51 +14,58 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # ==========================================
-# 1. ページ設定（必ず最初に記述）
+# 1. ページ設定
 # ==========================================
 st.set_page_config(
-    page_title="2026年運勢鑑定書 | 占いミザリー",
-    page_icon="🔮",
-    layout="centered"
+    page_title="2026年運勢鑑定書",
+    layout="centered",
+    page_icon="🔮"
 )
 
-# --- UI完全削除（埋め込みモードのフッター対策強化版） ---
+# --- 画面のUI整形（ロゴ・メニュー非表示） ---
+hide_streamlit_style = """
+            <style>
+            /* 1. ヘッダー（上の色帯）と右上のメニューを消す */
+            header {visibility: hidden;}
+            
+            /* 2. フッター（Made with Streamlit）を消す */
+            footer {visibility: hidden;}
+            
+            /* 3. 右下の管理ボタン（開発者用）やツールバーを消す */
+            div[data-testid="stToolbar"] {visibility: hidden; display: none;}
+            div[data-testid="stDecoration"] {visibility: hidden; display: none;}
+            div[data-testid="stStatusWidget"] {visibility: hidden; display: none;}
+            
+            /* 4. ヘッダーを消した分の余白を詰める（スマホで見やすく） */
+            .block-container {
+                padding-top: 1rem !important;
+            }
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# --- UI完全削除（ヘッダー・フッター・開発者ツール・赤アイコン） ---
 hide_st_style = """
     <style>
-    /* 1. ヘッダー・フッターの徹底削除 */
-    header {visibility: hidden !important; display: none !important;}
-    footer {visibility: hidden !important; display: none !important; height: 0px !important;}
-    
-    /* 2. Streamlitの特定要素IDに対する非表示 */
+    header {visibility: hidden !important; height: 0px !important;}
     [data-testid="stHeader"] {display: none !important;}
+    footer {visibility: hidden !important; height: 0px !important;}
     [data-testid="stFooter"] {display: none !important;}
-    
-    /* 3. embed=true 時の下部バー対策 */
-    /* 通常のfooterタグだけでなく、アプリ直下のfooter要素もターゲットにする */
-    .stApp > footer {display: none !important;}
-    
-    /* 4. ツールバー・ビューワーバッジの削除 */
     div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    
-    /* 5. ハンバーガーメニューとデコレーションラインの削除 */
-    #MainMenu {display: none !important;}
     [data-testid="stDecoration"] {display: none !important;}
-    
-    /* 6. 余白調整 */
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
     }
-    
-    /* 7. 右下の固定要素を包括的に非表示（念のための強力な指定） */
-    [style*="position: fixed"][style*="bottom"] {
+    .stApp > header {display: none !important;}
+    [style*="position: fixed"][style*="right"][style*="bottom"],
+    [style*="position:fixed"][style*="right"][style*="bottom"] {
         display: none !important;
         visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
-    
-    /* 8. リンク（Built with Streamlit）を含む可能性のある要素を消す */
-    a[href*="streamlit.io"] {display: none !important;}
     </style>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
@@ -182,21 +189,25 @@ def get_monthly_fortunes(life_path):
     ]
 
 # ==========================================
-# 5. スプレッドシート保存関数
+# 5. スプレッドシート保存関数（新規追加）
 # ==========================================
 def save_to_gsheet(name, year, month, day, life_path):
     """スプレッドシートに行を追加する関数"""
     try:
+        # Secretsの設定があるか確認
         if "connections" not in st.secrets or "gsheets" not in st.secrets["connections"]:
             st.warning("⚠️ Secretsの設定が見つかりません。ログへの記録のみ行います。")
             print(f"【保存失敗】Secrets未設定: {name}, LP:{life_path}")
             return False
 
+        # 認証処理
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds_dict = dict(st.secrets["connections"]["gsheets"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
 
+        # シートを開く（※あなたのスプレッドシート名に合わせてください）
+        # もし名前が違う場合はここを書き換えてください
         SPREADSHEET_NAME = "顧客リスト_2026運勢" 
         
         try:
@@ -205,6 +216,7 @@ def save_to_gsheet(name, year, month, day, life_path):
             st.error(f"❌ スプレッドシート「{SPREADSHEET_NAME}」が見つかりません。名前を確認するか、共有設定を見直してください。")
             return False
 
+        # データを追加
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         row = [timestamp, name, f"{year}/{month}/{day}", life_path]
         sheet.append_row(row)
@@ -212,6 +224,7 @@ def save_to_gsheet(name, year, month, day, life_path):
         
     except Exception as e:
         print(f"スプレッドシート保存エラー: {e}")
+        # エラー詳細はログに出す
         return False
 
 # ==========================================
