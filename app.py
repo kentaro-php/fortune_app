@@ -58,90 +58,166 @@ hide_st_style = """
     </style>
     <script>
     (function() {
+        // 非表示にする要素のリスト（重複チェック用）
+        const hiddenElements = new WeakSet();
+        
+        function forceHideElement(el) {
+            if (hiddenElements.has(el)) return;
+            
+            el.style.cssText += 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important;';
+            el.setAttribute('data-force-hidden', 'true');
+            hiddenElements.add(el);
+            
+            // 親要素も非表示にする場合がある
+            let parent = el.parentElement;
+            if (parent && (parent.classList.contains('viewerBadge') || parent.getAttribute('data-testid') === 'stToolbar')) {
+                forceHideElement(parent);
+            }
+        }
+        
         function hideAllToolbars() {
-            // 1. ツールバーを非表示
-            const toolbars = document.querySelectorAll('[data-testid="stToolbar"], div[class*="viewerBadge"], div[class*="toolbar"]');
-            toolbars.forEach(function(el) {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-                el.style.opacity = '0';
-                el.style.pointerEvents = 'none';
+            // 1. ツールバーとviewerBadgeを非表示（より包括的に）
+            const selectors = [
+                '[data-testid="stToolbar"]',
+                'div[class*="viewerBadge"]',
+                'div[class*="toolbar"]',
+                '[class*="viewerBadge"]',
+                '[class*="toolbar"]',
+                '[data-testid*="Toolbar"]',
+                '[data-testid*="toolbar"]',
+                'button[title*="Manage"]',
+                'button[title*="manage"]',
+                'button[aria-label*="Manage"]',
+                'button[aria-label*="manage"]',
+                'a[href*="manage"]',
+                'a[href*="Manage"]'
+            ];
+            
+            selectors.forEach(function(selector) {
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(forceHideElement);
+                } catch(e) {}
             });
             
-            // 2. 右下に固定されているすべての要素を検出して非表示
+            // 2. 右下に固定されているすべての要素を検出（より広範囲に）
             const allElements = document.querySelectorAll('*');
             allElements.forEach(function(el) {
+                // 既に非表示にした要素はスキップ
+                if (hiddenElements.has(el) || el.getAttribute('data-force-hidden') === 'true') {
+                    return;
+                }
+                
+                // スクリプトやスタイルは除外
+                if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') {
+                    return;
+                }
+                
+                // カスタムフッターやアプリコンテンツは除外
+                if (el.closest('.custom-footer') || 
+                    el.closest('[data-testid="stApp"]') ||
+                    el.closest('main') ||
+                    el.closest('.block-container')) {
+                    return;
+                }
+                
                 const style = window.getComputedStyle(el);
                 const rect = el.getBoundingClientRect();
                 
-                // 右下に固定されている要素を検出
+                // 右下に固定されている要素を検出（より厳密に）
                 if (style.position === 'fixed' || style.position === 'absolute') {
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    const threshold = 200; // 右下200px以内
+                    
                     const isBottomRight = (
-                        (rect.right >= window.innerWidth - 150) && 
-                        (rect.bottom >= window.innerHeight - 150) &&
-                        rect.width < 200 && 
-                        rect.height < 200
+                        rect.right >= windowWidth - threshold && 
+                        rect.bottom >= windowHeight - threshold &&
+                        rect.width < 300 && 
+                        rect.height < 300 &&
+                        rect.width > 0 &&
+                        rect.height > 0
                     );
                     
                     if (isBottomRight) {
-                        // カスタムフッターやアプリコンテンツは除外
-                        if (!el.closest('.custom-footer') && 
-                            !el.closest('[data-testid="stApp"]') &&
-                            el.tagName !== 'SCRIPT' && 
-                            el.tagName !== 'STYLE' &&
-                            !el.closest('main')) {
-                            el.style.display = 'none';
-                            el.style.visibility = 'hidden';
-                            el.style.opacity = '0';
-                            el.style.pointerEvents = 'none';
+                        // z-indexが高い要素（ツールバーなど）を優先的に非表示
+                        const zIndex = parseInt(style.zIndex) || 0;
+                        if (zIndex > 100 || style.zIndex === 'auto') {
+                            forceHideElement(el);
                         }
+                    }
+                }
+                
+                // SVGやアイコン要素もチェック
+                if (el.tagName === 'svg' || el.tagName === 'IMG') {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.right >= window.innerWidth - 200 && 
+                        rect.bottom >= window.innerHeight - 200 &&
+                        rect.width < 100 && 
+                        rect.height < 100) {
+                        forceHideElement(el);
                     }
                 }
             });
             
-            // 3. 特定のクラス名や属性を持つ要素を非表示
-            const badElements = document.querySelectorAll(
-                '[class*="viewerBadge"], ' +
-                '[class*="toolbar"], ' +
-                '[data-testid*="Toolbar"], ' +
-                'button[title*="Manage"], ' +
-                'button[title*="manage"], ' +
-                'img[alt*="user"], ' +
-                'img[src*="avatar"]'
-            );
-            badElements.forEach(function(el) {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-                el.style.opacity = '0';
-                el.style.pointerEvents = 'none';
+            // 3. 王冠アイコンを直接検出（SVGパスや特定のクラス）
+            const svgs = document.querySelectorAll('svg');
+            svgs.forEach(function(svg) {
+                const rect = svg.getBoundingClientRect();
+                if (rect.right >= window.innerWidth - 150 && 
+                    rect.bottom >= window.innerHeight - 150) {
+                    // 王冠のような形状のSVGを検出
+                    const paths = svg.querySelectorAll('path');
+                    paths.forEach(function(path) {
+                        const d = path.getAttribute('d') || '';
+                        // 王冠のような複雑なパスを検出
+                        if (d.length > 50) {
+                            forceHideElement(svg);
+                        }
+                    });
+                }
             });
         }
         
-        // 即座に実行
+        // 即座に実行（複数回）
         hideAllToolbars();
+        setTimeout(hideAllToolbars, 100);
+        setTimeout(hideAllToolbars, 300);
+        setTimeout(hideAllToolbars, 500);
         
         // DOMContentLoaded時に実行
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', hideAllToolbars);
+            document.addEventListener('DOMContentLoaded', function() {
+                hideAllToolbars();
+                setTimeout(hideAllToolbars, 100);
+            });
         }
         
-        // MutationObserverで動的に追加される要素も監視
+        // MutationObserverで動的に追加される要素も監視（より頻繁に）
         const observer = new MutationObserver(function(mutations) {
             hideAllToolbars();
         });
         
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'class']
-        });
+        if (document.body) {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'class', 'data-testid']
+            });
+        }
         
-        // 定期的にもチェック（念のため）
-        setInterval(hideAllToolbars, 500);
+        // より頻繁にチェック（100msごと）
+        setInterval(hideAllToolbars, 100);
         
         // ウィンドウリサイズ時にも実行
         window.addEventListener('resize', hideAllToolbars);
+        
+        // スクロール時にも実行
+        window.addEventListener('scroll', hideAllToolbars);
+        
+        // フォーカス時にも実行
+        window.addEventListener('focus', hideAllToolbars);
     })();
     </script>
 """
@@ -478,6 +554,9 @@ if not font_path:
 # -------------------------------------------
 query_params = st.query_params
 is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
+
+# ▼▼▼ テスト用に強制的に True（支払い済み）にする ▼▼▼
+is_paid = True
 
 # セッション状態の初期化
 if 'user_name' not in st.session_state:
