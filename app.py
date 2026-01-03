@@ -309,40 +309,21 @@ st.markdown("""
     button[kind="header"] {
         display: none !important;
     }
-    /* Streamlit Cloudのユーザーアバター */
-    div[data-testid="stHeader"] {
+    /* Streamlit Cloudのユーザーアバター（ヘッダー全体は非表示にしない） */
+    div[data-testid="stHeader"] button[title="Manage app"],
+    div[data-testid="stHeader"] button[kind="header"] {
         display: none !important;
     }
-    /* 右下に固定されるすべての要素 */
-    div[style*="position: fixed"][style*="bottom"] {
+    /* Streamlit Cloudのツールバーとアバターのみを対象 */
+    div[data-testid="stToolbar"] button,
+    div[data-testid="stToolbar"] img,
+    div[data-testid="stToolbar"] a {
         display: none !important;
     }
-    /* より具体的なセレクタで右下の要素を非表示 */
-    .stApp > div:last-child > div:last-child {
-        display: none !important;
-    }
-    /* ツールバー関連のすべての要素 */
-    [class*="stToolbar"],
-    [class*="toolbar"],
-    [data-testid*="toolbar"],
-    [data-testid*="Toolbar"] {
-        display: none !important;
-    }
-    /* Streamlit Cloudのユーザーアバターとボタン */
-    div[data-testid="stHeader"] button,
-    div[data-testid="stHeader"] img,
-    div[data-testid="stHeader"] a {
-        display: none !important;
-    }
-    /* 右下に固定されるすべてのボタンと画像 */
-    button[style*="position: fixed"],
-    img[style*="position: fixed"],
-    a[style*="position: fixed"] {
-        display: none !important;
-    }
-    /* より包括的な非表示設定 */
-    iframe[title*="streamlit"],
-    iframe[src*="streamlit"] {
+    /* Streamlit Cloudのユーザーアバター画像（右下の円形画像） */
+    div[data-testid="stToolbar"] img[alt*="user"],
+    div[data-testid="stToolbar"] img[src*="avatar"],
+    div[data-testid="stToolbar"] > div:has(img) {
         display: none !important;
     }
     
