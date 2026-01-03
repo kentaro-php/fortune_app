@@ -6,14 +6,13 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import HexColor
 import os
 import urllib.request
+import urllib.parse  # ▼ 追加：GASへの送信に必要
 from datetime import datetime
 import io
 import json
 import base64
 
-# ▼▼▼ スプレッドシート連携用 ▼▼▼
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+# （不要なスプレッドシート用ライブラリは削除しました）
 
 # ==========================================
 # 1. ページ設定
@@ -36,7 +35,7 @@ hide_st_style = """
     [data-testid="stFooter"] {display: none !important;}
     div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    .block-container {padding-top: 0rem !important; padding-bottom: 6rem !important;}
+    .block-container {padding-top: 0rem !important; padding-bottom: 2rem !important;}
     .stApp > header {display: none !important;}
     
     /* ▼▼▼ 興味付けセクションのスタイル ▼▼▼ */
@@ -92,8 +91,8 @@ hide_st_style = """
     /* ▼▼▼ フッター（著作権表示） ▼▼▼ */
     .custom-footer {
         text-align: center;
-        margin: 40px 0 20px 0;
-        padding: 20px 0;
+        margin: 40px 0 0 0;
+        padding: 20px 0 10px 0;
         border-top: 1px solid #e0e0e0;
         color: #666;
         font-size: 0.85rem;
@@ -109,8 +108,29 @@ hide_st_style = """
     }
     .custom-footer .copyright {
         margin-top: 10px;
+        margin-bottom: 0;
         color: #999;
         font-size: 0.8rem;
+    }
+    
+    /* ▼▼▼ 発行ボタンのスタイル ▼▼▼ */
+    div[data-testid="stLinkButton"] > a,
+    div[data-testid="stLinkButton"] > a button {
+        background-color: #e10080 !important;
+        color: white !important;
+        padding: 18px 30px !important;
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        border-radius: 10px !important;
+        border: none !important;
+        width: 100% !important;
+        transition: all 0.3s ease !important;
+    }
+    div[data-testid="stLinkButton"] > a:hover,
+    div[data-testid="stLinkButton"] > a button:hover {
+        background-color: #c1006e !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(225, 0, 128, 0.3) !important;
     }
     </style>
 """
@@ -193,37 +213,30 @@ def get_monthly_fortunes(lp):
     return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
-# 5. スプレッドシート保存関数（ログ機能）
+# 5. GAS経由でのデータ保存（一番簡単な保存方法）
 # ==========================================
-def save_to_gsheet(action_type, name, year, month, day, life_path):
+def save_data_via_gas(action_type, name, year, month, day, lp):
+    # ▼▼▼ 手順1でコピーしたURLをここに貼り付け ▼▼▼
+    gas_url = "ここにGASのURLを貼り付け"
+    # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+    
+    if gas_url == "ここにGASのURLを貼り付け":
+        return # URL未設定時は何もしない
+
+    data = {
+        "action": action_type,
+        "name": name,
+        "dob": f"{year}/{month}/{day}",
+        "lp": lp
+    }
+    
     try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = None
-        
-        if "GCP_CREDENTIALS" in os.environ:
-            creds_dict = json.loads(os.environ["GCP_CREDENTIALS"])
-            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        elif "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
-            creds_dict = dict(st.secrets["connections"]["gsheets"])
-            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        else:
-            return False
-
-        client = gspread.authorize(creds)
-        # あなたのシートID
-        SPREADSHEET_KEY = "1GFS4FjxcHvamWlJaFbXFTmJuL3UyTtaiT4eVxxF15vU"
-        
-        try:
-            sheet = client.open_by_key(SPREADSHEET_KEY).sheet1
-        except:
-            return False
-
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sheet.append_row([timestamp, action_type, name, f"{year}/{month}/{day}", life_path])
-        return True
+        json_data = json.dumps(data).encode('utf-8')
+        req = urllib.request.Request(gas_url, data=json_data, headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req) as res:
+            pass # 送信成功
     except Exception as e:
-        print(f"Spreadsheet Error: {e}")
-        return False
+        print(f"GAS Save Error: {e}")
 
 # ==========================================
 # 6. PDF生成
@@ -267,25 +280,6 @@ st.markdown("""
     .main-title {font-family: "Helvetica", sans-serif; font-weight: bold; font-size: 2.5rem; background: linear-gradient(45deg, #FFB6C1, #C71585); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
     .sub-title {font-size: 1.2rem; color: #C0A060; font-weight: bold;}
     div.stButton > button {background-color: #C71585; color: white; border-radius: 10px; padding: 10px 20px; border:none;}
-    /* ▼▼▼ 発行ボタンのスタイル ▼▼▼ */
-    div[data-testid="stLinkButton"] > a,
-    div[data-testid="stLinkButton"] > a button {
-        background-color: #e10080 !important;
-        color: white !important;
-        padding: 18px 30px !important;
-        font-size: 1.1rem !important;
-        font-weight: bold !important;
-        border-radius: 10px !important;
-        border: none !important;
-        width: 100% !important;
-        transition: all 0.3s ease !important;
-    }
-    div[data-testid="stLinkButton"] > a:hover,
-    div[data-testid="stLinkButton"] > a button:hover {
-        background-color: #c1006e !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(225, 0, 128, 0.3) !important;
-    }
     </style>
     <div class="title-container">
         <div class="sub-title">✨ 数秘術で紐解くあなたの未来 ✨</div>
@@ -328,8 +322,9 @@ if not is_paid:
             if name_pre:
                 lp = calculate_life_path_number(y_pre, m_pre, d_pre)
                 preview_data = get_fortune_data(lp)
-                # ログ保存：無料プレビュー
-                save_to_gsheet("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
+                
+                # ▼ GAS経由でデータを保存
+                save_data_via_gas("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
                 
                 # 興味を引く見出しを表示
                 st.markdown("---")
@@ -395,7 +390,8 @@ else:
                 st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
                 
                 # ログ保存：購入完了
-                save_to_gsheet("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
+                # ▼ GAS経由でデータを保存
+                save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
                 
                 st.success("完了しました！下のバーからダウンロードできます。")
             except Exception as e:
