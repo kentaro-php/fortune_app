@@ -46,7 +46,104 @@ hide_st_style = """
     
     /* 6. 万が一残る場合の強力な上書き */
     .stApp > header {display: none !important;}
+    
+    /* 7. 右下に固定されているすべての要素を非表示 */
+    [style*="position: fixed"][style*="right"][style*="bottom"],
+    [style*="position:fixed"][style*="right"][style*="bottom"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
     </style>
+    <script>
+    (function() {
+        function hideAllToolbars() {
+            // 1. ツールバーを非表示
+            const toolbars = document.querySelectorAll('[data-testid="stToolbar"], div[class*="viewerBadge"], div[class*="toolbar"]');
+            toolbars.forEach(function(el) {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+            });
+            
+            // 2. 右下に固定されているすべての要素を検出して非表示
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(function(el) {
+                const style = window.getComputedStyle(el);
+                const rect = el.getBoundingClientRect();
+                
+                // 右下に固定されている要素を検出
+                if (style.position === 'fixed' || style.position === 'absolute') {
+                    const isBottomRight = (
+                        (rect.right >= window.innerWidth - 150) && 
+                        (rect.bottom >= window.innerHeight - 150) &&
+                        rect.width < 200 && 
+                        rect.height < 200
+                    );
+                    
+                    if (isBottomRight) {
+                        // カスタムフッターやアプリコンテンツは除外
+                        if (!el.closest('.custom-footer') && 
+                            !el.closest('[data-testid="stApp"]') &&
+                            el.tagName !== 'SCRIPT' && 
+                            el.tagName !== 'STYLE' &&
+                            !el.closest('main')) {
+                            el.style.display = 'none';
+                            el.style.visibility = 'hidden';
+                            el.style.opacity = '0';
+                            el.style.pointerEvents = 'none';
+                        }
+                    }
+                }
+            });
+            
+            // 3. 特定のクラス名や属性を持つ要素を非表示
+            const badElements = document.querySelectorAll(
+                '[class*="viewerBadge"], ' +
+                '[class*="toolbar"], ' +
+                '[data-testid*="Toolbar"], ' +
+                'button[title*="Manage"], ' +
+                'button[title*="manage"], ' +
+                'img[alt*="user"], ' +
+                'img[src*="avatar"]'
+            );
+            badElements.forEach(function(el) {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+            });
+        }
+        
+        // 即座に実行
+        hideAllToolbars();
+        
+        // DOMContentLoaded時に実行
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hideAllToolbars);
+        }
+        
+        // MutationObserverで動的に追加される要素も監視
+        const observer = new MutationObserver(function(mutations) {
+            hideAllToolbars();
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+        
+        // 定期的にもチェック（念のため）
+        setInterval(hideAllToolbars, 500);
+        
+        // ウィンドウリサイズ時にも実行
+        window.addEventListener('resize', hideAllToolbars);
+    })();
+    </script>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
