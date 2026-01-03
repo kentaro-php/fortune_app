@@ -151,10 +151,10 @@ def save_to_gsheet(name, year, month, day, life_path):
             return False
 
         client = gspread.authorize(creds)
-        SPREADSHEET_NAME = "顧客リスト_2026運勢"
+        SPREADSHEET_KEY = "1GFS4FjxcHvamWlJaFbXFTmJuL3UyTtaiT4eVxxF15vU"
         
         try:
-            sheet = client.open(SPREADSHEET_NAME).sheet1
+            sheet = client.open_by_key(SPREADSHEET_KEY).sheet1
         except:
             print(f"❌ シート「{SPREADSHEET_NAME}」が見つかりません。共有設定を確認してください。")
             return False
