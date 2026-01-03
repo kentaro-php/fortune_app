@@ -9,6 +9,10 @@ import urllib.request
 from datetime import datetime
 import io
 
+# ▼▼▼【追加】スプレッドシート連携用ライブラリ ▼▼▼
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 # ==========================================
 # 1. ページ設定
 # ==========================================
@@ -18,36 +22,43 @@ st.set_page_config(
     page_icon="🔮"
 )
 
+# --- 画面のUI整形（ロゴ・メニュー非表示） ---
+hide_streamlit_style = """
+            <style>
+            /* 1. ヘッダー（上の色帯）と右上のメニューを消す */
+            header {visibility: hidden;}
+            
+            /* 2. フッター（Made with Streamlit）を消す */
+            footer {visibility: hidden;}
+            
+            /* 3. 右下の管理ボタン（開発者用）やツールバーを消す */
+            div[data-testid="stToolbar"] {visibility: hidden; display: none;}
+            div[data-testid="stDecoration"] {visibility: hidden; display: none;}
+            div[data-testid="stStatusWidget"] {visibility: hidden; display: none;}
+            
+            /* 4. ヘッダーを消した分の余白を詰める（スマホで見やすく） */
+            .block-container {
+                padding-top: 1rem !important;
+            }
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # --- UI完全削除（ヘッダー・フッター・開発者ツール・赤アイコン） ---
 hide_st_style = """
     <style>
-    /* 1. ヘッダー領域全体を消す */
     header {visibility: hidden !important; height: 0px !important;}
     [data-testid="stHeader"] {display: none !important;}
-    
-    /* 2. フッターを消す */
     footer {visibility: hidden !important; height: 0px !important;}
     [data-testid="stFooter"] {display: none !important;}
-    
-    /* 3. ★最重要★ 右下のツールバー（王冠・アバター）をクラス名の部分一致で強制消去 */
-    /* "viewerBadge" という文字が含まれる要素はすべて消す */
     div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
-    /* ツールバー自体も消す */
     [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    
-    /* 4. 上部の虹色の線を消す */
     [data-testid="stDecoration"] {display: none !important;}
-    
-    /* 5. 余白を詰める */
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
     }
-    
-    /* 6. 万が一残る場合の強力な上書き */
     .stApp > header {display: none !important;}
-    
-    /* 7. 右下に固定されているすべての要素を非表示 */
     [style*="position: fixed"][style*="right"][style*="bottom"],
     [style*="position:fixed"][style*="right"][style*="bottom"] {
         display: none !important;
@@ -56,175 +67,11 @@ hide_st_style = """
         pointer-events: none !important;
     }
     </style>
-    <script>
-    (function() {
-        // 非表示にする要素のリスト（重複チェック用）
-        const hiddenElements = new WeakSet();
-        
-        function forceHideElement(el) {
-            if (hiddenElements.has(el)) return;
-            
-            el.style.cssText += 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; width: 0 !important; height: 0 !important;';
-            el.setAttribute('data-force-hidden', 'true');
-            hiddenElements.add(el);
-            
-            // 親要素も非表示にする場合がある
-            let parent = el.parentElement;
-            if (parent && (parent.classList.contains('viewerBadge') || parent.getAttribute('data-testid') === 'stToolbar')) {
-                forceHideElement(parent);
-            }
-        }
-        
-        function hideAllToolbars() {
-            // 1. ツールバーとviewerBadgeを非表示（より包括的に）
-            const selectors = [
-                '[data-testid="stToolbar"]',
-                'div[class*="viewerBadge"]',
-                'div[class*="toolbar"]',
-                '[class*="viewerBadge"]',
-                '[class*="toolbar"]',
-                '[data-testid*="Toolbar"]',
-                '[data-testid*="toolbar"]',
-                'button[title*="Manage"]',
-                'button[title*="manage"]',
-                'button[aria-label*="Manage"]',
-                'button[aria-label*="manage"]',
-                'a[href*="manage"]',
-                'a[href*="Manage"]'
-            ];
-            
-            selectors.forEach(function(selector) {
-                try {
-                    const elements = document.querySelectorAll(selector);
-                    elements.forEach(forceHideElement);
-                } catch(e) {}
-            });
-            
-            // 2. 右下に固定されているすべての要素を検出（より広範囲に）
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(function(el) {
-                // 既に非表示にした要素はスキップ
-                if (hiddenElements.has(el) || el.getAttribute('data-force-hidden') === 'true') {
-                    return;
-                }
-                
-                // スクリプトやスタイルは除外
-                if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') {
-                    return;
-                }
-                
-                // カスタムフッターやアプリコンテンツは除外
-                if (el.closest('.custom-footer') || 
-                    el.closest('[data-testid="stApp"]') ||
-                    el.closest('main') ||
-                    el.closest('.block-container')) {
-                    return;
-                }
-                
-                const style = window.getComputedStyle(el);
-                const rect = el.getBoundingClientRect();
-                
-                // 右下に固定されている要素を検出（より厳密に）
-                if (style.position === 'fixed' || style.position === 'absolute') {
-                    const windowWidth = window.innerWidth;
-                    const windowHeight = window.innerHeight;
-                    const threshold = 200; // 右下200px以内
-                    
-                    const isBottomRight = (
-                        rect.right >= windowWidth - threshold && 
-                        rect.bottom >= windowHeight - threshold &&
-                        rect.width < 300 && 
-                        rect.height < 300 &&
-                        rect.width > 0 &&
-                        rect.height > 0
-                    );
-                    
-                    if (isBottomRight) {
-                        // z-indexが高い要素（ツールバーなど）を優先的に非表示
-                        const zIndex = parseInt(style.zIndex) || 0;
-                        if (zIndex > 100 || style.zIndex === 'auto') {
-                            forceHideElement(el);
-                        }
-                    }
-                }
-                
-                // SVGやアイコン要素もチェック
-                if (el.tagName === 'svg' || el.tagName === 'IMG') {
-                    const rect = el.getBoundingClientRect();
-                    if (rect.right >= window.innerWidth - 200 && 
-                        rect.bottom >= window.innerHeight - 200 &&
-                        rect.width < 100 && 
-                        rect.height < 100) {
-                        forceHideElement(el);
-                    }
-                }
-            });
-            
-            // 3. 王冠アイコンを直接検出（SVGパスや特定のクラス）
-            const svgs = document.querySelectorAll('svg');
-            svgs.forEach(function(svg) {
-                const rect = svg.getBoundingClientRect();
-                if (rect.right >= window.innerWidth - 150 && 
-                    rect.bottom >= window.innerHeight - 150) {
-                    // 王冠のような形状のSVGを検出
-                    const paths = svg.querySelectorAll('path');
-                    paths.forEach(function(path) {
-                        const d = path.getAttribute('d') || '';
-                        // 王冠のような複雑なパスを検出
-                        if (d.length > 50) {
-                            forceHideElement(svg);
-                        }
-                    });
-                }
-            });
-        }
-        
-        // 即座に実行（複数回）
-        hideAllToolbars();
-        setTimeout(hideAllToolbars, 100);
-        setTimeout(hideAllToolbars, 300);
-        setTimeout(hideAllToolbars, 500);
-        
-        // DOMContentLoaded時に実行
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                hideAllToolbars();
-                setTimeout(hideAllToolbars, 100);
-            });
-        }
-        
-        // MutationObserverで動的に追加される要素も監視（より頻繁に）
-        const observer = new MutationObserver(function(mutations) {
-            hideAllToolbars();
-        });
-        
-        if (document.body) {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style', 'class', 'data-testid']
-            });
-        }
-        
-        // より頻繁にチェック（100msごと）
-        setInterval(hideAllToolbars, 100);
-        
-        // ウィンドウリサイズ時にも実行
-        window.addEventListener('resize', hideAllToolbars);
-        
-        // スクロール時にも実行
-        window.addEventListener('scroll', hideAllToolbars);
-        
-        // フォーカス時にも実行
-        window.addEventListener('focus', hideAllToolbars);
-    })();
-    </script>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
-# フォントファイルのパス設定（プロジェクトルートから読み込み）
-FONT_PATH_ROOT = "ipaexg.ttf"  # プロジェクトルートのフォントファイル
+# フォント設定
+FONT_PATH_ROOT = "ipaexg.ttf"
 FONT_DIR = "fonts"
 FONT_PATH_FALLBACK = os.path.join(FONT_DIR, "ipaexm.ttf")
 
@@ -232,20 +79,15 @@ FONT_PATH_FALLBACK = os.path.join(FONT_DIR, "ipaexm.ttf")
 # 2. フォント準備・登録関数
 # ==========================================
 def get_font_path():
-    """フォントファイルのパスを取得（プロジェクトルート優先）"""
-    # プロジェクトルートのフォントファイルを優先
     if os.path.exists(FONT_PATH_ROOT):
         return FONT_PATH_ROOT
-    # フォールバック：fontsディレクトリ
     elif os.path.exists(FONT_PATH_FALLBACK):
         return FONT_PATH_FALLBACK
     return None
 
 def download_font():
-    """IPAex明朝フォントをダウンロードする（フォールバック用）"""
     if not os.path.exists(FONT_DIR):
         os.makedirs(FONT_DIR)
-    
     if not os.path.exists(FONT_PATH_FALLBACK):
         font_url = "https://raw.githubusercontent.com/making/demo-jasper-report-ja/master/src/main/resources/fonts/ipaexm/ipaexm.ttf"
         try:
@@ -256,11 +98,9 @@ def download_font():
     return True
 
 def register_font():
-    """フォントをReportLabに登録する（プロジェクトルートのフォントを優先）"""
     font_path = get_font_path()
     if font_path and os.path.exists(font_path):
         try:
-            # フォント名はファイル名に基づいて決定
             if "ipaexg" in font_path.lower():
                 font_name = 'IPAexGothic'
             else:
@@ -270,7 +110,6 @@ def register_font():
         except Exception as e:
             st.error(f"フォントの登録に失敗しました: {e}")
             return None
-    # フォントが見つからない場合はダウンロードを試みる
     if download_font():
         font_path = get_font_path()
         if font_path:
@@ -282,16 +121,13 @@ def register_font():
     return None
 
 # ==========================================
-# 3. PDF描画用ヘルパー関数（日本語折り返し対応）
+# 3. PDF描画用ヘルパー関数
 # ==========================================
 def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_height, color=HexColor("#333333")):
-    """長い日本語テキストを指定幅で折り返して描画し、書き終わったY座標を返す"""
     c.setFillColor(color)
     c.setFont(font_name, font_size)
-    
     lines = []
     current_line = ""
-    
     for char in text:
         if c.stringWidth(current_line + char, font_name, font_size) <= max_width:
             current_line += char
@@ -300,13 +136,10 @@ def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_heigh
             current_line = char
     if current_line:
         lines.append(current_line)
-    
     for line in lines:
-        if y < 30: # ページ下端に来たら中断
-            break
+        if y < 30: break
         c.drawString(x, y, line)
         y -= line_height
-    
     return y
 
 # ==========================================
@@ -323,7 +156,6 @@ def calculate_life_path_number(year, month, day):
     return life_path
 
 def get_fortune_data(life_path):
-    """ライフパスナンバーに基づく運勢データを一括取得"""
     data = {
         "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
         "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
@@ -341,7 +173,6 @@ def get_fortune_data(life_path):
     return data
 
 def get_monthly_fortunes(life_path):
-    """1月〜12月の運勢リストを返す"""
     return [
         "1月: 新しいことを始めるのに最適な時期です。",
         "2月: 周囲との協力を大切にしましょう。",
@@ -358,30 +189,64 @@ def get_monthly_fortunes(life_path):
     ]
 
 # ==========================================
-# 5. PDF生成関数（2ページ構成、メモリ上で生成）
+# 5. スプレッドシート保存関数（新規追加）
+# ==========================================
+def save_to_gsheet(name, year, month, day, life_path):
+    """スプレッドシートに行を追加する関数"""
+    try:
+        # Secretsの設定があるか確認
+        if "connections" not in st.secrets or "gsheets" not in st.secrets["connections"]:
+            st.warning("⚠️ Secretsの設定が見つかりません。ログへの記録のみ行います。")
+            print(f"【保存失敗】Secrets未設定: {name}, LP:{life_path}")
+            return False
+
+        # 認証処理
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds_dict = dict(st.secrets["connections"]["gsheets"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+
+        # シートを開く（※あなたのスプレッドシート名に合わせてください）
+        # もし名前が違う場合はここを書き換えてください
+        SPREADSHEET_NAME = "顧客リスト_2026運勢" 
+        
+        try:
+            sheet = client.open(SPREADSHEET_NAME).sheet1
+        except gspread.exceptions.SpreadsheetNotFound:
+            st.error(f"❌ スプレッドシート「{SPREADSHEET_NAME}」が見つかりません。名前を確認するか、共有設定を見直してください。")
+            return False
+
+        # データを追加
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row = [timestamp, name, f"{year}/{month}/{day}", life_path]
+        sheet.append_row(row)
+        return True
+        
+    except Exception as e:
+        print(f"スプレッドシート保存エラー: {e}")
+        # エラー詳細はログに出す
+        return False
+
+# ==========================================
+# 6. PDF生成関数
 # ==========================================
 def create_pdf(name, birth_year, birth_month, birth_day):
-    """PDFをメモリ上で生成してBytesIOオブジェクトを返す"""
     life_path = calculate_life_path_number(birth_year, birth_month, birth_day)
     data = get_fortune_data(life_path)
     monthly_data = get_monthly_fortunes(life_path)
     
-    # メモリ上でPDFを生成
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4 
     
-    # 色定義
     bg_color = HexColor("#FFFBF0")
     text_color = HexColor("#333333")
     accent_color = HexColor("#C0A060")
     title_color = HexColor("#C71585")
     
-    # フォント登録（プロジェクトルートのフォントを優先）
     font_name = register_font()
     if not font_name:
         font_name = 'Helvetica'
-        st.warning("⚠️ 日本語フォントが見つかりません。日本語が正しく表示されない可能性があります。")
 
     # --- 1ページ目 ---
     c.setFillColor(bg_color)
@@ -422,14 +287,7 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     current_y = draw_wrapped_text(c, data["overall"][1], margin, current_y, content_width, font_name, 11, 18, text_color)
     current_y -= 25
 
-    topics = [
-        ("恋愛運", data["love"]),
-        ("仕事運", data["work"]),
-        ("金運", data["money"]),
-        ("健康運", data["health"]),
-        ("対人運", data["interpersonal"]),
-    ]
-    
+    topics = [("恋愛運", data["love"]), ("仕事運", data["work"]), ("金運", data["money"]), ("健康運", data["health"]), ("対人運", data["interpersonal"])]
     for title, (stars, text) in topics:
         c.setFillColor(title_color)
         c.setFont(font_name, 14)
@@ -446,7 +304,7 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c.setFont(font_name, 14)
     c.drawString(margin, current_y, f"ラッキーカラー： {data['color']}   /   ラッキーアイテム： {data['item']}")
     
-    # --- 2ページ目（月別運勢） ---
+    # --- 2ページ目 ---
     c.showPage()
     c.setFillColor(bg_color)
     c.rect(0, 0, width, height, fill=1)
@@ -469,72 +327,21 @@ def create_pdf(name, birth_year, birth_month, birth_day):
     c.drawCentredString(width/2, 30, "Mizary Fortune Telling - 2026 Special Report")
 
     c.save()
-    
-    # バッファの位置を先頭に戻す
     buffer.seek(0)
     return buffer
 
 # ==========================================
-# 6. アプリUI (Stripe & 強制非表示CSS対応)
+# 7. アプリUI
 # ==========================================
 
 st.markdown("""
     <style>
-    /* タイトルデザイン */
-    .title-container {
-        text-align: center;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #C0A060;
-        margin-bottom: 30px;
-    }
-    .main-title {
-        font-family: "Helvetica", "Arial", sans-serif;
-        font-weight: bold;
-        font-size: 2.5rem;
-        background: linear-gradient(45deg, #FFB6C1, #C71585);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 10px;
-    }
-    .sub-title {
-        font-size: 1.2rem;
-        color: #C0A060;
-        font-weight: bold;
-    }
-    
-    /* ボタンデザイン */
-    div.stButton > button {
-        background-color: #C71585;
-        color: white;
-        font-weight: bold;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 10px;
-    }
-    
-    
-    /* カスタムフッターのスタイル */
-    .custom-footer {
-        text-align: center;
-        padding: 30px 20px;
-        margin-top: 50px;
-        border-top: 1px solid #E8E8E8;
-        color: #666666;
-        font-size: 0.9rem;
-    }
-    .custom-footer a {
-        color: #D81B60;
-        text-decoration: none;
-        margin: 0 10px;
-    }
-    .custom-footer a:hover {
-        text-decoration: underline;
-    }
-    .custom-footer .copyright {
-        margin-top: 10px;
-        color: #999999;
-        font-size: 0.85rem;
-    }
+    .title-container {text-align: center; padding-bottom: 20px; border-bottom: 2px solid #C0A060; margin-bottom: 30px;}
+    .main-title {font-family: "Helvetica", sans-serif; font-weight: bold; font-size: 2.5rem; background: linear-gradient(45deg, #FFB6C1, #C71585); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;}
+    .sub-title {font-size: 1.2rem; color: #C0A060; font-weight: bold;}
+    div.stButton > button {background-color: #C71585; color: white; font-weight: bold; border: none; padding: 10px 20px; border-radius: 10px;}
+    .custom-footer {text-align: center; padding: 30px 20px; margin-top: 50px; border-top: 1px solid #E8E8E8; color: #666666; font-size: 0.9rem;}
+    .custom-footer a {color: #D81B60; text-decoration: none; margin: 0 10px;}
     </style>
     
     <div class="title-container">
@@ -544,77 +351,50 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# フォントの初期化（存在確認）
 font_path = get_font_path()
 if not font_path:
     download_font()
 
-# -------------------------------------------
-# 決済状態のチェック
-# -------------------------------------------
+# 決済チェック（URLパラメータ または 強制テスト用）
 query_params = st.query_params
 is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
 
-# # ▼▼▼ テスト用に強制的に True（支払い済み）にする ▼▼▼
-# is_paid = True
+# ★テスト用：Stripeをスキップしたい場合はここを True に書き換えてください
+# is_paid = True 
 
-# セッション状態の初期化
-if 'user_name' not in st.session_state:
-    st.session_state.user_name = ""
-if 'birth_year' not in st.session_state:
-    st.session_state.birth_year = 2000
-if 'birth_month' not in st.session_state:
-    st.session_state.birth_month = 1
-if 'birth_day' not in st.session_state:
-    st.session_state.birth_day = 1
-if 'pdf_data' not in st.session_state:
-    st.session_state.pdf_data = None
-if 'pdf_filename' not in st.session_state:
-    st.session_state.pdf_filename = None
+# セッション初期化
+if 'user_name' not in st.session_state: st.session_state.user_name = ""
+if 'birth_year' not in st.session_state: st.session_state.birth_year = 2000
+if 'birth_month' not in st.session_state: st.session_state.birth_month = 1
+if 'birth_day' not in st.session_state: st.session_state.birth_day = 1
+if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
+if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
-# -------------------------------------------
-# パターンA：未払い（LPページ）
-# -------------------------------------------
+# --- パターンA: 未払い ---
 if not is_paid:
     st.info("👋 ようこそ！まずは無料プレビューをご覧ください。")
-    
     with st.form("preview_form"):
         st.write("### 🔮 無料プレビュー")
-        st.caption("お名前と生年月日を入力してください")
         name = st.text_input("お名前", placeholder="山田 花子")
         col1, col2, col3 = st.columns(3)
         with col1: st.number_input("年", 1900, 2024, 2000)
         with col2: st.number_input("月", 1, 12, 1)
         with col3: st.number_input("日", 1, 31, 1)
-        
         submitted = st.form_submit_button("鑑定結果の一部を見る")
     
     if submitted:
         st.warning("🔒 詳しい結果を見るには「完全版」の購入が必要です。")
-        st.markdown(f"""
-        **{name}** 様の運勢の鍵となる「ライフパスナンバー」や、
-        **2026年の月別詳細運勢**、**金運・健康運**などを網羅した
-        全2ページの鑑定書を発行します。
-        """)
 
     st.markdown("---")
     st.header("💎 完全版鑑定書 (PDF)")
-    st.write("2026年を最高の一年にするための、あなただけのガイドブックです。")
-    
-    # 入力データをセッションに保存（Stripe決済前に保存）
     with st.form("payment_form"):
         st.write("### 📝 お客様情報")
-        st.caption("決済前に情報を入力してください（決済後も保持されます）")
         payment_name = st.text_input("お名前", value=st.session_state.user_name, placeholder="山田 花子", key="payment_name")
         col1, col2, col3 = st.columns(3)
-        with col1: 
-            payment_year = st.number_input("年", 1900, 2024, st.session_state.birth_year, key="payment_year")
-        with col2: 
-            payment_month = st.number_input("月", 1, 12, st.session_state.birth_month, key="payment_month")
-        with col3: 
-            payment_day = st.number_input("日", 1, 31, st.session_state.birth_day, key="payment_day")
+        with col1: payment_year = st.number_input("年", 1900, 2024, st.session_state.birth_year, key="payment_year")
+        with col2: payment_month = st.number_input("月", 1, 12, st.session_state.birth_month, key="payment_month")
+        with col3: payment_day = st.number_input("日", 1, 31, st.session_state.birth_day, key="payment_day")
         
-        # フォーム送信時にセッションに保存
         if st.form_submit_button("情報を保存して決済へ進む"):
             st.session_state.user_name = payment_name
             st.session_state.birth_year = payment_year
@@ -622,28 +402,15 @@ if not is_paid:
             st.session_state.birth_day = payment_day
             st.success("✅ 情報を保存しました。決済ボタンをクリックしてください。")
     
-    # ▼▼▼【重要】ここにStripeの本番URLを貼り付けてください！▼▼▼
     stripe_url = "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k"
-    
-    # Stripe決済URLにリダイレクト（セッションデータは保持される）
-    st.link_button(
-        label="👉 500円で鑑定書を発行する", 
-        url=stripe_url, 
-        type="primary", 
-        use_container_width=True
-    )
+    st.link_button(label="👉 500円で鑑定書を発行する", url=stripe_url, type="primary", use_container_width=True)
 
-# -------------------------------------------
-# パターンB：支払い完了（発行ページ）
-# -------------------------------------------
+# --- パターンB: 支払い完了（発行 & シート保存） ---
 else:
     st.success("✅ ご購入ありがとうございます！鑑定書を発行できます。")
     
     with st.form("fortune_form"):
         st.write("### 📄 鑑定書発行フォーム")
-        st.write("正確な情報を入力して、PDFを生成してください。")
-        
-        # セッションからデータを復元（入力欄が空の場合）
         default_name = st.session_state.user_name if st.session_state.user_name else ""
         default_year = st.session_state.birth_year if st.session_state.birth_year else 2000
         default_month = st.session_state.birth_month if st.session_state.birth_month else 1
@@ -651,17 +418,13 @@ else:
         
         name = st.text_input("お名前", value=default_name, placeholder="山田 花子", key="form_name")
         col1, col2, col3 = st.columns(3)
-        with col1: 
-            birth_year = st.number_input("年", 1900, 2024, default_year, key="form_year")
-        with col2: 
-            birth_month = st.number_input("月", 1, 12, default_month, key="form_month")
-        with col3: 
-            birth_day = st.number_input("日", 1, 31, default_day, key="form_day")
+        with col1: birth_year = st.number_input("年", 1900, 2024, default_year, key="form_year")
+        with col2: birth_month = st.number_input("月", 1, 12, default_month, key="form_month")
+        with col3: birth_day = st.number_input("日", 1, 31, default_day, key="form_day")
         
         submitted = st.form_submit_button("✨ 鑑定書PDFをダウンロードする", use_container_width=True)
 
     if submitted and name:
-        # セッションに最新のデータを保存
         st.session_state.user_name = name
         st.session_state.birth_year = birth_year
         st.session_state.birth_month = birth_month
@@ -669,11 +432,15 @@ else:
         
         with st.spinner("鑑定書を生成中..."):
             try:
-                # PDFをメモリ上で生成
+                # 1. PDF生成
                 pdf_buffer = create_pdf(name, birth_year, birth_month, birth_day)
                 pdf_data = pdf_buffer.getvalue()
                 
-                # セッションにPDFデータをキャッシュ
+                # 2. スプレッドシート保存（ここが追加機能）
+                life_path = calculate_life_path_number(birth_year, birth_month, birth_day)
+                save_to_gsheet(name, birth_year, birth_month, birth_day, life_path)
+
+                # 3. セッションに保存
                 st.session_state.pdf_data = pdf_data
                 filename = f"運勢鑑定書_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
                 st.session_state.pdf_filename = filename
@@ -684,7 +451,6 @@ else:
                 st.error(f"エラーが発生しました: {e}")
                 st.exception(e)
     
-    # PDFが生成済みの場合はダウンロードボタンを表示（リロード後も表示）
     if st.session_state.pdf_data:
         st.download_button(
             label="📥 PDFをダウンロード", 
@@ -695,14 +461,11 @@ else:
             use_container_width=True
         )
 
-# -------------------------------------------
-# フッター（著作権表示）
-# -------------------------------------------
 st.markdown("""
     <div class="custom-footer">
         <div>
-            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
-            <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+            <a href="https://mizary.com/tokusyouhou/" target="_blank">特定商取引法に基づく表記</a> | 
+            <a href="https://mizary.com/privacy/" target="_blank">プライバシーポリシー</a>
         </div>
         <div class="copyright">© 2026 占いミザリー</div>
     </div>
