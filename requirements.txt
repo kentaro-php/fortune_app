@@ -1,5 +1,4 @@
-streamlit>=1.28.0
-reportlab>=4.0.0
-
+streamlit
+reportlab
 gspread
 oauth2client
