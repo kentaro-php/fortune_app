@@ -417,6 +417,15 @@ def create_pdf(name, y, m, d):
     c.setFont(font_name, 11)
     c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円~")
     
+    # 鑑定した占い師
+    y_pos -= 40
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 10)
+    c.drawCentredString(width/2, y_pos, "鑑定した占い師 MIZARY")
+    y_pos -= 15
+    c.setFont(font_name, 9)
+    c.drawCentredString(width/2, y_pos, "https://mizary.com/staff/mizary/")
+    
     # フッター
     y_pos = 50
     c.setFillColor(HexColor("#666666"))
