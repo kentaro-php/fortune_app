@@ -388,20 +388,35 @@ def create_pdf(name, y, m, d):
     c.setFillColor(HexColor("#FFFBF0"))
     c.rect(0, 0, width, height, fill=1)
     
-    # タイトル
+    # タイトル「2026年 月別運勢カレンダー」
+    title_text = "2026年 月別運勢カレンダー"
     c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 20)
-    c.drawCentredString(width/2, height-60, "2026年 月別運勢カレンダー")
+    c.setFont(font_name, 22)
+    # タイトルを中央に配置
+    title_y = height - 60
+    c.drawCentredString(width/2, title_y, title_text)
     
-    # 月別運勢
+    # 月別運勢リスト
     y_pos = height-100
-    for txt in monthly:
-        if y_pos < 50:  # ページが足りない場合は改ページ
+    
+    # 月別運勢を1つずつ描画
+    for i, txt in enumerate(monthly):
+        # ページが足りない場合は改ページ
+        if y_pos < 50:
             c.showPage()
             c.setFillColor(HexColor("#FFFBF0"))
             c.rect(0, 0, width, height, fill=1)
-            y_pos = height - 50
-        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20) - 10
+            # 改ページ時もタイトルを再表示
+            c.setFillColor(HexColor("#C71585"))
+            c.setFont(font_name, 22)
+            c.drawCentredString(width/2, height-60, title_text)
+            y_pos = height - 100
+        
+        # 月別運勢を描画（色とフォントを設定）
+        c.setFillColor(HexColor("#333333"))
+        c.setFont(font_name, 12)
+        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20)
+        y_pos -= 10  # 月間の間隔を追加
     
     # 占いミザリーへの案内（フッターの前）
     y_pos -= 30
