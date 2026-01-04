@@ -498,9 +498,6 @@ if not is_paid:
                 lp = calculate_life_path_number(y_pre, m_pre, d_pre)
                 preview_data = get_fortune_data(lp)
                 
-                # ▼ GAS経由でデータを保存
-                save_data_via_gas("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
-                
                 # 興味を引く見出しを表示
                 st.markdown("---")
                 st.markdown(f"### {name_pre} 様の2026年運勢")
@@ -561,12 +558,12 @@ else:
     st.success("✅ ご購入ありがとうございます！")
     
     # 決済完了後、情報が揃っていれば自動的にPDFを生成
-    name = st.session_state.user_name
-    y = st.session_state.birth_year
-    m = st.session_state.birth_month
-    d = st.session_state.birth_day
+    name = st.session_state.user_name if st.session_state.user_name else ""
+    y = st.session_state.birth_year if st.session_state.birth_year else 2000
+    m = st.session_state.birth_month if st.session_state.birth_month else 1
+    d = st.session_state.birth_day if st.session_state.birth_day else 1
     
-    # PDFがまだ生成されていない、または情報が揃っている場合は自動生成
+    # PDFがまだ生成されていない、かつ情報が揃っている場合は自動生成
     if name and not st.session_state.pdf_data:
         with st.spinner("PDFを生成中..."):
             try:
@@ -574,12 +571,9 @@ else:
                 pdf_bytes = pdf.getvalue()
                 st.session_state.pdf_data = pdf_bytes
                 st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
-                
-                # ログ保存：購入完了
-                # ▼ GAS経由でデータを保存
-                save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
             except Exception as e:
                 st.error(f"PDF生成エラー: {e}")
+                st.info("下のフォームから再度お試しください。")
     
     # PDFダウンロードボタンを表示
     if st.session_state.pdf_data and st.session_state.pdf_filename:
@@ -599,11 +593,11 @@ else:
         with st.form("final"):
             st.write("### 📄 発行フォーム")
             # 完全版鑑定書フォームで入力した内容を自動反映
-            name_input = st.text_input("お名前", value=st.session_state.user_name, key="f_name")
+            name_input = st.text_input("お名前", value=name, key="f_name")
             c1, c2, c3 = st.columns(3)
-            y_input = c1.number_input("年", 1900, 2025, st.session_state.birth_year, key="f_y")
-            m_input = c2.number_input("月", 1, 12, st.session_state.birth_month, key="f_m")
-            d_input = c3.number_input("日", 1, 31, st.session_state.birth_day, key="f_d")
+            y_input = c1.number_input("年", 1900, 2025, y, key="f_y")
+            m_input = c2.number_input("月", 1, 12, m, key="f_m")
+            d_input = c3.number_input("日", 1, 31, d, key="f_d")
             submitted = st.form_submit_button("✨ PDFを作成する", use_container_width=True)
 
         if submitted and name_input:
@@ -619,10 +613,6 @@ else:
                     pdf_bytes = pdf.getvalue()
                     st.session_state.pdf_data = pdf_bytes
                     st.session_state.pdf_filename = f"運勢鑑定書_{name_input}.pdf"
-                    
-                    # ログ保存：購入完了
-                    # ▼ GAS経由でデータを保存
-                    save_data_via_gas("購入・発行", name_input, y_input, m_input, d_input, calculate_life_path_number(y_input, m_input, d_input))
                     
                     st.success("完了しました！下のボタンからダウンロードできます。")
                     st.rerun()  # ページを再読み込みしてダウンロードボタンを表示
