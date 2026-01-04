@@ -208,18 +208,32 @@ def calculate_life_path_number(year, month, day):
     return total if total in [11, 22, 33] else lp
 
 def get_fortune_data(lp):
-    data = {
-        "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
-        "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
-        "love": (5, "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"),
-        "work": (4, "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"),
-        "money": (4, "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"),
-        "health": (3, "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。"),
-        "interpersonal": (5, "人脈が広がる年です。新しいコミュニティに参加することで、人生を豊かにする出会いがあります。"),
-        "color": "ゴールド", "item": "手帳"
-    }
-    if lp % 2 == 0:
-        data["color"], data["overall"] = "シルバー", ("中吉", "2026年は基盤を固める年。焦らず着実に進むことで、揺るぎない成果を手に入れます。")
+    # LP4の場合の詳細な説明（画像に基づく）
+    if lp == 4:
+        data = {
+            "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
+            "lp_description": "誠実で責任感が強く、実務的な能力に優れている傾向があります。安定を好み、着実に物事を進める力をお持ちのようです。その真面目さと信頼性は、周囲から高く評価されていることでしょう。着実な努力を積み重ねることで、長期的な成功と安定を手に入れられる可能性が高いでしょう。",
+            "overall": ("中吉", "2026年は、着実な成長の年となりそうです。努力を積み重ねることで、安定した成果を得られる傾向があります。焦らず、一歩ずつ進まれることで、確かな実りが待っていることでしょう。責任ある立場での活躍が期待でき、周囲からの信頼も深まっていくことでしょう。"),
+            "love": (3, "2026年は、安定した関係を築く年となる傾向があります。誠実さと信頼が、あなたの恋愛運を高めていく可能性が高いでしょう。焦らず、着実に信頼関係を深めていかれると良いでしょう。真面目で誠実なあなたの姿勢が、パートナーからの信頼を深めていくことでしょう。"),
+            "work": (4, "2026年は、着実な努力が認められる年となりそうです。責任ある立場での活躍が期待できる傾向があります。これまでに積み重ねてきた努力が、実を結んでいくことでしょう。誠実さと責任感が、周囲からの信頼を深めていくことでしょう。安定した成果を手に入れられる可能性が高いでしょう。"),
+            "money": (4, "2026年は、着実な貯蓄と計画的な投資が金運を高める年となる傾向があります。安定した収入を基盤に、計画的に資産を増やしていかれると良いでしょう。真面目で誠実な姿勢が、経済的な安定をもたらしていくことでしょう。長期的な視点で資産を築いていくことで、将来の金運が高まっていくことでしょう。"),
+            "health": (3, "2026年は、規則正しい生活習慣が健康運を高める年となる傾向があります。適度な運動とバランスの取れた食事を心がけることで、体調を良好に保てるでしょう。無理をせず、着実に健康管理を続けていくことが大切です。"),
+            "color": "シルバー",
+            "item": "手帳"
+        }
+    else:
+        # その他のLPの場合（デフォルト）
+        data = {
+            "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
+            "lp_description": "あなたは独自の才能と魅力を持っています。2026年は、その才能を活かして新しいステージへと進む準備が整います。",
+            "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
+            "love": (5, "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"),
+            "work": (4, "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"),
+            "money": (4, "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"),
+            "health": (3, "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。"),
+            "color": "ゴールド",
+            "item": "手帳"
+        }
     return data
 
 def get_monthly_fortunes(lp):
@@ -278,10 +292,90 @@ def create_pdf(name, y, m, d):
     c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
     c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 26); c.drawCentredString(width/2, height-60, "2026年 運勢鑑定書")
     c.setFillColor(HexColor("#C0A060")); c.setFont(font_name, 22); c.drawCentredString(width/2, height-100, f"{name} 様")
-    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日 (LP: {lp})")
+    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日")
+    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-150, f"ライフパスナンバー: {lp}")
     
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 14); c.drawString(50, height-180, "【あなたの本質】")
-    y_personality = draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
+    # ライフパスナンバーの説明
+    y_pos = height-180
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 11)
+    y_pos = draw_wrapped_text(c, data.get("lp_description", ""), 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 【総合運】
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【総合運】")
+    y_pos -= 20
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, data["overall"][0])
+    y_pos -= 20
+    c.setFont(font_name, 11)
+    y_pos = draw_wrapped_text(c, data["overall"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 【恋愛運】
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【恋愛運】")
+    y_pos -= 20
+    stars = "★" * data["love"][0] + "☆" * (5 - data["love"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    c.setFont(font_name, 11)
+    y_pos = draw_wrapped_text(c, data["love"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 【仕事運】
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【仕事運】")
+    y_pos -= 20
+    stars = "★" * data["work"][0] + "☆" * (5 - data["work"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    c.setFont(font_name, 11)
+    y_pos = draw_wrapped_text(c, data["work"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 【金運】
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【金運】")
+    y_pos -= 20
+    stars = "★" * data["money"][0] + "☆" * (5 - data["money"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    c.setFont(font_name, 11)
+    y_pos = draw_wrapped_text(c, data["money"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 【健康運】
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【健康運】")
+    y_pos -= 20
+    stars = "★" * data["health"][0] + "☆" * (5 - data["health"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    c.setFont(font_name, 11)
+    y_pos = draw_wrapped_text(c, data["health"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # ページが足りない場合は改ページ
+    if y_pos < 100:
+        c.showPage()
+        c.setFillColor(HexColor("#FFFBF0"))
+        c.rect(0, 0, width, height, fill=1)
+        y_pos = height - 100
     
     # 2ページ目: 月別運勢カレンダー
     c.showPage()
@@ -323,7 +417,7 @@ def create_pdf(name, y, m, d):
     y_pos -= 30
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 11)
-    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円～")
+    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円~")
     
     # フッター
     y_pos = 50
