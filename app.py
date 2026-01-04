@@ -370,29 +370,24 @@ def create_pdf(name, y, m, d):
     c.setFont(font_name, 11)
     y_pos = draw_wrapped_text(c, data["health"][1], 50, y_pos, width-100, font_name, 11, 18)
     
-    # 月別運勢カレンダーセクション
-    y_pos -= 30
-    if y_pos < 200:  # スペースが足りない場合は改ページ
-        c.showPage()
-        c.setFillColor(HexColor("#FFFBF0"))
-        c.rect(0, 0, width, height, fill=1)
-        y_pos = height - 60
-    else:
-        y_pos -= 20
+    # 2ページ目: 月別運勢カレンダー
+    c.showPage()
+    c.setFillColor(HexColor("#FFFBF0"))
+    c.rect(0, 0, width, height, fill=1)
     
     # タイトル「2026年 月別運勢カレンダー」
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 20)
-    c.drawCentredString(width/2, y_pos, "2026年 月別運勢カレンダー")
+    c.drawCentredString(width/2, height-60, "2026年 月別運勢カレンダー")
     
     # 月別運勢リストを描画
-    y_pos -= 40
+    y_pos = height-100
     c.setFillColor(HexColor("#333333"))
     c.setFont(font_name, 12)
     
     for txt in monthly:
         if txt and txt.strip():  # テキストが空でないことを確認
-            if y_pos < 150:  # スペースが足りない場合は改ページ
+            if y_pos < 200:  # スペースが足りない場合は改ページ
                 c.showPage()
                 c.setFillColor(HexColor("#FFFBF0"))
                 c.rect(0, 0, width, height, fill=1)
