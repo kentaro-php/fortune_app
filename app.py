@@ -550,7 +550,8 @@ if not is_paid:
             })
             st.success("✅ 保存しました。下のボタンから決済してください。")
             
-    # ▼▼▼ Stripeリンク（修正済み） ▼▼▼
+    # ▼▼▼ Stripeリンク（決済完了後は?checkout=successまたは?paid=trueでリダイレクト） ▼▼▼
+    # 注意: Stripeのダッシュボードで、決済完了後のリダイレクトURLに?checkout=successを追加してください
     stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
     st.link_button("👉 500円で発行する", stripe_url, type="primary", use_container_width=True)
 
@@ -558,13 +559,14 @@ else:
     st.success("✅ ご購入ありがとうございます！")
     
     # 決済完了後、情報が揃っていれば自動的にPDFを生成
-    name = st.session_state.user_name if st.session_state.user_name else ""
-    y = st.session_state.birth_year if st.session_state.birth_year else 2000
-    m = st.session_state.birth_month if st.session_state.birth_month else 1
-    d = st.session_state.birth_day if st.session_state.birth_day else 1
+    # セッションステートから情報を取得（デフォルト値付き）
+    name = st.session_state.get('user_name', '')
+    y = st.session_state.get('birth_year', 2000)
+    m = st.session_state.get('birth_month', 1)
+    d = st.session_state.get('birth_day', 1)
     
     # PDFがまだ生成されていない、かつ情報が揃っている場合は自動生成
-    if name and not st.session_state.pdf_data:
+    if name and name.strip() and not st.session_state.get('pdf_data'):
         with st.spinner("PDFを生成中..."):
             try:
                 pdf = create_pdf(name, y, m, d)
@@ -576,7 +578,7 @@ else:
                 st.info("下のフォームから再度お試しください。")
     
     # PDFダウンロードボタンを表示
-    if st.session_state.pdf_data and st.session_state.pdf_filename:
+    if st.session_state.get('pdf_data') and st.session_state.get('pdf_filename'):
         st.success("完了しました！下のボタンからダウンロードできます。")
         st.markdown("---")
         st.download_button(
