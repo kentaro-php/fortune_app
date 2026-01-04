@@ -419,16 +419,25 @@ def create_pdf(name, y, m, d):
         c.rect(0, 0, width, height, fill=1)
         y_pos = height - 100
     
+    # 「さらにもっと深く知るには占いミザリーへ」のテキストを描画（「占いミザリー」にリンクを追加）
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 12)
-    c.drawCentredString(width/2, y_pos, "さらにもっと深く知るには占いミザリーへ")
+    text1 = "さらにもっと深く知るには"
+    text2 = "占いミザリー"
+    text3 = "へ"
+    text1_width = c.stringWidth(text1, font_name, 12)
+    text2_width = c.stringWidth(text2, font_name, 12)
+    text3_width = c.stringWidth(text3, font_name, 12)
+    total_width = text1_width + text2_width + text3_width
+    start_x = (width - total_width) / 2
     
-    y_pos -= 25
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 11)
-    c.drawCentredString(width/2, y_pos, "https://mizary.com/")
+    c.drawString(start_x, y_pos, text1)
+    link_x = start_x + text1_width
+    c.drawString(link_x, y_pos, text2)
+    c.linkURL("https://mizary.com/", (link_x, y_pos - 2, link_x + text2_width, y_pos + 14), relative=0)
+    c.drawString(link_x + text2_width, y_pos, text3)
     
-    y_pos -= 30
+    y_pos -= 35
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 11)
     c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円~")
