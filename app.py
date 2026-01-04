@@ -271,10 +271,11 @@ def save_data_via_gas(action_type, name, year, month, day, lp):
     try:
         json_data = json.dumps(data).encode('utf-8')
         req = urllib.request.Request(gas_url, data=json_data, headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req) as res:
+        with urllib.request.urlopen(req, timeout=5) as res:
             pass # 送信成功
     except Exception as e:
-        st.error(f"⚠️ 保存エラー: {e}")
+        # 保存エラーは静かに失敗（バックグラウンド処理のため、ユーザーには表示しない）
+        pass
 
 # ==========================================
 # 6. PDF生成
