@@ -411,6 +411,12 @@ def create_pdf(name, y, m, d):
     # リンクを追加
     c.linkURL("https://mizary.com/staff/mizary/", (text_x, y_pos - 2, text_x + text_width, y_pos + 12), relative=0)
     
+    # フッター（鑑定した占い師の下）
+    y_pos -= 25
+    c.setFillColor(HexColor("#666666"))
+    c.setFont(font_name, 9)
+    c.drawCentredString(width/2, y_pos, "この鑑定書は数秘術に基づいて作成されました。")
+    
     # 占いミザリーへの案内
     y_pos -= 35
     if y_pos < 200:  # スペースが足りない場合は改ページ
@@ -441,14 +447,6 @@ def create_pdf(name, y, m, d):
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 11)
     c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円~")
-    
-    # フッター
-    y_pos -= 50
-    if y_pos < 80:  # フッターのスペースが足りない場合は調整
-        y_pos = 50
-    c.setFillColor(HexColor("#666666"))
-    c.setFont(font_name, 9)
-    c.drawCentredString(width/2, y_pos, "この鑑定書は数秘術に基づいて作成されました。")
         
     c.save()
     buffer.seek(0)
