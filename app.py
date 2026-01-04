@@ -210,22 +210,50 @@ def calculate_life_path_number(year, month, day):
     return total if total in [11, 22, 33] else lp
 
 def get_fortune_data(lp):
-    data = {
-        "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
-        "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
-        "love": (5, "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"),
-        "work": (4, "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"),
-        "money": (4, "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"),
-        "health": (3, "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。"),
-        "interpersonal": (5, "人脈が広がる年です。新しいコミュニティに参加することで、人生を豊かにする出会いがあります。"),
-        "color": "ゴールド", "item": "手帳"
-    }
-    if lp % 2 == 0:
-        data["color"], data["overall"] = "シルバー", ("中吉", "2026年は基盤を固める年。焦らず着実に進むことで、揺るぎない成果を手に入れます。")
+    # LP: 4の場合のデータ（画像に基づく）
+    if lp == 4:
+        data = {
+            "personality": "誠実さと責任感が強く、実務能力に優れています。安定を好み、着実な歩みを大切にする傾向があります。誠実さと信頼性が周囲から高く評価され、着実な努力が長期的な成功と安定につながります。",
+            "overall": ("中吉", "2026年は着実な成長の年。積み重ねた努力が安定した成果として現れます。段階的な進歩が確実な報酬につながり、責任ある立場での活動が期待され、周囲からの信頼が深まります。"),
+            "love": (3, "2026年は安定した関係を築く年です。誠実さと信頼が恋愛運を高めます。焦らずに着実に信頼を深めていきましょう。真面目で誠実な姿勢がパートナーの信頼を強めます。"),
+            "work": (4, "2026年は着実な努力が評価される年です。責任ある立場での活動が期待されます。積み重ねた努力が実を結び、誠実さと責任感が周囲からの信頼を深め、安定した成果につながります。"),
+            "money": (4, "2026年は着実な貯蓄と計画的な投資が金運を高める年です。安定した収入を基に、計画的に資産を増やしていきましょう。真面目で誠実な姿勢が経済的な安定をもたらし、長期的な視点で資産を築くことで、将来の金運が向上します。"),
+            "health": (3, "2026年は規則正しい生活リズムを保つことが健康運を高めます。無理をせず、着実に健康管理を続けることが大切です。適度な運動とバランスの取れた食事で、長期的な健康を維持しましょう。")
+        }
+    else:
+        # その他のLP番号用のデフォルトデータ
+        data = {
+            "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
+            "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
+            "love": (5, "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"),
+            "work": (4, "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"),
+            "money": (4, "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"),
+            "health": (3, "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。")
+        }
+        if lp % 2 == 0:
+            data["overall"] = ("中吉", "2026年は基盤を固める年。焦らず着実に進むことで、揺るぎない成果を手に入れます。")
     return data
 
 def get_monthly_fortunes(lp):
-    return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
+    # LP: 4の場合の月別運勢（画像に基づく）
+    if lp == 4:
+        return [
+            "1月: 着実な成長の月。積み重ねた努力が安定した成果として現れます。",
+            "2月: 安定した関係を築く月。誠実さと信頼が運気を高めます。",
+            "3月: 計画的な行動が重要な月。着実に進めていきましょう。",
+            "4月: 責任ある立場での活動が期待される月。真面目さと信頼性が評価されます。",
+            "5月: 変化に対応する月。柔軟な姿勢が運気を高めます。",
+            "6月: 安定した関係が深まる月。誠実さと信頼が絆を強めます。",
+            "7月: 内面の安定が重要な月。着実な成長が運気を高めます。",
+            "8月: 着実な努力が評価される月。責任ある立場での活動が期待されます。",
+            "9月: 完成と新たな始まりの月。これまでの努力が実を結びます。",
+            "10月: 計画的な行動が成果をもたらす月。着実に目標を達成していきましょう。",
+            "11月: 大きなプロジェクトの基盤を築く月。理想を実現するための準備が整います。",
+            "12月: 安定した成果を手に入れる月。誠実さと責任感が成功をもたらします。"
+        ]
+    else:
+        # その他のLP番号用のデフォルトメッセージ
+        return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
 # 5. GAS経由でのデータ保存（修正版）
@@ -264,21 +292,123 @@ def create_pdf(name, y, m, d):
     width, height = A4
     font_name = register_font() or 'Helvetica'
     
-    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 26); c.drawCentredString(width/2, height-60, "2026年 運勢鑑定書")
-    c.setFillColor(HexColor("#C0A060")); c.setFont(font_name, 22); c.drawCentredString(width/2, height-100, f"{name} 様")
-    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日 (LP: {lp})")
+    # 1ページ目: 運勢鑑定書
+    c.setFillColor(HexColor("#FFFBF0"))
+    c.rect(0, 0, width, height, fill=1)
     
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 14); c.drawString(50, height-180, "【あなたの本質】")
-    draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
+    # タイトル
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 26)
+    c.drawCentredString(width/2, height-60, "2026年 運勢鑑定書")
     
+    # 名前
+    c.setFillColor(HexColor("#C0A060"))
+    c.setFont(font_name, 22)
+    c.drawCentredString(width/2, height-100, f"{name} 様")
+    
+    # 生年月日とライフパスナンバー
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日")
+    c.drawCentredString(width/2, height-150, f"ライフパスナンバー: {lp}")
+    
+    # あなたの本質
+    y_pos = height-200
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【あなたの本質】")
+    y_pos -= 25
+    c.setFillColor(HexColor("#333333"))
+    y_pos = draw_wrapped_text(c, data["personality"], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 総合運
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【総合運】")
+    y_pos -= 20
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, data["overall"][0])
+    y_pos -= 20
+    y_pos = draw_wrapped_text(c, data["overall"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 恋愛運
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【恋愛運】")
+    y_pos -= 20
+    stars = "★" * data["love"][0] + "☆" * (5 - data["love"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    y_pos = draw_wrapped_text(c, data["love"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 仕事運
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【仕事運】")
+    y_pos -= 20
+    stars = "★" * data["work"][0] + "☆" * (5 - data["work"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    y_pos = draw_wrapped_text(c, data["work"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 金運
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【金運】")
+    y_pos -= 20
+    stars = "★" * data["money"][0] + "☆" * (5 - data["money"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    y_pos = draw_wrapped_text(c, data["money"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 健康運
+    y_pos -= 20
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 14)
+    c.drawString(50, y_pos, "【健康運】")
+    y_pos -= 20
+    stars = "★" * data["health"][0] + "☆" * (5 - data["health"][0])
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    c.drawString(50, y_pos, stars)
+    y_pos -= 20
+    y_pos = draw_wrapped_text(c, data["health"][1], 50, y_pos, width-100, font_name, 11, 18)
+    
+    # 2ページ目: 月別運勢カレンダー
     c.showPage()
-    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 20); c.drawCentredString(width/2, height-60, "月別運勢カレンダー")
+    c.setFillColor(HexColor("#FFFBF0"))
+    c.rect(0, 0, width, height, fill=1)
     
+    # タイトル
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 20)
+    c.drawCentredString(width/2, height-60, "2026年 月別運勢カレンダー")
+    
+    # 月別運勢
     y_pos = height-100
     for txt in monthly:
-        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 25) - 15
+        if y_pos < 50:  # ページが足りない場合は改ページ
+            c.showPage()
+            c.setFillColor(HexColor("#FFFBF0"))
+            c.rect(0, 0, width, height, fill=1)
+            y_pos = height - 50
+        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20) - 10
+    
+    # フッター
+    c.setFillColor(HexColor("#666666"))
+    c.setFont(font_name, 9)
+    c.drawCentredString(width/2, 30, "この鑑定書は数秘術に基づいて作成されました。")
         
     c.save()
     buffer.seek(0)
