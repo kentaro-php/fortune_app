@@ -416,6 +416,11 @@ st.markdown("""
 
 st.markdown("""
     <div class="custom-footer">
+        <div style="margin-bottom: 15px;">
+            <strong>お問い合わせ</strong><br>
+            <a href="https://mizary.com/contact/" target="_blank" rel="noopener noreferrer">メール</a> | 
+            <a href="https://lin.ee/OKV7A8H" target="_blank" rel="noopener noreferrer">LINE</a>
+        </div>
         <div>
             <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
             <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
