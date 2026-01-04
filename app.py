@@ -351,6 +351,7 @@ if not is_paid:
                 st.markdown(f"{preview_data['love'][1]}")
                 
                 st.markdown("---")
+                st.info("💡 入力した情報は完全版鑑定書フォームに自動的に反映されました。")
                 st.warning("🔒 詳しい結果（全運勢・月別カレンダー・ラッキーアイテムなど）をご覧になるには、完全版の購入が必要です。")
                 
                 # 完全版へのアンカーリンク
@@ -368,13 +369,15 @@ if not is_paid:
     # アンカー用のIDを追加
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
     st.markdown('<h2 style="white-space: nowrap;">💎 完全版鑑定書 <small style="font-size: 0.7em;">(PDF)</small></h2>', unsafe_allow_html=True)
+    
+    # 無料プレビューで入力した情報を自動的に反映（セッションステートから確実に読み込む）
     with st.form("pay"):
-        # 無料プレビューで入力した情報を自動的に反映
-        name = st.text_input("お名前", value=st.session_state.user_name if st.session_state.user_name else "", key="p_name")
+        # セッションステートから値を取得（無料プレビューで入力した値が自動的に反映される）
+        name = st.text_input("お名前", value=st.session_state.user_name, key="p_name")
         c1, c2, c3 = st.columns(3)
-        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year if st.session_state.birth_year else 2000, key="p_y")
-        m = c2.number_input("月", 1, 12, st.session_state.birth_month if st.session_state.birth_month else 1, key="p_m")
-        d = c3.number_input("日", 1, 31, st.session_state.birth_day if st.session_state.birth_day else 1, key="p_d")
+        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year, key="p_y")
+        m = c2.number_input("月", 1, 12, st.session_state.birth_month, key="p_m")
+        d = c3.number_input("日", 1, 31, st.session_state.birth_day, key="p_d")
         if st.form_submit_button("情報を保存して決済へ"):
             st.session_state.update({'user_name': name, 'birth_year': y, 'birth_month': m, 'birth_day': d})
             st.success("✅ 保存しました。下のボタンから決済してください。")
