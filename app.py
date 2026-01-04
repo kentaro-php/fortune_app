@@ -527,7 +527,7 @@ if not is_paid:
                 # 完全版へのアンカーリンク
                 st.markdown("""
                 <div style="text-align: center; margin: 20px 0;">
-                    <a href="javascript:void(0);" onclick="document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'});" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; padding: 10px 20px; background-color: #fff0f5; border-radius: 25px; border: 2px solid #e10080;">
+                    <a href="#完全版鑑定書" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; padding: 10px 20px; background-color: #fff0f5; border-radius: 25px; border: 2px solid #e10080;">
                         ↓ 完全版鑑定書を見る ↓
                     </a>
                 </div>
