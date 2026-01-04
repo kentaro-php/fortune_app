@@ -12,8 +12,6 @@ import io
 import json
 import base64
 
-# （不要なスプレッドシート用ライブラリは削除しました）
-
 # ==========================================
 # 1. ページ設定
 # ==========================================
@@ -87,27 +85,12 @@ hide_st_style = """
     .top-link a:hover {
         color: #c1006e;
     }
-    /* ▼▼▼ サポート連絡先 ▼▼▼ */
-    .support-contact {
-        text-align: center;
-        margin: 20px 0;
-        padding: 15px 0;
-        color: #666;
-        font-size: 0.9rem;
-    }
-    .support-contact a {
-        color: #e10080;
-        text-decoration: none;
-    }
-    .support-contact a:hover {
-        text-decoration: underline;
-    }
     
     /* ▼▼▼ フッター（著作権表示） ▼▼▼ */
     .custom-footer {
         text-align: center;
-        margin: 40px 0 0 0;
-        padding: 20px 0 10px 0;
+        margin: 40px 0 20px 0;
+        padding: 20px 0;
         border-top: 1px solid #e0e0e0;
         color: #666;
         font-size: 0.85rem;
@@ -123,7 +106,6 @@ hide_st_style = """
     }
     .custom-footer .copyright {
         margin-top: 10px;
-        margin-bottom: 0;
         color: #999;
         font-size: 0.8rem;
     }
@@ -199,7 +181,7 @@ def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_heigh
     return y
 
 # ==========================================
-# 4. 運勢ロジック
+# 4. 運勢ロジック（ここを修正しました）
 # ==========================================
 def calculate_life_path_number(year, month, day):
     def sum_digits(n):
@@ -210,56 +192,43 @@ def calculate_life_path_number(year, month, day):
     return total if total in [11, 22, 33] else lp
 
 def get_fortune_data(lp):
-    # LP: 4の場合のデータ（画像に基づく）
-    if lp == 4:
-        data = {
-            "personality": "誠実さと責任感が強く、実務能力に優れています。安定を好み、着実な歩みを大切にする傾向があります。誠実さと信頼性が周囲から高く評価され、着実な努力が長期的な成功と安定につながります。",
-            "overall": ("中吉", "2026年は着実な成長の年。積み重ねた努力が安定した成果として現れます。段階的な進歩が確実な報酬につながり、責任ある立場での活動が期待され、周囲からの信頼が深まります。"),
-            "love": (3, "2026年は安定した関係を築く年です。誠実さと信頼が恋愛運を高めます。焦らずに着実に信頼を深めていきましょう。真面目で誠実な姿勢がパートナーの信頼を強めます。"),
-            "work": (4, "2026年は着実な努力が評価される年です。責任ある立場での活動が期待されます。積み重ねた努力が実を結び、誠実さと責任感が周囲からの信頼を深め、安定した成果につながります。"),
-            "money": (4, "2026年は着実な貯蓄と計画的な投資が金運を高める年です。安定した収入を基に、計画的に資産を増やしていきましょう。真面目で誠実な姿勢が経済的な安定をもたらし、長期的な視点で資産を築くことで、将来の金運が向上します。"),
-            "health": (3, "2026年は規則正しい生活リズムを保つことが健康運を高めます。無理をせず、着実に健康管理を続けることが大切です。適度な運動とバランスの取れた食事で、長期的な健康を維持しましょう。")
-        }
-    else:
-        # その他のLP番号用のデフォルトデータ
-        data = {
-            "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
-            "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
-            "love": (5, "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"),
-            "work": (4, "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"),
-            "money": (4, "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"),
-            "health": (3, "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。")
-        }
-        if lp % 2 == 0:
-            data["overall"] = ("中吉", "2026年は基盤を固める年。焦らず着実に進むことで、揺るぎない成果を手に入れます。")
+    data = {
+        "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
+        "overall": ("大吉", "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"),
+        "love": (5, "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"),
+        "work": (4, "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"),
+        "money": (4, "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"),
+        "health": (3, "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。"),
+        "interpersonal": (5, "人脈が広がる年です。新しいコミュニティに参加することで、人生を豊かにする出会いがあります。"),
+        "color": "ゴールド", "item": "手帳"
+    }
+    if lp % 2 == 0:
+        data["color"], data["overall"] = "シルバー", ("中吉", "2026年は基盤を固める年。焦らず着実に進むことで、揺るぎない成果を手に入れます。")
     return data
 
 def get_monthly_fortunes(lp):
-    # LP: 4の場合の月別運勢（画像に基づく）
-    if lp == 4:
-        return [
-            "1月: 着実な成長の月。積み重ねた努力が安定した成果として現れます。",
-            "2月: 安定した関係を築く月。誠実さと信頼が運気を高めます。",
-            "3月: 計画的な行動が重要な月。着実に進めていきましょう。",
-            "4月: 責任ある立場での活動が期待される月。真面目さと信頼性が評価されます。",
-            "5月: 変化に対応する月。柔軟な姿勢が運気を高めます。",
-            "6月: 安定した関係が深まる月。誠実さと信頼が絆を強めます。",
-            "7月: 内面の安定が重要な月。着実な成長が運気を高めます。",
-            "8月: 着実な努力が評価される月。責任ある立場での活動が期待されます。",
-            "9月: 完成と新たな始まりの月。これまでの努力が実を結びます。",
-            "10月: 計画的な行動が成果をもたらす月。着実に目標を達成していきましょう。",
-            "11月: 大きなプロジェクトの基盤を築く月。理想を実現するための準備が整います。",
-            "12月: 安定した成果を手に入れる月。誠実さと責任感が成功をもたらします。"
-        ]
-    else:
-        # その他のLP番号用のデフォルトメッセージ
-        return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
+    # ▼▼▼ 【修正】正しい日本語のメッセージを設定しました ▼▼▼
+    messages = [
+        "1月: 1月は、着実な成長の月です。努力を積み重ねることで、安定した成果を得られます。",
+        "2月: 2月は、安定した関係を築く月です。誠実さと信頼が、運気を高めます。",
+        "3月: 3月は、計画的な行動が重要となる月です。着実に物事を進めましょう。",
+        "4月: 4月は、責任ある立場での活躍が期待できる月です。真面目さと信頼性が評価されます。",
+        "5月: 5月は、変化に対応する月です。柔軟な姿勢が運気を高めます。",
+        "6月: 6月は、安定した関係が深まる月です。誠実さと信頼が、絆を強めます。",
+        "7月: 7月は、内面の安定が重要となる月です。着実な成長が運気を高めます。",
+        "8月: 8月は、着実な努力が認められる月です。責任ある立場での活躍が期待できます。",
+        "9月: 9月は、完成と新たな始まりの月です。これまでの努力が実を結びます。",
+        "10月: 10月は、計画的な行動が成果を生む月です。着実に目標を達成しましょう。",
+        "11月: 11月は、大きなプロジェクトの基盤を築く月です。理想を現実化する準備が整います。",
+        "12月: 12月は、安定した成果を手に入れる月です。誠実さと責任感が、成功をもたらします。"
+    ]
+    return messages
 
 # ==========================================
-# 5. GAS経由でのデータ保存（エラー表示なし）
+# 5. GAS経由でのデータ保存（修正版）
 # ==========================================
 def save_data_via_gas(action_type, name, year, month, day, lp):
-    # GAS URL（エラーが発生しても表示しない）
+    # ▼▼▼ URLを設定済み（xのもの） ▼▼▼
     gas_url = "https://script.google.com/macros/s/AKfycbx7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec"
 
     data = {
@@ -274,8 +243,8 @@ def save_data_via_gas(action_type, name, year, month, day, lp):
         req = urllib.request.Request(gas_url, data=json_data, headers={'Content-Type': 'application/json'})
         with urllib.request.urlopen(req) as res:
             pass # 送信成功
-    except Exception:
-        pass # エラーを表示しない
+    except Exception as e:
+        st.error(f"⚠️ 保存エラー: {e}")
 
 # ==========================================
 # 6. PDF生成
@@ -290,161 +259,21 @@ def create_pdf(name, y, m, d):
     width, height = A4
     font_name = register_font() or 'Helvetica'
     
-    # 1ページ目: 運勢鑑定書
-    c.setFillColor(HexColor("#FFFBF0"))
-    c.rect(0, 0, width, height, fill=1)
+    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
+    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 26); c.drawCentredString(width/2, height-60, "2026年 運勢鑑定書")
+    c.setFillColor(HexColor("#C0A060")); c.setFont(font_name, 22); c.drawCentredString(width/2, height-100, f"{name} 様")
+    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日 (LP: {lp})")
     
-    # タイトル
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 26)
-    c.drawCentredString(width/2, height-60, "2026年 運勢鑑定書")
+    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 14); c.drawString(50, height-180, "【あなたの本質】")
+    draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
     
-    # 名前
-    c.setFillColor(HexColor("#C0A060"))
-    c.setFont(font_name, 22)
-    c.drawCentredString(width/2, height-100, f"{name} 様")
-    
-    # 生年月日とライフパスナンバー
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日")
-    c.drawCentredString(width/2, height-150, f"ライフパスナンバー: {lp}")
-    
-    # あなたの本質
-    y_pos = height-200
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, "【あなたの本質】")
-    y_pos -= 25
-    c.setFillColor(HexColor("#333333"))
-    y_pos = draw_wrapped_text(c, data["personality"], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 総合運
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, "【総合運】")
-    y_pos -= 20
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, data["overall"][0])
-    y_pos -= 20
-    y_pos = draw_wrapped_text(c, data["overall"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 恋愛運
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, "【恋愛運】")
-    y_pos -= 20
-    stars = "★" * data["love"][0] + "☆" * (5 - data["love"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    y_pos = draw_wrapped_text(c, data["love"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 仕事運
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, "【仕事運】")
-    y_pos -= 20
-    stars = "★" * data["work"][0] + "☆" * (5 - data["work"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    y_pos = draw_wrapped_text(c, data["work"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 金運
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, "【金運】")
-    y_pos -= 20
-    stars = "★" * data["money"][0] + "☆" * (5 - data["money"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    y_pos = draw_wrapped_text(c, data["money"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 健康運
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, "【健康運】")
-    y_pos -= 20
-    stars = "★" * data["health"][0] + "☆" * (5 - data["health"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    y_pos = draw_wrapped_text(c, data["health"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 2ページ目: 月別運勢カレンダー
     c.showPage()
-    c.setFillColor(HexColor("#FFFBF0"))
-    c.rect(0, 0, width, height, fill=1)
+    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
+    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 20); c.drawCentredString(width/2, height-60, "月別運勢カレンダー")
     
-    # タイトル「2026年 月別運勢カレンダー」
-    title_text = "2026年 月別運勢カレンダー"
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 22)
-    # タイトルを中央に配置
-    title_y = height - 60
-    c.drawCentredString(width/2, title_y, title_text)
-    
-    # 月別運勢リスト
     y_pos = height-100
-    
-    # 月別運勢を1つずつ描画
-    for i, txt in enumerate(monthly):
-        # ページが足りない場合は改ページ
-        if y_pos < 50:
-            c.showPage()
-            c.setFillColor(HexColor("#FFFBF0"))
-            c.rect(0, 0, width, height, fill=1)
-            # 改ページ時もタイトルを再表示
-            c.setFillColor(HexColor("#C71585"))
-            c.setFont(font_name, 22)
-            c.drawCentredString(width/2, height-60, title_text)
-            y_pos = height - 100
-        
-        # 月別運勢を描画（色とフォントを設定）
-        c.setFillColor(HexColor("#333333"))
-        c.setFont(font_name, 12)
-        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20)
-        y_pos -= 10  # 月間の間隔を追加
-    
-    # 占いミザリーへの案内（フッターの前）
-    y_pos -= 30
-    if y_pos < 150:  # スペースが足りない場合は改ページ
-        c.showPage()
-        c.setFillColor(HexColor("#FFFBF0"))
-        c.rect(0, 0, width, height, fill=1)
-        y_pos = height - 100
-    
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 12)
-    y_pos = draw_wrapped_text(c, "さらにもっと深く知るには占いミザリーへ", 50, y_pos, width-100, font_name, 12, 20)
-    
-    y_pos -= 10
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 11)
-    c.drawCentredString(width/2, y_pos, "https://mizary.com/")
-    
-    y_pos -= 25
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 11)
-    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円〜")
-    
-    # フッター
-    y_pos -= 30
-    c.setFillColor(HexColor("#666666"))
-    c.setFont(font_name, 9)
-    c.drawCentredString(width/2, 30, "この鑑定書は数秘術に基づいて作成されました。")
+    for txt in monthly:
+        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 25) - 15
         
     c.save()
     buffer.seek(0)
@@ -491,27 +320,19 @@ if not is_paid:
     st.info("👋 まずは無料プレビューで、あなたの「数字」を知ってください。")
     
     with st.form("preview"):
-        # セッションステートから値を取得（既に入力済みの場合は自動反映）
-        name_pre = st.text_input("お名前", value=st.session_state.user_name if st.session_state.user_name else "")
+        name_pre = st.text_input("お名前")
         c1, c2, c3 = st.columns(3)
-        y_pre = c1.number_input("年", 1900, 2025, st.session_state.birth_year if st.session_state.birth_year else 2000)
-        m_pre = c2.number_input("月", 1, 12, st.session_state.birth_month if st.session_state.birth_month else 1)
-        d_pre = c3.number_input("日", 1, 31, st.session_state.birth_day if st.session_state.birth_day else 1)
+        y_pre = c1.number_input("年", 1900, 2025, 2000)
+        m_pre = c2.number_input("月", 1, 12, 1)
+        d_pre = c3.number_input("日", 1, 31, 1)
         
-        preview_submitted = st.form_submit_button("鑑定結果の一部を見る")
-        
-        if preview_submitted:
+        if st.form_submit_button("鑑定結果の一部を見る"):
             if name_pre:
-                # セッションステートに保存（完全版鑑定書フォームに自動反映される）
-                st.session_state.update({
-                    'user_name': name_pre,
-                    'birth_year': y_pre,
-                    'birth_month': m_pre,
-                    'birth_day': d_pre
-                })
-                
                 lp = calculate_life_path_number(y_pre, m_pre, d_pre)
                 preview_data = get_fortune_data(lp)
+                
+                # ▼ GAS経由でデータを保存（URL修正版）
+                save_data_via_gas("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
                 
                 # 興味を引く見出しを表示
                 st.markdown("---")
@@ -527,13 +348,12 @@ if not is_paid:
                 st.markdown(f"{preview_data['love'][1]}")
                 
                 st.markdown("---")
-                st.info("💡 入力した情報は完全版鑑定書フォームに自動的に反映されました。")
                 st.warning("🔒 詳しい結果（全運勢・月別カレンダー・ラッキーアイテムなど）をご覧になるには、完全版の購入が必要です。")
                 
                 # 完全版へのアンカーリンク
                 st.markdown("""
-                <div style="text-align: center; margin: 25px 0;">
-                    <a href="#完全版鑑定書" onclick="event.preventDefault(); document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'}); return false;" style="color: #e10080; text-decoration: underline; font-weight: bold; font-size: 1rem;">
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="javascript:void(0);" onclick="document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'});" style="color: #e10080; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; padding: 10px 20px; background-color: #fff0f5; border-radius: 25px; border: 2px solid #e10080;">
                         ↓ 完全版鑑定書を見る ↓
                     </a>
                 </div>
@@ -545,106 +365,52 @@ if not is_paid:
     # アンカー用のIDを追加
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
     st.markdown('<h2 style="white-space: nowrap;">💎 完全版鑑定書 <small style="font-size: 0.7em;">(PDF)</small></h2>', unsafe_allow_html=True)
-    
-    # 無料プレビューで入力した情報を自動的に反映（セッションステートから確実に読み込む）
     with st.form("pay"):
-        # セッションステートから値を取得（無料プレビューで入力した値が自動的に反映される）
-        name = st.text_input("お名前", value=st.session_state.user_name, key="p_name")
+        name = st.text_input("お名前", key="p_name")
         c1, c2, c3 = st.columns(3)
-        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year, key="p_y")
-        m = c2.number_input("月", 1, 12, st.session_state.birth_month, key="p_m")
-        d = c3.number_input("日", 1, 31, st.session_state.birth_day, key="p_d")
-        pay_submitted = st.form_submit_button("情報を保存して決済へ")
-        if pay_submitted:
-            # 完全版鑑定書フォームの入力内容をセッションステートに保存（発行フォームに自動反映される）
-            st.session_state.update({
-                'user_name': name, 
-                'birth_year': y, 
-                'birth_month': m, 
-                'birth_day': d
-            })
+        y = c1.number_input("年", 1900, 2025, 2000, key="p_y")
+        m = c2.number_input("月", 1, 12, 1, key="p_m")
+        d = c3.number_input("日", 1, 31, 1, key="p_d")
+        if st.form_submit_button("情報を保存して決済へ"):
+            st.session_state.update({'user_name': name, 'birth_year': y, 'birth_month': m, 'birth_day': d})
             st.success("✅ 保存しました。下のボタンから決済してください。")
             
-    # ▼▼▼ Stripeリンク（決済完了後は?checkout=successまたは?paid=trueでリダイレクト） ▼▼▼
-    # 注意: Stripeのダッシュボードで、決済完了後のリダイレクトURLに?checkout=successを追加してください
-    stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
-    st.link_button("👉 500円で発行する", stripe_url, type="primary", use_container_width=True)
+    # ▼▼▼ Stripeリンク ▼▼▼
+    st.link_button("👉 500円で発行する", "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v", type="primary", use_container_width=True)
 
 else:
     st.success("✅ ご購入ありがとうございます！")
-    
-    # 決済完了後、情報が揃っていれば自動的にPDFを生成
-    # セッションステートから情報を取得（デフォルト値付き）
-    name = st.session_state.get('user_name', '')
-    y = st.session_state.get('birth_year', 2000)
-    m = st.session_state.get('birth_month', 1)
-    d = st.session_state.get('birth_day', 1)
-    
-    # PDFがまだ生成されていない、かつ情報が揃っている場合は自動生成
-    if name and name.strip() and not st.session_state.get('pdf_data'):
-        with st.spinner("PDFを生成中..."):
+    with st.form("final"):
+        st.write("### 📄 発行フォーム")
+        name = st.text_input("お名前", value=st.session_state.user_name)
+        c1, c2, c3 = st.columns(3)
+        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year)
+        m = c2.number_input("月", 1, 12, st.session_state.birth_month)
+        d = c3.number_input("日", 1, 31, st.session_state.birth_day)
+        submitted = st.form_submit_button("✨ PDFを作成する", use_container_width=True)
+
+    if submitted and name:
+        with st.spinner("生成中..."):
             try:
                 pdf = create_pdf(name, y, m, d)
                 pdf_bytes = pdf.getvalue()
                 st.session_state.pdf_data = pdf_bytes
                 st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
+                
+                # ログ保存：購入完了
+                # ▼ GAS経由でデータを保存
+                save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
+                
+                st.success("完了しました！下のバーからダウンロードできます。")
             except Exception as e:
-                st.error(f"PDF生成エラー: {e}")
-                st.info("下のフォームから再度お試しください。")
-    
-    # PDFダウンロードボタンを表示
-    if st.session_state.get('pdf_data') and st.session_state.get('pdf_filename'):
-        st.success("完了しました！下のボタンからダウンロードできます。")
-        st.markdown("---")
-        st.download_button(
-            label="📥 PDFをダウンロード",
-            data=st.session_state.pdf_data,
-            file_name=st.session_state.pdf_filename,
-            mime="application/pdf",
-            use_container_width=True,
-            type="primary"
-        )
-    else:
-        # 情報が不足している場合はフォームを表示
-        st.info("📝 お名前と生年月日を入力してPDFを作成してください。")
-        with st.form("final"):
-            st.write("### 📄 発行フォーム")
-            # 完全版鑑定書フォームで入力した内容を自動反映
-            name_input = st.text_input("お名前", value=name, key="f_name")
-            c1, c2, c3 = st.columns(3)
-            y_input = c1.number_input("年", 1900, 2025, y, key="f_y")
-            m_input = c2.number_input("月", 1, 12, m, key="f_m")
-            d_input = c3.number_input("日", 1, 31, d, key="f_d")
-            submitted = st.form_submit_button("✨ PDFを作成する", use_container_width=True)
-
-        if submitted and name_input:
-            # セッションステートを更新
-            st.session_state.user_name = name_input
-            st.session_state.birth_year = y_input
-            st.session_state.birth_month = m_input
-            st.session_state.birth_day = d_input
-            
-            with st.spinner("生成中..."):
-                try:
-                    pdf = create_pdf(name_input, y_input, m_input, d_input)
-                    pdf_bytes = pdf.getvalue()
-                    st.session_state.pdf_data = pdf_bytes
-                    st.session_state.pdf_filename = f"運勢鑑定書_{name_input}.pdf"
-                    
-                    st.success("完了しました！下のボタンからダウンロードできます。")
-                    st.rerun()  # ページを再読み込みしてダウンロードボタンを表示
-                except Exception as e:
-                    st.error(f"エラー: {e}")
+                st.error(f"エラー: {e}")
 
 # ==========================================
-# 8. トップへ戻るリンク + サポート連絡先 + フッター（著作権表示）
+# 8. トップへ戻るリンク + フッター（著作権表示）
 # ==========================================
 st.markdown("""
     <div class="top-link">
         <a href="https://mizary.com/" target="_blank" rel="noopener noreferrer">トップへ戻る</a>
-    </div>
-    <div class="support-contact">
-        お問い合わせ: <a href="mailto:info@dspartners.jp">info@dspartners.jp</a>
     </div>
 """, unsafe_allow_html=True)
 
