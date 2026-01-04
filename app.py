@@ -396,8 +396,8 @@ def create_pdf(name, y, m, d):
             y_pos -= 15  # 月間の間隔を追加
     
     # 鑑定した占い師（12月の運勢の下）
-    y_pos -= 20
-    if y_pos < 200:  # スペースが足りない場合は改ページ
+    y_pos -= 40
+    if y_pos < 250:  # スペースが足りない場合は改ページ
         c.showPage()
         c.setFillColor(HexColor("#FFFBF0"))
         c.rect(0, 0, width, height, fill=1)
@@ -412,7 +412,7 @@ def create_pdf(name, y, m, d):
     c.linkURL("https://mizary.com/staff/mizary/", (text_x, y_pos - 2, text_x + text_width, y_pos + 12), relative=0)
     
     # 占いミザリーへの案内
-    y_pos -= 30
+    y_pos -= 35
     if y_pos < 200:  # スペースが足りない場合は改ページ
         c.showPage()
         c.setFillColor(HexColor("#FFFBF0"))
@@ -421,9 +421,9 @@ def create_pdf(name, y, m, d):
     
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 12)
-    y_pos = draw_wrapped_text(c, "さらにもっと深く知るには占いミザリーへ", 50, y_pos, width-100, font_name, 12, 20, HexColor("#C71585"))
+    c.drawCentredString(width/2, y_pos, "さらにもっと深く知るには占いミザリーへ")
     
-    y_pos -= 15
+    y_pos -= 25
     c.setFillColor(HexColor("#333333"))
     c.setFont(font_name, 11)
     c.drawCentredString(width/2, y_pos, "https://mizary.com/")
@@ -434,7 +434,9 @@ def create_pdf(name, y, m, d):
     c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円~")
     
     # フッター
-    y_pos = 50
+    y_pos -= 50
+    if y_pos < 80:  # フッターのスペースが足りない場合は調整
+        y_pos = 50
     c.setFillColor(HexColor("#666666"))
     c.setFont(font_name, 9)
     c.drawCentredString(width/2, y_pos, "この鑑定書は数秘術に基づいて作成されました。")
