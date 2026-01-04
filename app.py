@@ -319,7 +319,9 @@ if not is_paid:
         m_pre = c2.number_input("月", 1, 12, st.session_state.birth_month if st.session_state.birth_month else 1)
         d_pre = c3.number_input("日", 1, 31, st.session_state.birth_day if st.session_state.birth_day else 1)
         
-        if st.form_submit_button("鑑定結果の一部を見る"):
+        preview_submitted = st.form_submit_button("鑑定結果の一部を見る")
+        
+        if preview_submitted:
             if name_pre:
                 # セッションステートに保存（完全版鑑定書フォームに自動反映される）
                 st.session_state.update({
@@ -354,8 +356,8 @@ if not is_paid:
                 # 完全版へのアンカーリンク
                 st.markdown("""
                 <div style="text-align: center; margin: 25px 0;">
-                    <a href="javascript:void(0);" onclick="document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'});" style="color: #e10080; text-decoration: underline; font-weight: bold; font-size: 1rem;">
-                        完全版鑑定書を見る
+                    <a href="#完全版鑑定書" onclick="event.preventDefault(); document.querySelector('#完全版鑑定書').scrollIntoView({behavior: 'smooth'}); return false;" style="color: #e10080; text-decoration: underline; font-weight: bold; font-size: 1rem;">
+                        ↓ 完全版鑑定書を見る ↓
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
