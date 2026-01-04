@@ -6,7 +6,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import HexColor
 import os
 import urllib.request
-import urllib.parse  # ▼ 追加：GASへの送信に必要
+import urllib.parse
 from datetime import datetime
 import io
 import json
@@ -86,6 +86,21 @@ hide_st_style = """
     }
     .top-link a:hover {
         color: #c1006e;
+    }
+    /* ▼▼▼ サポート連絡先 ▼▼▼ */
+    .support-contact {
+        text-align: center;
+        margin: 20px 0;
+        padding: 15px 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .support-contact a {
+        color: #e10080;
+        text-decoration: none;
+    }
+    .support-contact a:hover {
+        text-decoration: underline;
     }
     
     /* ▼▼▼ フッター（著作権表示） ▼▼▼ */
@@ -213,12 +228,13 @@ def get_monthly_fortunes(lp):
     return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
-# 5. GAS経由でのデータ保存（一番簡単な保存方法）
+# 5. GAS経由でのデータ保存（修正版）
 # ==========================================
 def save_data_via_gas(action_type, name, year, month, day, lp):
-    # ▼▼▼ 手順1でコピーしたURLをここに貼り付け ▼▼▼
-    gas_url = "https://script.google.com/macros/s/AKfycby7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec"
-    # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+    # ▼▼▼ URLのタイプミス(y→x)を修正済み ▼▼▼
+    gas_url = "https://script.google.com/macros/s/AKfycbx7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec"
+    
+    # ⚠️ 保存を妨げていた if 文を削除しました
 
     data = {
         "action": action_type,
@@ -379,22 +395,22 @@ if not is_paid:
             st.session_state.update({'user_name': name, 'birth_year': y, 'birth_month': m, 'birth_day': d})
             st.success("✅ 保存しました。下のボタンから決済してください。")
             
-    # ▼▼▼ Stripeリンク ▼▼▼
-    st.link_button("👉 500円で発行する", "https://buy.stripe.com/28E4gzcga8yma9b1FJcfT1k", type="primary", use_container_width=True)
+    # ▼▼▼ Stripeリンク（修正済み） ▼▼▼
+    stripe_url = "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v"
+    st.link_button("👉 500円で発行する", stripe_url, type="primary", use_container_width=True)
 
 else:
     st.success("✅ ご購入ありがとうございます！")
-    with st.form("final"):
-        st.write("### 📄 発行フォーム")
-        name = st.text_input("お名前", value=st.session_state.user_name)
-        c1, c2, c3 = st.columns(3)
-        y = c1.number_input("年", 1900, 2025, st.session_state.birth_year)
-        m = c2.number_input("月", 1, 12, st.session_state.birth_month)
-        d = c3.number_input("日", 1, 31, st.session_state.birth_day)
-        submitted = st.form_submit_button("✨ PDFを作成する", use_container_width=True)
-
-    if submitted and name:
-        with st.spinner("生成中..."):
+    
+    # 決済完了後、情報が揃っていれば自動的にPDFを生成
+    name = st.session_state.user_name
+    y = st.session_state.birth_year
+    m = st.session_state.birth_month
+    d = st.session_state.birth_day
+    
+    # PDFがまだ生成されていない、または情報が揃っている場合は自動生成
+    if name and not st.session_state.pdf_data:
+        with st.spinner("PDFを生成中..."):
             try:
                 pdf = create_pdf(name, y, m, d)
                 pdf_bytes = pdf.getvalue()
@@ -404,17 +420,65 @@ else:
                 # ログ保存：購入完了
                 # ▼ GAS経由でデータを保存
                 save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
-                
-                st.success("完了しました！下のバーからダウンロードできます。")
             except Exception as e:
-                st.error(f"エラー: {e}")
+                st.error(f"PDF生成エラー: {e}")
+    
+    # PDFダウンロードボタンを表示
+    if st.session_state.pdf_data and st.session_state.pdf_filename:
+        st.success("完了しました！下のボタンからダウンロードできます。")
+        st.markdown("---")
+        st.download_button(
+            label="📥 PDFをダウンロード",
+            data=st.session_state.pdf_data,
+            file_name=st.session_state.pdf_filename,
+            mime="application/pdf",
+            use_container_width=True,
+            type="primary"
+        )
+    else:
+        # 情報が不足している場合はフォームを表示
+        st.info("📝 お名前と生年月日を入力してPDFを作成してください。")
+        with st.form("final"):
+            st.write("### 📄 発行フォーム")
+            name_input = st.text_input("お名前", value=st.session_state.user_name)
+            c1, c2, c3 = st.columns(3)
+            y_input = c1.number_input("年", 1900, 2025, st.session_state.birth_year)
+            m_input = c2.number_input("月", 1, 12, st.session_state.birth_month)
+            d_input = c3.number_input("日", 1, 31, st.session_state.birth_day)
+            submitted = st.form_submit_button("✨ PDFを作成する", use_container_width=True)
+
+        if submitted and name_input:
+            # セッションステートを更新
+            st.session_state.user_name = name_input
+            st.session_state.birth_year = y_input
+            st.session_state.birth_month = m_input
+            st.session_state.birth_day = d_input
+            
+            with st.spinner("生成中..."):
+                try:
+                    pdf = create_pdf(name_input, y_input, m_input, d_input)
+                    pdf_bytes = pdf.getvalue()
+                    st.session_state.pdf_data = pdf_bytes
+                    st.session_state.pdf_filename = f"運勢鑑定書_{name_input}.pdf"
+                    
+                    # ログ保存：購入完了
+                    # ▼ GAS経由でデータを保存
+                    save_data_via_gas("購入・発行", name_input, y_input, m_input, d_input, calculate_life_path_number(y_input, m_input, d_input))
+                    
+                    st.success("完了しました！下のボタンからダウンロードできます。")
+                    st.rerun()  # ページを再読み込みしてダウンロードボタンを表示
+                except Exception as e:
+                    st.error(f"エラー: {e}")
 
 # ==========================================
-# 8. トップへ戻るリンク + フッター（著作権表示）
+# 8. トップへ戻るリンク + サポート連絡先 + フッター（著作権表示）
 # ==========================================
 st.markdown("""
     <div class="top-link">
         <a href="https://mizary.com/" target="_blank" rel="noopener noreferrer">トップへ戻る</a>
+    </div>
+    <div class="support-contact">
+        お問い合わせ: <a href="mailto:info@dspartners.jp">info@dspartners.jp</a>
     </div>
 """, unsafe_allow_html=True)
 
