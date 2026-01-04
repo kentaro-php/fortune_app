@@ -90,22 +90,38 @@ hide_st_style = """
     .custom-footer {
         text-align: center;
         margin: 40px 0 20px 0;
-        padding: 20px 0;
+        padding: 30px 20px;
         border-top: 1px solid #e0e0e0;
         color: #666;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        line-height: 1.8;
+    }
+    .custom-footer > div {
+        margin-bottom: 15px;
+    }
+    .custom-footer > div:last-child {
+        margin-bottom: 0;
+    }
+    .custom-footer strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 0.95rem;
     }
     .custom-footer a {
         color: #666;
         text-decoration: none;
-        margin: 0 5px;
+        margin: 0 8px;
+        transition: color 0.3s ease;
     }
     .custom-footer a:hover {
         color: #e10080;
         text-decoration: underline;
     }
     .custom-footer .copyright {
-        margin-top: 10px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
         color: #999;
         font-size: 0.8rem;
     }
@@ -267,13 +283,52 @@ def create_pdf(name, y, m, d):
     c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 14); c.drawString(50, height-180, "【あなたの本質】")
     draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
     
+    # 2ページ目: 月別運勢カレンダー
     c.showPage()
-    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 20); c.drawCentredString(width/2, height-60, "月別運勢カレンダー")
+    c.setFillColor(HexColor("#FFFBF0"))
+    c.rect(0, 0, width, height, fill=1)
     
+    # タイトル「2026年 月別運勢カレンダー」
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 20)
+    c.drawCentredString(width/2, height-60, "2026年 月別運勢カレンダー")
+    
+    # 月別運勢リストを描画
     y_pos = height-100
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 12)
+    
     for txt in monthly:
-        y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 25) - 15
+        if txt and txt.strip():  # テキストが空でないことを確認
+            y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20, HexColor("#333333"))
+            y_pos -= 10  # 月間の間隔を追加
+    
+    # 占いミザリーへの案内
+    y_pos -= 30
+    if y_pos < 150:  # スペースが足りない場合は改ページ
+        c.showPage()
+        c.setFillColor(HexColor("#FFFBF0"))
+        c.rect(0, 0, width, height, fill=1)
+        y_pos = height - 100
+    
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 12)
+    y_pos = draw_wrapped_text(c, "さらにもっと深く知るには占いミザリーへ", 50, y_pos, width-100, font_name, 12, 20, HexColor("#C71585"))
+    
+    y_pos -= 10
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 11)
+    c.drawCentredString(width/2, y_pos, "https://mizary.com/")
+    
+    y_pos -= 25
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 11)
+    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円〜")
+    
+    # フッター
+    c.setFillColor(HexColor("#666666"))
+    c.setFont(font_name, 9)
+    c.drawCentredString(width/2, 30, "この鑑定書は数秘術に基づいて作成されました。")
         
     c.save()
     buffer.seek(0)
@@ -398,12 +453,30 @@ else:
                 st.session_state.pdf_filename = f"運勢鑑定書_{name}.pdf"
                 
                 # ログ保存：購入完了
-                # ▼ GAS経由でデータを保存
-                save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
+                # ▼ GAS経由でデータを保存（エラーが発生しても続行）
+                try:
+                    save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
+                except:
+                    pass  # 保存エラーは無視
                 
-                st.success("完了しました！下のバーからダウンロードできます。")
+                st.success("完了しました！下のボタンからダウンロードできます。")
+                st.rerun()  # ページを再読み込みしてダウンロードボタンを表示
             except Exception as e:
-                st.error(f"エラー: {e}")
+                st.error(f"PDF生成エラー: {e}")
+                import traceback
+                st.error(f"詳細: {traceback.format_exc()}")
+    
+    # PDFダウンロードボタンを表示
+    if st.session_state.get('pdf_data') and st.session_state.get('pdf_filename'):
+        st.markdown("---")
+        st.download_button(
+            label="📥 PDFをダウンロード",
+            data=st.session_state.pdf_data,
+            file_name=st.session_state.pdf_filename,
+            mime="application/pdf",
+            use_container_width=True,
+            type="primary"
+        )
 
 # ==========================================
 # 8. トップへ戻るリンク + フッター（著作権表示）
@@ -416,13 +489,17 @@ st.markdown("""
 
 st.markdown("""
     <div class="custom-footer">
-        <div style="margin-bottom: 15px;">
-            <strong>お問い合わせ</strong><br>
-            <a href="https://mizary.com/contact/" target="_blank" rel="noopener noreferrer">メール</a> | 
-            <a href="https://lin.ee/OKV7A8H" target="_blank" rel="noopener noreferrer">LINE</a>
+        <div>
+            <strong>お問い合わせ</strong>
+            <div>
+                <a href="https://mizary.com/contact/" target="_blank" rel="noopener noreferrer">メール</a>
+                <span style="margin: 0 8px;">|</span>
+                <a href="https://lin.ee/OKV7A8H" target="_blank" rel="noopener noreferrer">LINE</a>
+            </div>
         </div>
         <div>
-            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a> | 
+            <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a>
+            <span style="margin: 0 8px;">|</span>
             <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
         </div>
         <div class="copyright">© 2026 占いミザリー</div>
