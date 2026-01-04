@@ -256,13 +256,11 @@ def get_monthly_fortunes(lp):
         return [f"{i}月: 運勢メッセージ..." for i in range(1, 13)]
 
 # ==========================================
-# 5. GAS経由でのデータ保存（修正版）
+# 5. GAS経由でのデータ保存（エラー表示なし）
 # ==========================================
 def save_data_via_gas(action_type, name, year, month, day, lp):
-    # ▼▼▼ URLのタイプミス(y→x)を修正済み ▼▼▼
+    # GAS URL（エラーが発生しても表示しない）
     gas_url = "https://script.google.com/macros/s/AKfycbx7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec"
-    
-    # ⚠️ 保存を妨げていた if 文を削除しました
 
     data = {
         "action": action_type,
@@ -276,8 +274,8 @@ def save_data_via_gas(action_type, name, year, month, day, lp):
         req = urllib.request.Request(gas_url, data=json_data, headers={'Content-Type': 'application/json'})
         with urllib.request.urlopen(req) as res:
             pass # 送信成功
-    except Exception as e:
-        st.error(f"⚠️ 保存エラー: {e}")
+    except Exception:
+        pass # エラーを表示しない
 
 # ==========================================
 # 6. PDF生成
@@ -405,7 +403,30 @@ def create_pdf(name, y, m, d):
             y_pos = height - 50
         y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20) - 10
     
+    # 占いミザリーへの案内（フッターの前）
+    y_pos -= 30
+    if y_pos < 150:  # スペースが足りない場合は改ページ
+        c.showPage()
+        c.setFillColor(HexColor("#FFFBF0"))
+        c.rect(0, 0, width, height, fill=1)
+        y_pos = height - 100
+    
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 12)
+    y_pos = draw_wrapped_text(c, "さらにもっと深く知るには占いミザリーへ", 50, y_pos, width-100, font_name, 12, 20)
+    
+    y_pos -= 10
+    c.setFillColor(HexColor("#333333"))
+    c.setFont(font_name, 11)
+    c.drawCentredString(width/2, y_pos, "https://mizary.com/")
+    
+    y_pos -= 25
+    c.setFillColor(HexColor("#C71585"))
+    c.setFont(font_name, 11)
+    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円〜")
+    
     # フッター
+    y_pos -= 30
     c.setFillColor(HexColor("#666666"))
     c.setFont(font_name, 9)
     c.drawCentredString(width/2, 30, "この鑑定書は数秘術に基づいて作成されました。")
@@ -521,8 +542,15 @@ if not is_paid:
         y = c1.number_input("年", 1900, 2025, st.session_state.birth_year, key="p_y")
         m = c2.number_input("月", 1, 12, st.session_state.birth_month, key="p_m")
         d = c3.number_input("日", 1, 31, st.session_state.birth_day, key="p_d")
-        if st.form_submit_button("情報を保存して決済へ"):
-            st.session_state.update({'user_name': name, 'birth_year': y, 'birth_month': m, 'birth_day': d})
+        pay_submitted = st.form_submit_button("情報を保存して決済へ")
+        if pay_submitted:
+            # 完全版鑑定書フォームの入力内容をセッションステートに保存（発行フォームに自動反映される）
+            st.session_state.update({
+                'user_name': name, 
+                'birth_year': y, 
+                'birth_month': m, 
+                'birth_day': d
+            })
             st.success("✅ 保存しました。下のボタンから決済してください。")
             
     # ▼▼▼ Stripeリンク（修正済み） ▼▼▼
@@ -570,11 +598,12 @@ else:
         st.info("📝 お名前と生年月日を入力してPDFを作成してください。")
         with st.form("final"):
             st.write("### 📄 発行フォーム")
-            name_input = st.text_input("お名前", value=st.session_state.user_name)
+            # 完全版鑑定書フォームで入力した内容を自動反映
+            name_input = st.text_input("お名前", value=st.session_state.user_name, key="f_name")
             c1, c2, c3 = st.columns(3)
-            y_input = c1.number_input("年", 1900, 2025, st.session_state.birth_year)
-            m_input = c2.number_input("月", 1, 12, st.session_state.birth_month)
-            d_input = c3.number_input("日", 1, 31, st.session_state.birth_day)
+            y_input = c1.number_input("年", 1900, 2025, st.session_state.birth_year, key="f_y")
+            m_input = c2.number_input("月", 1, 12, st.session_state.birth_month, key="f_m")
+            d_input = c3.number_input("日", 1, 31, st.session_state.birth_day, key="f_d")
             submitted = st.form_submit_button("✨ PDFを作成する", use_container_width=True)
 
         if submitted and name_input:
