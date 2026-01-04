@@ -281,7 +281,7 @@ def create_pdf(name, y, m, d):
     c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"生年月日: {y}年{m}月{d}日 (LP: {lp})")
     
     c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 14); c.drawString(50, height-180, "【あなたの本質】")
-    draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
+    y_personality = draw_wrapped_text(c, data["personality"], 50, height-200, width-100, font_name, 11, 18)
     
     # 2ページ目: 月別運勢カレンダー
     c.showPage()
@@ -301,11 +301,11 @@ def create_pdf(name, y, m, d):
     for txt in monthly:
         if txt and txt.strip():  # テキストが空でないことを確認
             y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20, HexColor("#333333"))
-            y_pos -= 10  # 月間の間隔を追加
+            y_pos -= 15  # 月間の間隔を追加
     
     # 占いミザリーへの案内
-    y_pos -= 30
-    if y_pos < 150:  # スペースが足りない場合は改ページ
+    y_pos -= 40
+    if y_pos < 200:  # スペースが足りない場合は改ページ
         c.showPage()
         c.setFillColor(HexColor("#FFFBF0"))
         c.rect(0, 0, width, height, fill=1)
@@ -315,20 +315,21 @@ def create_pdf(name, y, m, d):
     c.setFont(font_name, 12)
     y_pos = draw_wrapped_text(c, "さらにもっと深く知るには占いミザリーへ", 50, y_pos, width-100, font_name, 12, 20, HexColor("#C71585"))
     
-    y_pos -= 10
+    y_pos -= 15
     c.setFillColor(HexColor("#333333"))
     c.setFont(font_name, 11)
     c.drawCentredString(width/2, y_pos, "https://mizary.com/")
     
-    y_pos -= 25
+    y_pos -= 30
     c.setFillColor(HexColor("#C71585"))
     c.setFont(font_name, 11)
-    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円〜")
+    c.drawCentredString(width/2, y_pos, "LINE予約で20分2,980円～")
     
     # フッター
+    y_pos = 50
     c.setFillColor(HexColor("#666666"))
     c.setFont(font_name, 9)
-    c.drawCentredString(width/2, 30, "この鑑定書は数秘術に基づいて作成されました。")
+    c.drawCentredString(width/2, y_pos, "この鑑定書は数秘術に基づいて作成されました。")
         
     c.save()
     buffer.seek(0)
@@ -499,8 +500,6 @@ st.markdown("""
         </div>
         <div>
             <a href="https://mizary.com/tokusyouhou/" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記</a>
-            <span style="margin: 0 8px;">|</span>
-            <a href="https://mizary.com/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
         </div>
         <div class="copyright">© 2026 占いミザリー</div>
     </div>
