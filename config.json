@@ -1,0 +1,143 @@
+{
+  "app_title": "2026年運勢鑑定書 | 占いミザリー",
+  "app_subtitle": "✨ 数秘術で紐解くあなたの未来 ✨",
+  "app_main_title": "2026年 運勢鑑定書",
+  "app_description": "🔮 2026年、あなたを待つ運命とは？",
+  "app_intro_questions": [
+    "「来年はどんな年になる？」",
+    "「恋愛や仕事の転機はいつ？」"
+  ],
+  "app_intro_text": "あなたの生年月日から導き出される特別な数字で、<strong>2026年の運勢バイオリズム</strong>を読み解きましょう。",
+  "app_icon": "🔮",
+  "stripe_checkout_url": "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v",
+  "stripe_price_id": "price_1234567890abcdef",
+  "price": 500,
+  "price_display": "500円",
+  "fortune_year": "2026年",
+  "fortune_year_num": 2026,
+  "pdf_title": "2026年 運勢鑑定書",
+  "pdf_monthly_title": "2026年 月別運勢カレンダー",
+  "fortune_teller_name": "MIZARY",
+  "fortune_teller_url": "https://mizary.com/staff/mizary/",
+  "fortune_site_url": "https://mizary.com/",
+  "fortune_site_name": "占いミザリー",
+  "line_reservation_text": "LINE予約で20分2,980円~",
+  "contact_email_url": "https://mizary.com/contact/",
+  "contact_line_url": "https://lin.ee/OKV7A8H",
+  "legal_url": "https://mizary.com/tokusyouhou/",
+  "copyright_text": "© 2026 占いミザリー",
+  "life_path_descriptions": {
+    "4": {
+      "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
+      "lp_description": "誠実で責任感が強く、実務的な能力に優れている傾向があります。安定を好み、着実に物事を進める力をお持ちのようです。その真面目さと信頼性は、周囲から高く評価されていることでしょう。着実な努力を積み重ねることで、長期的な成功と安定を手に入れられる可能性が高いでしょう。",
+      "overall": {
+        "rank": "中吉",
+        "description": "2026年は、着実な成長の年となりそうです。努力を積み重ねることで、安定した成果を得られる傾向があります。焦らず、一歩ずつ進まれることで、確かな実りが待っていることでしょう。責任ある立場での活躍が期待でき、周囲からの信頼も深まっていくことでしょう。"
+      },
+      "love": {
+        "stars": 3,
+        "description": "2026年は、安定した関係を築く年となる傾向があります。誠実さと信頼が、あなたの恋愛運を高めていく可能性が高いでしょう。焦らず、着実に信頼関係を深めていかれると良いでしょう。真面目で誠実なあなたの姿勢が、パートナーからの信頼を深めていくことでしょう。"
+      },
+      "work": {
+        "stars": 4,
+        "description": "2026年は、着実な努力が認められる年となりそうです。責任ある立場での活躍が期待できる傾向があります。これまでに積み重ねてきた努力が、実を結んでいくことでしょう。誠実さと責任感が、周囲からの信頼を深めていくことでしょう。安定した成果を手に入れられる可能性が高いでしょう。"
+      },
+      "money": {
+        "stars": 4,
+        "description": "2026年は、着実な貯蓄と計画的な投資が金運を高める年となる傾向があります。安定した収入を基盤に、計画的に資産を増やしていかれると良いでしょう。真面目で誠実な姿勢が、経済的な安定をもたらしていくことでしょう。長期的な視点で資産を築いていくことで、将来の金運が高まっていくことでしょう。"
+      },
+      "health": {
+        "stars": 3,
+        "description": "2026年は、規則正しい生活習慣が健康運を高める年となる傾向があります。適度な運動とバランスの取れた食事を心がけることで、体調を良好に保てるでしょう。無理をせず、着実に健康管理を続けていくことが大切です。"
+      },
+      "color": "シルバー",
+      "item": "手帳"
+    },
+    "default": {
+      "personality": "独自の感性と才能を持ち、周囲に新しい風を吹き込む力を持っています。",
+      "lp_description": "あなたは独自の才能と魅力を持っています。2026年は、その才能を活かして新しいステージへと進む準備が整います。",
+      "overall": {
+        "rank": "大吉",
+        "description": "2026年は飛躍の年。これまでの努力が実を結び、新しいステージへと進む準備が整います。"
+      },
+      "love": {
+        "stars": 5,
+        "description": "素晴らしい出会いが期待できる年。パートナーとの絆も深まり、穏やかな愛に包まれるでしょう。"
+      },
+      "work": {
+        "stars": 4,
+        "description": "リーダーシップを発揮する場面が増えそうです。自信を持って決断することで信頼を得られます。"
+      },
+      "money": {
+        "stars": 4,
+        "description": "安定した金運です。自己投資にお金を使うことで、将来的なリターンが大きくなるでしょう。"
+      },
+      "health": {
+        "stars": 3,
+        "description": "忙しさから疲れが溜まりやすい時期。適度な休息とバランスの取れた食事を心がけてください。"
+      },
+      "color": "ゴールド",
+      "item": "手帳"
+    }
+  },
+  "monthly_fortunes": [
+    "1月: 着実な成長の月です。努力を積み重ねることで、安定した成果を得られます。",
+    "2月: 安定した関係を築く月です。誠実さと信頼が、運気を高めます。",
+    "3月: 計画的な行動が重要となる月です。着実に物事を進めましょう。",
+    "4月: 責任ある立場での活躍が期待できる月です。真面目さと信頼性が評価されます。",
+    "5月: 変化に対応する月です。柔軟な姿勢が運気を高めます。",
+    "6月: 安定した関係が深まる月です。誠実さと信頼が、絆を強めます。",
+    "7月: 内面の安定が重要となる月です。着実な成長が運気を高めます。",
+    "8月: 着実な努力が認められる月です。責任ある立場での活躍が期待できます。",
+    "9月: 完成と新たな始まりの月です。これまでの努力が実を結びます。",
+    "10月: 計画的な行動が成果を生む月です。着実に目標を達成しましょう。",
+    "11月: 大きなプロジェクトの基盤を築く月です。理想を現実化する準備が整います。",
+    "12月: 安定した成果を手に入れる月です。誠実さと責任感が、成功をもたらします。"
+  ],
+  "gas_url": "https://script.google.com/macros/s/AKfycbx7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec",
+  "ui": {
+    "preview_info_message": "👋 まずは無料プレビューで、あなたの「数字」を知ってください。",
+    "preview_button": "鑑定結果の一部を見る",
+    "preview_success_title_template": "{name} 様の{year}運勢",
+    "preview_success_subtitle_template": "✨ あなたの{year}はこんな年に！",
+    "preview_section_title": "💫 気になる運勢の一部",
+    "preview_warning": "🔒 詳しい結果（全運勢・月別カレンダー・ラッキーアイテムなど）をご覧になるには、完全版の購入が必要です。",
+    "preview_link_text": "↓ 完全版鑑定書を見る ↓",
+    "name_required_error": "お名前を入力してください",
+    "form_labels": {
+      "name": "お名前",
+      "year": "年",
+      "month": "月",
+      "day": "日"
+    },
+    "save_button": "情報を保存して決済へ",
+    "save_success": "✅ 保存しました。下のボタンから決済してください。",
+    "purchase_success": "✅ ご購入ありがとうございます！",
+    "pdf_form_title": "📄 発行フォーム",
+    "pdf_create_button": "✨ PDFを作成する",
+    "pdf_download_button": "📥 PDFをダウンロード",
+    "pdf_generation_success": "完了しました！下のボタンからダウンロードできます。",
+    "pdf_filename_template": "運勢鑑定書_{name}.pdf",
+    "full_version_title": "💎 完全版鑑定書",
+    "full_version_subtitle": "(PDF)"
+  },
+  "pdf": {
+    "sections": {
+      "overall": "【総合運】",
+      "love": "【恋愛運】",
+      "work": "【仕事運】",
+      "money": "【金運】",
+      "health": "【健康運】",
+      "lucky": "【ラッキーカラー・アイテム】"
+    },
+    "labels": {
+      "birth_date": "生年月日:",
+      "life_path_number": "ライフパスナンバー:",
+      "fortune_teller_prefix": "鑑定した占い師",
+      "disclaimer": "この鑑定書は数秘術に基づいて作成されました。",
+      "learn_more_prefix": "さらにもっと深く知るには",
+      "learn_more_suffix": "へ"
+    },
+    "name_suffix": "様"
+  }
+}

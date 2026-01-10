@@ -1,0 +1,153 @@
+{
+  "app_title": "2月限定｜バレンタイン緊急攻略・恋の『勝算』診断",
+  "app_subtitle": "💘 データと星回りが導く、戦略的恋愛アドバイス",
+  "app_main_title": "2月限定｜バレンタイン緊急攻略",
+  "app_description": "💘 人間は嘘をつきますが、データと星回りは嘘をつきません。あなたの恋が『成就』するか『玉砕』するか。感情論抜きの戦略的アドバイスを提示します。",
+  "app_intro_questions": [
+    "「この恋、本当に成就する？」",
+    "「バレンタイン、どう動けばいい？」",
+    "「今の関係、このままで大丈夫？」"
+  ],
+  "app_intro_text": "生年月日から導き出される数字と星回りで、<strong>2月のバレンタイン戦略</strong>を徹底分析。感情論ではなく、データに基づいた『勝算』を提示します。",
+  "app_icon": "💘",
+  "mode": "love",
+  "stripe_checkout_url": "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v",
+  "stripe_price_id": "price_REPLACE_THIS_BASIC",
+  "stripe_product_ids": {
+    "_comment": "⚠️ 以下を実際のStripe価格IDに置き換えてください",
+    "basic": "price_REPLACE_THIS_BASIC",
+    "pro": "price_REPLACE_THIS_PRO"
+  },
+  "price": 500,
+  "price_display": "500円",
+  "fortune_year": "2月",
+  "fortune_year_num": 2026,
+  "pdf_title": "2月限定｜バレンタイン緊急攻略・恋の『勝算』診断書",
+  "pdf_monthly_title": "2月 バレンタイン戦略カレンダー",
+  "fortune_teller_name": "MIZARY",
+  "fortune_teller_url": "https://mizary.com/staff/mizary/",
+  "fortune_site_url": "https://mizary.com/",
+  "fortune_site_name": "占いミザリー",
+  "line_reservation_text": "LINE予約で20分2,980円~",
+  "contact_email_url": "https://mizary.com/contact/",
+  "contact_email": "info@dspartners.jp",
+  "contact_line_url": "https://lin.ee/OKV7A8H",
+  "legal_url": "https://mizary.com/tokusyouhou/",
+  "copyright_text": "© 2026 占いミザリー",
+  "input_label": "あなたのお名前（ニックネーム可）",
+  "products": {
+    "basic": {
+      "name": "梅コース",
+      "price": 500,
+      "price_display": "500円",
+      "description": "基本的な脈あり度診断",
+      "_comment": "⚠️ 以下を実際のStripe価格IDに置き換えてください",
+      "stripe_price_id": "price_REPLACE_THIS_BASIC"
+    },
+    "pro": {
+      "name": "竹コース",
+      "price": 1000,
+      "price_display": "1000円",
+      "description": "詳細な戦略アドバイス付き",
+      "_comment": "⚠️ 以下を実際のStripe価格IDに置き換えてください",
+      "stripe_price_id": "price_REPLACE_THIS_PRO"
+    }
+  },
+  "results": {
+    "basic": [
+      "脈あり度: 85% - 今こそ攻める時です。相手の反応を見ながら、積極的にアプローチを。バレンタイン前のこの時期が勝負の分岐点です。",
+      "脈あり度: 40% - まだ機は熟していません。撤退も視野に。無理なアプローチは逆効果。まずは距離を置き、相手の反応を待つ戦略が吉。",
+      "脈あり度: 120% - 相手もあなたを待っています。このタイミングを逃さないで。バレンタインは絶好のチャンス。迷わず行動に移してください。",
+      "脈あり度: 65% - 慎重に進める必要があります。焦らず、相手のペースに合わせながら関係を深めていきましょう。",
+      "脈あり度: 95% - ほぼ確実に成就する可能性が高いです。ただし、油断は禁物。最後まで気を抜かず、誠実な姿勢を保ちましょう。"
+    ],
+    "pro": [
+      "【Xデー】2月10日。【作戦】あえて深夜に短い連絡を入れてください。返信速度が答えです。即座に返信があれば脈あり確定。既読スルーが続く場合は撤退を検討。",
+      "【Xデー】2月14日当日。【作戦】重いプレゼントはNG。『義理チョコ風の本命』で相手を試すのが吉。手作り感を残しつつ、さりげなく本命感を演出してください。",
+      "【Xデー】2月7日。【作戦】まずは既読スルーして相手の焦りを誘発させる『引き』の戦略が必要です。3日間連絡を控え、相手からの連絡を待ちましょう。",
+      "【Xデー】2月12日。【作戦】グループでのイベントに誘い、相手の反応を観察。あなたへの態度と他の人への態度の違いが、本気度を表します。",
+      "【Xデー】2月8日。【作戦】SNSでさりげなく『バレンタインどうしよう』と投稿。相手からのリアクションやコメントで、関心度を測れます。",
+      "【Xデー】2月15日。【作戦】ホワイトデーの返答を待つ。相手からの返答の内容とタイミングで、今後の関係性が決まります。"
+    ]
+  },
+  "life_path_descriptions": {
+    "default": {
+      "personality": "戦略的思考を持ち、恋愛でも計画的に行動するタイプです。",
+      "lp_description": "あなたはデータと戦略を重視するタイプです。2月のバレンタインは、感情論ではなく、冷静な分析と戦略的なアプローチが成功の鍵となります。",
+      "overall": {
+        "rank": "戦略的中吉",
+        "description": "2月は、あなたの恋愛に戦略的な転機が訪れる月です。データと星回りが示す通り、適切なタイミングと方法でアプローチすれば、関係を次のステージへと進めることができます。"
+      },
+      "love": {
+        "stars": 4,
+        "description": "バレンタインシーズンは、あなたの恋愛にとって重要な転機となります。戦略的なアプローチが成功の鍵。感情に流されず、データに基づいた判断を心がけましょう。"
+      },
+      "work": {
+        "stars": 3,
+        "description": "仕事と恋愛のバランスを取ることが重要です。恋愛に集中しすぎず、仕事も疎かにしない姿勢が、あなたの魅力を高めます。"
+      },
+      "money": {
+        "stars": 3,
+        "description": "バレンタイン関連の出費は計画的に。高価なプレゼントよりも、相手の心に響く戦略的なアプローチが重要です。"
+      },
+      "health": {
+        "stars": 3,
+        "description": "恋愛のストレスから、体調を崩しやすい時期です。適度な休息を心がけ、無理をしすぎないようにしましょう。"
+      },
+      "color": "ピンク",
+      "item": "戦略ノート"
+    }
+  },
+  "monthly_fortunes": [
+    "2月1日〜7日: 情報収集期間。相手の反応を冷静に観察し、次のステップを計画しましょう。",
+    "2月8日〜14日: バレンタインウィーク。戦略的なアプローチが成功の鍵。データに基づいた判断を。",
+    "2月15日〜21日: 結果の検証期間。相手の反応を分析し、今後の戦略を調整しましょう。",
+    "2月22日〜28日: 関係の再構築期間。必要に応じて戦略を見直し、次のステップを準備します。"
+  ],
+  "gas_url": "https://script.google.com/macros/s/AKfycbx7er_1XN-G1KmGFvmAo8zHKNfA0_nKYPr5m6SL4pexfoz8M7JgovdtQ6VYxopjSj5C/exec",
+  "ui": {
+    "preview_info_message": "💘 まずは無料プレビューで、あなたの恋の『勝算』を知ってください。",
+    "preview_button": "診断結果の一部を見る",
+    "preview_success_title_template": "{name} 様の2月バレンタイン戦略",
+    "preview_success_subtitle_template": "✨ あなたの恋の勝算は",
+    "preview_section_title": "💘 気になる診断結果",
+    "preview_warning": "🔒 詳しい戦略アドバイス（Xデー・具体的な作戦・タイミング分析など）をご覧になるには、完全版の購入が必要です。",
+    "preview_link_text": "↓ 完全版診断書を見る ↓",
+    "name_required_error": "お名前を入力してください",
+    "form_labels": {
+      "name": "あなたのお名前（ニックネーム可）",
+      "year": "年",
+      "month": "月",
+      "day": "日"
+    },
+    "save_button": "情報を保存して決済へ",
+    "save_success": "✅ 保存しました。下のボタンから決済してください。",
+    "purchase_success": "✅ ご購入ありがとうございます！",
+    "pdf_form_title": "📄 発行フォーム",
+    "pdf_create_button": "✨ PDFを作成する",
+    "pdf_download_button": "📥 PDFをダウンロード",
+    "pdf_generation_success": "完了しました！下のボタンからダウンロードできます。",
+    "pdf_filename_template": "バレンタイン緊急攻略診断書_{name}.pdf",
+    "full_version_title": "💎 完全版診断書",
+    "full_version_subtitle": "(PDF)"
+  },
+  "pdf": {
+    "sections": {
+      "overall": "【総合戦略】",
+      "love": "【恋愛勝算】",
+      "work": "【仕事運】",
+      "money": "【金運】",
+      "health": "【健康運】",
+      "lucky": "【ラッキーカラー・アイテム】"
+    },
+    "labels": {
+      "birth_date": "生年月日:",
+      "life_path_number": "ライフパスナンバー:",
+      "fortune_teller_prefix": "診断した占い師",
+      "disclaimer": "この診断書は数秘術とデータ分析に基づいて作成されました。",
+      "learn_more_prefix": "さらにもっと深く知るには",
+      "learn_more_suffix": "へ"
+    },
+    "name_suffix": "様"
+  }
+}
