@@ -12,7 +12,7 @@
   "app_icon": "💘",
   "mode": "love",
   "stripe_checkout_url": "https://buy.stripe.com/8x2fZhfsm01Q813847cfT1v",
-  "stripe_price_id": "price_REPLACE_THIS_BASIC",
+  "stripe_price_id": "price_1SoYglFPzHf9rk9y8I1INC55",
   "stripe_product_ids": {
     "_comment": "⚠️ 以下を実際のStripe価格IDに置き換えてください",
     "basic": "price_REPLACE_THIS_BASIC",
