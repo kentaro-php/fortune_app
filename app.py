@@ -372,7 +372,27 @@ st.markdown(f"""
 # query_paramsは既に上で定義済み
 is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success" or query_params.get("payment_status") == "success"
 
-if 'user_name' not in st.session_state: st.session_state.update({k: v for k, v in zip(['user_name','birth_year','birth_month','birth_day'], ['', 2000, 1, 1])})
+# セッションステートの初期化（URLパラメータから情報を取得してセッションステートに保存）
+if 'user_name' not in st.session_state:
+    # URLパラメータから情報を取得（決済成功後のリダイレクト時に使用）
+    url_name = query_params.get("name", "")
+    url_year = query_params.get("year", "")
+    url_month = query_params.get("month", "")
+    url_day = query_params.get("day", "")
+    
+    # URLパラメータがあればそれを使用、なければデフォルト値
+    if url_name:
+        try:
+            st.session_state.update({
+                'user_name': url_name,
+                'birth_year': int(url_year) if url_year else 2000,
+                'birth_month': int(url_month) if url_month else 1,
+                'birth_day': int(url_day) if url_day else 1
+            })
+        except:
+            st.session_state.update({'user_name': url_name, 'birth_year': 2000, 'birth_month': 1, 'birth_day': 1})
+    else:
+        st.session_state.update({'user_name': '', 'birth_year': 2000, 'birth_month': 1, 'birth_day': 1})
 
 if not is_paid:
     # ▼▼▼ 興味を引くコンテンツセクション（設定ファイルから取得）▼▼▼
@@ -545,20 +565,61 @@ else:
     
     st.success(ui_config.get("purchase_success", "✅ ご購入ありがとうございます！"))
     
-    # フォームを表示して鑑定を実行
-    with st.form("final"):
-        st.write(f"### {ui_config.get('pdf_form_title', '📄 発行フォーム')}")
-        name = st.text_input(form_labels.get("name", "お名前"), value=st.session_state.user_name, key="final_name")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            y = st.number_input(form_labels.get("year", "年"), 1900, 2025, st.session_state.birth_year, key="final_year")
-        with col2:
-            m = st.number_input(form_labels.get("month", "月"), 1, 12, st.session_state.birth_month, key="final_month")
-        with col3:
-            d = st.number_input(form_labels.get("day", "日"), 1, 31, st.session_state.birth_day, key="final_day")
-        submitted = st.form_submit_button(ui_config.get("pdf_create_button", "✨ 鑑定結果を表示する"), use_container_width=True)
+    # URLパラメータから情報を取得してセッションステートに保存（決済成功後のリダイレクト時に使用）
+    url_name = query_params.get("name", "")
+    url_year = query_params.get("year", "")
+    url_month = query_params.get("month", "")
+    url_day = query_params.get("day", "")
+    
+    # URLパラメータがあればそれを使用してセッションステートを更新
+    if url_name and (not st.session_state.get('user_name') or st.session_state.user_name == ''):
+        try:
+            st.session_state.update({
+                'user_name': url_name,
+                'birth_year': int(url_year) if url_year else st.session_state.birth_year,
+                'birth_month': int(url_month) if url_month else st.session_state.birth_month,
+                'birth_day': int(url_day) if url_day else st.session_state.birth_day
+            })
+        except:
+            pass
+    
+    # フォームの初期値：セッションステートから取得（空でない場合）
+    form_name = st.session_state.user_name if st.session_state.get('user_name') else ""
+    form_year = st.session_state.birth_year if st.session_state.get('birth_year') else 2000
+    form_month = st.session_state.birth_month if st.session_state.get('birth_month') else 1
+    form_day = st.session_state.birth_day if st.session_state.get('birth_day') else 1
+    
+    # セッションステートに名前と生年月日が既にある場合は、フォームをスキップして自動的に処理
+    auto_process = form_name and st.session_state.get('birth_year') and st.session_state.get('birth_month') and st.session_state.get('birth_day')
+    
+    # 既に結果が表示されている場合は、自動処理をスキップ
+    if st.session_state.get('fortune_result'):
+        name = None  # 結果が既に表示されている場合は処理をスキップ
+    elif auto_process:
+        # 自動処理が可能な場合、自動的に鑑定を実行
+        name = form_name
+        y = form_year
+        m = form_month
+        d = form_day
+    else:
+        # フォームを表示して鑑定を実行
+        with st.form("final"):
+            st.write(f"### {ui_config.get('pdf_form_title', '📄 発行フォーム')}")
+            name = st.text_input(form_labels.get("name", "お名前"), value=form_name, key="final_name")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                y = st.number_input(form_labels.get("year", "年"), 1900, 2025, form_year, key="final_year")
+            with col2:
+                m = st.number_input(form_labels.get("month", "月"), 1, 12, form_month, key="final_month")
+            with col3:
+                d = st.number_input(form_labels.get("day", "日"), 1, 31, form_day, key="final_day")
+            submitted = st.form_submit_button(ui_config.get("pdf_create_button", "✨ 鑑定結果を表示する"), use_container_width=True)
+        
+        if not submitted or not name:
+            # フォームが送信されていない、または名前が入力されていない場合は処理をスキップ
+            name = None
 
-    if submitted and name:
+    if name:
         with st.spinner("鑑定中..."):
             try:
                 # モード判定
@@ -780,10 +841,12 @@ else:
         
         st.success("鑑定完了です！この画面をスクリーンショットして保存してください。")
         
-        # テキスト保存ボタン（バックアップ用）
+        # テキスト保存ボタン（バックアップ用）- UTF-8で文字化けを防止
+        # BOM付きUTF-8でエンコード（Windowsのメモ帳などで正しく表示される）
+        text_data_utf8 = full_response.encode('utf-8-sig')
         st.download_button(
             label="📝 バックアップ用テキスト保存",
-            data=full_response,
+            data=text_data_utf8,
             file_name="uranai_result.txt",
             mime="text/plain"
         )
