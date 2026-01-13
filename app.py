@@ -673,6 +673,51 @@ else:
                 font-size: 14px;
                 color: #888;
             }
+            /* LINE登録カード */
+            .line-card {
+                background: linear-gradient(135deg, #06C755 0%, #00B04F 100%);
+                border: 2px solid #06C755;
+                border-radius: 15px;
+                padding: 24px;
+                box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
+                margin: 30px 0 20px 0;
+                text-align: center;
+                color: white;
+            }
+            .line-card-title {
+                font-size: 22px;
+                font-weight: bold;
+                margin-bottom: 12px;
+                color: white;
+            }
+            .line-card-text {
+                font-size: 16px;
+                line-height: 1.8;
+                margin-bottom: 16px;
+                color: white;
+            }
+            .line-card-price {
+                font-size: 20px;
+                font-weight: bold;
+                margin: 12px 0;
+                color: #FFD700;
+            }
+            .line-button {
+                display: inline-block;
+                background-color: white;
+                color: #06C755;
+                padding: 14px 32px;
+                border-radius: 25px;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 18px;
+                margin-top: 12px;
+                transition: transform 0.2s;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            .line-button:hover {
+                transform: scale(1.05);
+            }
             /* スマホ対応 */
             @media (max-width: 600px) {
                 .fortune-card {
@@ -685,6 +730,22 @@ else:
                 .fortune-content {
                     font-size: 17px;
                     line-height: 1.9;
+                }
+                .line-card {
+                    padding: 20px;
+                }
+                .line-card-title {
+                    font-size: 20px;
+                }
+                .line-card-text {
+                    font-size: 15px;
+                }
+                .line-card-price {
+                    font-size: 18px;
+                }
+                .line-button {
+                    padding: 12px 24px;
+                    font-size: 16px;
                 }
             }
         </style>
@@ -713,6 +774,21 @@ else:
             file_name="uranai_result.txt",
             mime="text/plain"
         )
+        
+        # LINE登録への導線
+        st.markdown("""
+        <div class="line-card">
+            <div class="line-card-title">💬 もっと詳しく知りたい方はLINE登録</div>
+            <div class="line-card-text">
+                より詳しい鑑定や、個別の相談をご希望の方は<br>
+                公式LINEからお気軽にお問い合わせください
+            </div>
+            <div class="line-card-price">✨ LINE予約で20分2,980円から ✨</div>
+            <a href="https://lin.ee/2aPNobM" target="_blank" rel="noopener noreferrer" class="line-button">
+                📱 公式LINEを友だち追加
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ==========================================
 # 8. トップへ戻るリンク + フッター（著作権表示）
