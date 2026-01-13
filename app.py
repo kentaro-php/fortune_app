@@ -433,6 +433,20 @@ if not is_paid:
                     # 恋愛攻略モード：resultsからランダム選択
                     diagnosis_result = get_love_diagnosis_result(name_pre, y_pre, m_pre, d_pre, "basic")
                     
+                    # プレビュー用：診断結果の一部のみ表示（最初の3セクションまで）
+                    preview_result = diagnosis_result.split("\n\n")
+                    # 脈あり度、総合診断、相手の心理状態まで表示
+                    preview_sections = []
+                    for section in preview_result:
+                        preview_sections.append(section)
+                        # 「【2月の戦略アドバイス】」が見つかったらそこで終了
+                        if "【2月の戦略アドバイス】" in section or "【注意点】" in section:
+                            break
+                    preview_text = "\n\n".join(preview_sections)
+                    # 最後に「...」を追加して続きがあることを示す
+                    if len(preview_result) > len(preview_sections):
+                        preview_text += "\n\n..."
+                    
                     # ▼ GAS経由でデータを保存
                     save_data_via_gas("無料プレビュー", name_pre, y_pre, m_pre, d_pre, "love_mode")
                     
@@ -444,7 +458,7 @@ if not is_paid:
                     st.markdown(f"### {preview_title_template.format(name=name_pre, year=fortune_year)}")
                     
                     st.markdown(f"#### {ui_config.get('preview_section_title', '💘 気になる診断結果')}")
-                    st.markdown(f"**{diagnosis_result}**")
+                    st.markdown(f"**{preview_text}**")
                     
                     st.markdown("---")
                     st.warning(ui_config.get("preview_warning", "🔒 詳しい戦略アドバイス（Xデー・具体的な作戦・タイミング分析など）をご覧になるには、完全版の購入が必要です。"))
@@ -501,7 +515,7 @@ if not is_paid:
     st.markdown("---")
     # アンカー用のIDを追加
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
-    full_version_title = ui_config.get("full_version_title", "💎 完全版鑑定書")
+    full_version_title = ui_config.get("full_version_title", "💘 バレンタイン緊急攻略")
     
     st.markdown(f'<h2 style="white-space: nowrap;">{full_version_title}</h2>', unsafe_allow_html=True)
     with st.form("pay"):
@@ -519,9 +533,8 @@ if not is_paid:
             
     # ▼▼▼ Stripeリンク（設定ファイルから取得）▼▼▼
     stripe_checkout_url = CONFIG.get("stripe_checkout_url", "")
-    price_display = CONFIG.get("price_display", "500円")
     if stripe_checkout_url:
-        st.link_button(f"👉 {price_display}で発行する", stripe_checkout_url, type="primary", use_container_width=True)
+        st.link_button("👉 600円で全てを見る", stripe_checkout_url, type="primary", use_container_width=True)
 
 else:
     # ==========================================
