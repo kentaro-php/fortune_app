@@ -562,7 +562,17 @@ else:
                 # 鑑定結果のテキストを生成
                 if app_mode == "love":
                     # 恋愛攻略モード
-                    full_response = get_love_diagnosis_result(name, y, m, d, "basic")
+                    diagnosis_result = get_love_diagnosis_result(name, y, m, d, "basic")
+                    fortune_year = CONFIG.get("fortune_year", "2月")
+                    
+                    # パーソナライズされたヘッダーを追加
+                    full_response = f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                    full_response += f"💘 {name} 様 専用鑑定書 💘\n"
+                    full_response += f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    full_response += f"📅 生年月日: {y}年{m}月{d}日\n"
+                    full_response += f"📆 鑑定対象期間: {fortune_year}\n"
+                    full_response += f"🔮 鑑定日: {datetime.now().strftime('%Y年%m月%d日')}\n\n"
+                    full_response += diagnosis_result
                 else:
                     # 通常モード：数秘術ロジック
                     lp = calculate_life_path_number(y, m, d)
