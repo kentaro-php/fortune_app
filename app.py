@@ -708,7 +708,7 @@ else:
         
         # テキスト保存ボタン（バックアップ用）
         st.download_button(
-            label="📝 結果をテキストでダウンロード",
+            label="📝 バックアップ用テキスト保存",
             data=full_response,
             file_name="uranai_result.txt",
             mime="text/plain"
