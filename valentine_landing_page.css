@@ -1,0 +1,531 @@
+/* WordPress固定ページ用：バレンタイン緊急攻略ガイド */
+/* CSS部分：WordPressの「外観」→「カスタマイズ」→「追加CSS」に貼り付け、またはテーマのstyle.cssに追加 */
+
+/* ==========================================
+   基本ラッパー・コンテナ
+   ========================================== */
+.lp-wrapper.lp-valentine {
+    font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", "ヒラギノ明朝 ProN", serif;
+    font-size: 16px;
+    color: #333;
+    line-height: 1.8;
+    background: linear-gradient(135deg, #fdf6f0 0%, #fff5f5 50%, #fdf6f0 100%);
+}
+
+.lp-valentine .lp-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* ==========================================
+   ヘッダー
+   ========================================== */
+.lp-valentine .lp-header {
+    text-align: center;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #C0A060;
+    margin-bottom: 40px;
+}
+
+.lp-valentine .lp-title {
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #C0A060, #D4AF37, #C0A060);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    letter-spacing: 0.1em;
+}
+
+.lp-valentine .lp-sub {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.8;
+}
+
+/* ==========================================
+   ドキュメントギャラリー
+   ========================================== */
+.lp-valentine .lp-doc-gallery {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.lp-valentine .lp-img-box {
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+    max-width: 150px;
+}
+
+.lp-valentine .lp-sample-card {
+    background: linear-gradient(135deg, #fff0f5 0%, #ffe4e6 100%);
+    border: 2px solid #C0A060;
+    border-radius: 10px;
+    padding: 25px 15px;
+    box-shadow: 0 4px 12px rgba(192, 160, 96, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+}
+
+.lp-valentine .lp-sample-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.lp-valentine .lp-sample-text {
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}
+
+.lp-valentine .lp-img-label {
+    display: block;
+    margin-top: 8px;
+    font-size: 16px;
+    color: #666;
+}
+
+.lp-valentine .lp-secret-box {
+    position: relative;
+}
+
+.lp-valentine .lp-secret-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    z-index: 2;
+}
+
+.lp-valentine .lp-secret-overlay .lock-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.lp-valentine .lp-blur {
+    filter: blur(3px);
+    opacity: 0.7;
+}
+
+/* ==========================================
+   導入ボックス
+   ========================================== */
+.lp-valentine .lp-intro-box {
+    background: #fff;
+    border: 1px solid #e0d0c0;
+    border-radius: 10px;
+    padding: 30px 25px;
+    margin: 30px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.lp-valentine .lp-lead-text {
+    text-align: center;
+    font-size: 16px;
+    color: #C0A060;
+    font-weight: bold;
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+/* ==========================================
+   ゴールド見出し
+   ========================================== */
+.lp-valentine .lp-gold-heading {
+    text-align: center;
+    font-size: 16px;
+    color: #C0A060;
+    font-weight: bold;
+    margin: 40px 0 25px 0;
+    letter-spacing: 0.1em;
+}
+
+/* ==========================================
+   特徴ボックス
+   ========================================== */
+.lp-valentine .lp-features {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.lp-valentine .lp-feature-box {
+    flex: 1;
+    min-width: 250px;
+    background: #fff;
+    border: 1px solid #e0d0c0;
+    border-radius: 10px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lp-valentine .lp-feature-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(192, 160, 96, 0.2);
+}
+
+.lp-valentine .lp-feature-box h3 {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.lp-valentine .lp-feature-box p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.lp-valentine .lp-highlight {
+    color: #c71585;
+    font-weight: bold;
+}
+
+/* ==========================================
+   プレビューセクション
+   ========================================== */
+.lp-valentine .lp-preview-box {
+    background: #fff;
+    border: 2px solid #C0A060;
+    border-radius: 12px;
+    padding: 30px 25px;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(192, 160, 96, 0.15);
+}
+
+.lp-valentine .lp-preview-title {
+    font-size: 16px;
+    color: #c71585;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #C0A060;
+    margin-bottom: 20px;
+}
+
+.lp-valentine .lp-preview-content h4 {
+    font-size: 16px;
+    color: #C0A060;
+    margin: 20px 0 10px 0;
+    font-weight: bold;
+}
+
+.lp-valentine .lp-preview-content p {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+.lp-valentine .lp-strategy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lp-valentine .lp-strategy-list li {
+    font-size: 16px;
+    padding: 10px 0 10px 25px;
+    border-bottom: 1px solid #f0e0d0;
+    position: relative;
+}
+
+.lp-valentine .lp-strategy-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #c71585;
+    font-weight: bold;
+}
+
+.lp-valentine .lp-preview-note {
+    background: #fdf6e3;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 3px solid #C0A060;
+}
+
+.lp-valentine .lp-preview-note p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    line-height: 1.7;
+}
+
+/* ==========================================
+   CTAエリア
+   ========================================== */
+.lp-valentine .lp-cta-area {
+    background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+    border: 2px solid #c71585;
+    border-radius: 15px;
+    padding: 40px 30px;
+    margin: 50px 0;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(199, 21, 133, 0.15);
+}
+
+.lp-valentine .lp-price-box {
+    background: #fff;
+    border: 2px solid #c71585;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 25px 0;
+    display: inline-block;
+}
+
+.lp-valentine .lp-price-label {
+    display: block;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.lp-valentine .lp-price-amount {
+    font-size: 16px;
+    font-weight: bold;
+    color: #c71585;
+    display: block;
+}
+
+.lp-valentine .lp-price-note {
+    font-size: 16px;
+    color: #666;
+}
+
+.lp-valentine .lp-feature-list {
+    text-align: left;
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+.lp-valentine .lp-feature-item {
+    font-size: 16px;
+    padding: 8px 0 8px 25px;
+    border-bottom: 1px solid #f0e0e0;
+    position: relative;
+}
+
+.lp-valentine .lp-feature-item::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #c71585;
+    font-weight: bold;
+}
+
+.lp-valentine .lp-btn-pink {
+    display: inline-block;
+    background: linear-gradient(135deg, #c71585 0%, #e91e8c 100%);
+    color: #fff;
+    padding: 18px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(199, 21, 133, 0.4);
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.lp-valentine .lp-btn-pink:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(199, 21, 133, 0.5);
+    background: linear-gradient(135deg, #e91e8c 0%, #c71585 100%);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ==========================================
+   FAQセクション
+   ========================================== */
+.lp-valentine .lp-faq-list {
+    margin-top: 20px;
+}
+
+.lp-valentine .lp-faq-item {
+    background: #fff;
+    border: 1px solid #e0d0c0;
+    border-radius: 10px;
+    padding: 20px 25px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.lp-valentine .lp-faq-question {
+    font-size: 16px;
+    color: #C0A060;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.lp-valentine .lp-faq-answer {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ==========================================
+   信頼性セクション
+   ========================================== */
+.lp-valentine .lp-trust-section {
+    text-align: center;
+    padding: 40px 0;
+    border-top: 1px solid #e0d0c0;
+    margin-top: 40px;
+}
+
+.lp-valentine .lp-trust-text {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 2;
+    margin-bottom: 25px;
+}
+
+.lp-valentine .lp-trust-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.lp-valentine .lp-trust-link {
+    display: inline-block;
+    background: #fff;
+    color: #C0A060;
+    border: 2px solid #C0A060;
+    padding: 12px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.lp-valentine .lp-trust-link:hover {
+    background: #C0A060;
+    color: #fff;
+    text-decoration: none;
+}
+
+.lp-valentine .lp-trust-link-line {
+    background: #06C755;
+    color: #fff;
+    border-color: #06C755;
+}
+
+.lp-valentine .lp-trust-link-line:hover {
+    background: #05b04d;
+    border-color: #05b04d;
+}
+
+/* ==========================================
+   レスポンシブ対応
+   ========================================== */
+@media (max-width: 600px) {
+    .lp-valentine .lp-container {
+        padding: 30px 15px;
+    }
+    
+    .lp-valentine .lp-title {
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-sub {
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-doc-gallery {
+        gap: 10px;
+    }
+    
+    .lp-valentine .lp-img-box {
+        min-width: 80px;
+        max-width: 110px;
+    }
+    
+    .lp-valentine .lp-sample-card {
+        padding: 20px 10px;
+        min-height: 80px;
+    }
+    
+    .lp-valentine .lp-sample-icon {
+        font-size: 1.5rem;
+    }
+    
+    .lp-valentine .lp-sample-text {
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-intro-box {
+        padding: 25px 20px;
+    }
+    
+    .lp-valentine .lp-lead-text {
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-features {
+        flex-direction: column;
+    }
+    
+    .lp-valentine .lp-feature-box {
+        min-width: auto;
+    }
+    
+    .lp-valentine .lp-preview-box {
+        padding: 25px 20px;
+    }
+    
+    .lp-valentine .lp-cta-area {
+        padding: 30px 20px;
+    }
+    
+    .lp-valentine .lp-price-amount {
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-btn-pink {
+        padding: 15px 30px;
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-faq-item {
+        padding: 18px 20px;
+    }
+    
+    .lp-valentine .lp-trust-text {
+        font-size: 16px;
+    }
+    
+    .lp-valentine .lp-trust-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .lp-valentine .lp-trust-link {
+        display: block;
+        text-align: center;
+    }
+}
