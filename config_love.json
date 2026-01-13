@@ -124,12 +124,12 @@
     "save_success": "✅ 保存しました。下のボタンから決済してください。",
     "purchase_success": "✅ ご購入ありがとうございます！",
     "pdf_form_title": "📄 発行フォーム",
-    "pdf_create_button": "✨ PDFを作成する",
+    "pdf_create_button": "✨ 鑑定結果を見る（HTML）",
     "pdf_download_button": "📥 PDFをダウンロード",
     "pdf_generation_success": "完了しました！下のボタンからダウンロードできます。",
     "pdf_filename_template": "バレンタイン緊急攻略診断書_{name}.pdf",
     "full_version_title": "💎 完全版診断書",
-    "full_version_subtitle": "(PDF)"
+    "full_version_subtitle": "(HTML保存可)"
   },
   "pdf": {
     "sections": {
