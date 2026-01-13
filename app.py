@@ -48,6 +48,13 @@ def load_config(config_path="config.json"):
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
+        # 見つからない場合はデフォルトを試す
+        if config_path != "config.json":
+             try:
+                with open("config.json", 'r', encoding='utf-8') as f:
+                    return json.load(f)
+             except:
+                pass
         st.error(f"設定ファイル '{config_path}' が見つかりません。")
         st.stop()
     except json.JSONDecodeError as e:
@@ -226,7 +233,7 @@ def register_font():
     return None
 
 # ==========================================
-# 3. PDFヘルパー関数
+# 3. PDFヘルパー関数（※バックグラウンド生成用に維持）
 # ==========================================
 def draw_wrapped_text(c, text, x, y, max_width, font_name, font_size, line_height, color=HexColor("#333333")):
     c.setFillColor(color)
@@ -299,7 +306,6 @@ def get_monthly_fortunes(lp):
 def get_love_diagnosis_result(name, year, month, day, course="basic"):
     """恋愛攻略モード用：ユーザー名と日付をシードにして診断結果を選択"""
     import hashlib
-    from datetime import datetime
     
     # ユーザー名と日付を組み合わせてシードを作成
     seed_string = f"{name}_{year}_{month}_{day}_{datetime.now().strftime('%Y-%m-%d')}"
@@ -317,11 +323,15 @@ def get_love_diagnosis_result(name, year, month, day, course="basic"):
     return course_results[index]
 
 # ==========================================
-# 5. GAS経由でのデータ保存（修正版）
+# 5. GAS経由でのデータ保存
 # ==========================================
 def save_data_via_gas(action_type, name, year, month, day, lp):
     """設定ファイルからGAS URLを取得してデータを保存"""
     gas_url = CONFIG.get("gas_url", "")
+    
+    # URLが設定されていない場合は何もしない
+    if not gas_url:
+        return
 
     data = {
         "action": action_type,
@@ -338,197 +348,6 @@ def save_data_via_gas(action_type, name, year, month, day, lp):
     except Exception as e:
         # 保存エラーは静かに失敗（バックグラウンド処理のため、ユーザーには表示しない）
         pass
-
-# ==========================================
-# 6. PDF生成
-# ==========================================
-def create_pdf(name, y, m, d):
-    lp = calculate_life_path_number(y, m, d)
-    data = get_fortune_data(lp)
-    monthly = get_monthly_fortunes(lp)
-    
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    font_name = register_font() or 'Helvetica'
-    
-    c.setFillColor(HexColor("#FFFBF0")); c.rect(0, 0, width, height, fill=1)
-    pdf_title = CONFIG.get("pdf_title", "運勢鑑定書")
-    pdf_labels = CONFIG.get("pdf", {}).get("labels", {})
-    pdf_sections = CONFIG.get("pdf", {}).get("sections", {})
-    name_suffix = CONFIG.get("pdf", {}).get("name_suffix", "様")
-    
-    c.setFillColor(HexColor("#C71585")); c.setFont(font_name, 26); c.drawCentredString(width/2, height-60, pdf_title)
-    c.setFillColor(HexColor("#C0A060")); c.setFont(font_name, 22); c.drawCentredString(width/2, height-100, f"{name} {name_suffix}")
-    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-130, f"{pdf_labels.get('birth_date', '生年月日:')} {y}年{m}月{d}日")
-    c.setFillColor(HexColor("#333333")); c.setFont(font_name, 12); c.drawCentredString(width/2, height-150, f"{pdf_labels.get('life_path_number', 'ライフパスナンバー:')} {lp}")
-    
-    # ライフパスナンバーの説明
-    y_pos = height-180
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 11)
-    y_pos = draw_wrapped_text(c, data.get("lp_description", ""), 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 【総合運】
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, pdf_sections.get("overall", "【総合運】"))
-    y_pos -= 20
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, data["overall"][0])
-    y_pos -= 20
-    c.setFont(font_name, 11)
-    y_pos = draw_wrapped_text(c, data["overall"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 【恋愛運】
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, pdf_sections.get("love", "【恋愛運】"))
-    y_pos -= 20
-    stars = "★" * data["love"][0] + "☆" * (5 - data["love"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    c.setFont(font_name, 11)
-    y_pos = draw_wrapped_text(c, data["love"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 【仕事運】
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, pdf_sections.get("work", "【仕事運】"))
-    y_pos -= 20
-    stars = "★" * data["work"][0] + "☆" * (5 - data["work"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    c.setFont(font_name, 11)
-    y_pos = draw_wrapped_text(c, data["work"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 【金運】
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, pdf_sections.get("money", "【金運】"))
-    y_pos -= 20
-    stars = "★" * data["money"][0] + "☆" * (5 - data["money"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    c.setFont(font_name, 11)
-    y_pos = draw_wrapped_text(c, data["money"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 【健康運】
-    y_pos -= 20
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 14)
-    c.drawString(50, y_pos, pdf_sections.get("health", "【健康運】"))
-    y_pos -= 20
-    stars = "★" * data["health"][0] + "☆" * (5 - data["health"][0])
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    c.drawString(50, y_pos, stars)
-    y_pos -= 20
-    c.setFont(font_name, 11)
-    y_pos = draw_wrapped_text(c, data["health"][1], 50, y_pos, width-100, font_name, 11, 18)
-    
-    # 2ページ目: 月別運勢カレンダー
-    c.showPage()
-    c.setFillColor(HexColor("#FFFBF0"))
-    c.rect(0, 0, width, height, fill=1)
-    
-    # タイトル（設定ファイルから取得）
-    monthly_title = CONFIG.get("pdf_monthly_title", "月別運勢カレンダー")
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 20)
-    c.drawCentredString(width/2, height-60, monthly_title)
-    
-    # 月別運勢リストを描画
-    y_pos = height-100
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 12)
-    
-    for txt in monthly:
-        if txt and txt.strip():  # テキストが空でないことを確認
-            if y_pos < 200:  # スペースが足りない場合は改ページ
-                c.showPage()
-                c.setFillColor(HexColor("#FFFBF0"))
-                c.rect(0, 0, width, height, fill=1)
-                y_pos = height - 100
-            y_pos = draw_wrapped_text(c, txt, 50, y_pos, width-100, font_name, 12, 20, HexColor("#333333"))
-            y_pos -= 15  # 月間の間隔を追加
-    
-    # 鑑定した占い師（12月の運勢の下）
-    y_pos -= 40
-    if y_pos < 250:  # スペースが足りない場合は改ページ
-        c.showPage()
-        c.setFillColor(HexColor("#FFFBF0"))
-        c.rect(0, 0, width, height, fill=1)
-        y_pos = height - 100
-    
-    fortune_teller_name = CONFIG.get("fortune_teller_name", "占い師")
-    fortune_teller_url = CONFIG.get("fortune_teller_url", "")
-    c.setFillColor(HexColor("#333333"))
-    c.setFont(font_name, 10)
-    fortune_teller_text = f"{pdf_labels.get('fortune_teller_prefix', '鑑定した占い師')} {fortune_teller_name}"
-    text_width = c.stringWidth(fortune_teller_text, font_name, 10)
-    text_x = (width - text_width) / 2
-    c.drawString(text_x, y_pos, fortune_teller_text)
-    # リンクを追加
-    if fortune_teller_url:
-        c.linkURL(fortune_teller_url, (text_x, y_pos - 2, text_x + text_width, y_pos + 12), relative=0)
-    
-    # フッター（鑑定した占い師の下）
-    y_pos -= 25
-    c.setFillColor(HexColor("#666666"))
-    c.setFont(font_name, 9)
-    c.drawCentredString(width/2, y_pos, pdf_labels.get("disclaimer", "この鑑定書は数秘術に基づいて作成されました。"))
-    
-    # 占いミザリーへの案内
-    y_pos -= 35
-    if y_pos < 200:  # スペースが足りない場合は改ページ
-        c.showPage()
-        c.setFillColor(HexColor("#FFFBF0"))
-        c.rect(0, 0, width, height, fill=1)
-        y_pos = height - 100
-    
-    # 「さらにもっと深く知るには」のテキストを描画（設定ファイルから取得）
-    fortune_site_url = CONFIG.get("fortune_site_url", "")
-    fortune_site_name = CONFIG.get("fortune_site_name", "")
-    c.setFillColor(HexColor("#C71585"))
-    c.setFont(font_name, 12)
-    text1 = pdf_labels.get("learn_more_prefix", "さらにもっと深く知るには")
-    text2 = fortune_site_name
-    text3 = pdf_labels.get("learn_more_suffix", "へ")
-    text1_width = c.stringWidth(text1, font_name, 12)
-    text2_width = c.stringWidth(text2, font_name, 12)
-    text3_width = c.stringWidth(text3, font_name, 12)
-    total_width = text1_width + text2_width + text3_width
-    start_x = (width - total_width) / 2
-    
-    c.drawString(start_x, y_pos, text1)
-    link_x = start_x + text1_width
-    c.drawString(link_x, y_pos, text2)
-    if fortune_site_url:
-        c.linkURL(fortune_site_url, (link_x, y_pos - 2, link_x + text2_width, y_pos + 14), relative=0)
-    c.drawString(link_x + text2_width, y_pos, text3)
-    
-    y_pos -= 35
-    line_reservation_text = CONFIG.get("line_reservation_text", "")
-    if line_reservation_text:
-        c.setFillColor(HexColor("#C71585"))
-        c.setFont(font_name, 11)
-        c.drawCentredString(width/2, y_pos, line_reservation_text)
-        
-    c.save()
-    buffer.seek(0)
-    return buffer
 
 # ==========================================
 # 7. アプリUI
@@ -551,11 +370,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # query_paramsは既に上で定義済み
-is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success"
+is_paid = query_params.get("paid") == "true" or query_params.get("checkout") == "success" or query_params.get("payment_status") == "success"
 
 if 'user_name' not in st.session_state: st.session_state.update({k: v for k, v in zip(['user_name','birth_year','birth_month','birth_day'], ['', 2000, 1, 1])})
-if 'pdf_data' not in st.session_state: st.session_state.pdf_data = None
-if 'pdf_filename' not in st.session_state: st.session_state.pdf_filename = None
 
 if not is_paid:
     # ▼▼▼ 興味を引くコンテンツセクション（設定ファイルから取得）▼▼▼
@@ -646,7 +463,7 @@ if not is_paid:
                     lp = calculate_life_path_number(y_pre, m_pre, d_pre)
                     preview_data = get_fortune_data(lp)
                     
-                    # ▼ GAS経由でデータを保存（URL修正版）
+                    # ▼ GAS経由でデータを保存
                     save_data_via_gas("無料プレビュー", name_pre, y_pre, m_pre, d_pre, lp)
                     
                     # 興味を引く見出しを表示
@@ -685,8 +502,8 @@ if not is_paid:
     # アンカー用のIDを追加
     st.markdown('<div id="完全版鑑定書"></div>', unsafe_allow_html=True)
     full_version_title = ui_config.get("full_version_title", "💎 完全版鑑定書")
-    full_version_subtitle = ui_config.get("full_version_subtitle", "(PDF)")
-    st.markdown(f'<h2 style="white-space: nowrap;">{full_version_title} <small style="font-size: 0.7em;">{full_version_subtitle}</small></h2>', unsafe_allow_html=True)
+    
+    st.markdown(f'<h2 style="white-space: nowrap;">{full_version_title}</h2>', unsafe_allow_html=True)
     with st.form("pay"):
         name = st.text_input(form_labels.get("name", "お名前"), key="p_name")
         col1, col2, col3 = st.columns(3)
@@ -707,10 +524,15 @@ if not is_paid:
         st.link_button(f"👉 {price_display}で発行する", stripe_checkout_url, type="primary", use_container_width=True)
 
 else:
+    # ==========================================
+    # ▼ 決済成功時の表示処理（スマホ最適化版）
+    # ==========================================
     ui_config = CONFIG.get("ui", {})
     form_labels = ui_config.get("form_labels", {})
     
     st.success(ui_config.get("purchase_success", "✅ ご購入ありがとうございます！"))
+    
+    # フォームを表示して鑑定を実行
     with st.form("final"):
         st.write(f"### {ui_config.get('pdf_form_title', '📄 発行フォーム')}")
         name = st.text_input(form_labels.get("name", "お名前"), value=st.session_state.user_name, key="final_name")
@@ -724,13 +546,13 @@ else:
         submitted = st.form_submit_button(ui_config.get("pdf_create_button", "✨ 鑑定結果を表示する"), use_container_width=True)
 
     if submitted and name:
-        with st.spinner("生成中..."):
+        with st.spinner("鑑定中..."):
             try:
                 # モード判定
                 app_mode = CONFIG.get("mode", "normal")
                 
                 # ログ保存：購入完了
-                # ▼ GAS経由でデータを保存（エラーが発生しても続行）
+                # ▼ GAS経由でデータを保存
                 try:
                     lp = calculate_life_path_number(y, m, d) if app_mode != "love" else "love_mode"
                     save_data_via_gas("購入・発行", name, y, m, d, lp)
@@ -796,13 +618,9 @@ else:
                 import traceback
                 st.error(f"詳細: {traceback.format_exc()}")
     
-    # 鑑定結果を表示
+    # 鑑定結果を表示（スマホ最適化カード）
     if st.session_state.get('fortune_result'):
         full_response = st.session_state.fortune_result
-        
-        # ==========================================
-        # ▼ スマホ最適化（HTMLカード表示）
-        # ==========================================
         
         # 1. お祝いの演出
         st.balloons()
