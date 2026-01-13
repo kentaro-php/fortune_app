@@ -721,41 +721,154 @@ else:
             m = st.number_input(form_labels.get("month", "月"), 1, 12, st.session_state.birth_month, key="final_month")
         with col3:
             d = st.number_input(form_labels.get("day", "日"), 1, 31, st.session_state.birth_day, key="final_day")
-        submitted = st.form_submit_button(ui_config.get("pdf_create_button", "✨ PDFを作成する"), use_container_width=True)
+        submitted = st.form_submit_button(ui_config.get("pdf_create_button", "✨ 鑑定結果を表示する"), use_container_width=True)
 
     if submitted and name:
         with st.spinner("生成中..."):
             try:
-                pdf = create_pdf(name, y, m, d)
-                pdf_bytes = pdf.getvalue()
-                st.session_state.pdf_data = pdf_bytes
-                pdf_filename_template = ui_config.get("pdf_filename_template", "運勢鑑定書_{name}.pdf")
-                st.session_state.pdf_filename = pdf_filename_template.format(name=name)
+                # モード判定
+                app_mode = CONFIG.get("mode", "normal")
                 
                 # ログ保存：購入完了
                 # ▼ GAS経由でデータを保存（エラーが発生しても続行）
                 try:
-                    save_data_via_gas("購入・発行", name, y, m, d, calculate_life_path_number(y, m, d))
+                    lp = calculate_life_path_number(y, m, d) if app_mode != "love" else "love_mode"
+                    save_data_via_gas("購入・発行", name, y, m, d, lp)
                 except:
                     pass  # 保存エラーは無視
                 
-                st.success(ui_config.get("pdf_generation_success", "完了しました！下のボタンからダウンロードできます。"))
-                st.rerun()  # ページを再読み込みしてダウンロードボタンを表示
+                # 鑑定結果のテキストを生成
+                if app_mode == "love":
+                    # 恋愛攻略モード
+                    full_response = get_love_diagnosis_result(name, y, m, d, "basic")
+                else:
+                    # 通常モード：数秘術ロジック
+                    lp = calculate_life_path_number(y, m, d)
+                    data = get_fortune_data(lp)
+                    monthly = get_monthly_fortunes(lp)
+                    
+                    # テキストを整形
+                    pdf_labels = CONFIG.get("pdf", {}).get("labels", {})
+                    pdf_sections = CONFIG.get("pdf", {}).get("sections", {})
+                    fortune_year = CONFIG.get("fortune_year", "")
+                    
+                    full_response = f"{name} 様の{fortune_year}運勢\n\n"
+                    full_response += f"{pdf_labels.get('life_path_number', 'ライフパスナンバー:')} {lp}\n"
+                    full_response += f"{data.get('lp_description', '')}\n\n"
+                    
+                    full_response += f"{pdf_sections.get('overall', '【総合運】')}\n"
+                    full_response += f"{data['overall'][0]}\n"
+                    full_response += f"{data['overall'][1]}\n\n"
+                    
+                    full_response += f"{pdf_sections.get('love', '【恋愛運】')}\n"
+                    full_response += f"{'★' * data['love'][0] + '☆' * (5 - data['love'][0])}\n"
+                    full_response += f"{data['love'][1]}\n\n"
+                    
+                    full_response += f"{pdf_sections.get('work', '【仕事運】')}\n"
+                    full_response += f"{'★' * data['work'][0] + '☆' * (5 - data['work'][0])}\n"
+                    full_response += f"{data['work'][1]}\n\n"
+                    
+                    full_response += f"{pdf_sections.get('money', '【金運】')}\n"
+                    full_response += f"{'★' * data['money'][0] + '☆' * (5 - data['money'][0])}\n"
+                    full_response += f"{data['money'][1]}\n\n"
+                    
+                    full_response += f"{pdf_sections.get('health', '【健康運】')}\n"
+                    full_response += f"{'★' * data['health'][0] + '☆' * (5 - data['health'][0])}\n"
+                    full_response += f"{data['health'][1]}\n\n"
+                    
+                    if data.get('color'):
+                        full_response += f"ラッキーカラー: {data['color']}\n"
+                    if data.get('item'):
+                        full_response += f"ラッキーアイテム: {data['item']}\n\n"
+                    
+                    if monthly:
+                        monthly_title = CONFIG.get("pdf_monthly_title", "月別運勢カレンダー")
+                        full_response += f"{monthly_title}\n"
+                        for txt in monthly:
+                            if txt and txt.strip():
+                                full_response += f"{txt}\n"
+                
+                # セッションステートに保存
+                st.session_state.fortune_result = full_response
+                st.rerun()  # ページを再読み込みして結果を表示
             except Exception as e:
-                st.error(f"PDF生成エラー: {e}")
+                st.error(f"鑑定結果生成エラー: {e}")
                 import traceback
                 st.error(f"詳細: {traceback.format_exc()}")
     
-    # PDFダウンロードボタンを表示
-    if st.session_state.get('pdf_data') and st.session_state.get('pdf_filename'):
-        st.markdown("---")
+    # 鑑定結果を表示
+    if st.session_state.get('fortune_result'):
+        full_response = st.session_state.fortune_result
+        
+        # ==========================================
+        # ▼ スマホ最適化（HTMLカード表示）
+        # ==========================================
+        
+        # 1. お祝いの演出
+        st.balloons()
+        
+        # 2. デザイン定義（CSS）
+        st.markdown("""
+        <style>
+            /* 全体のカード枠 */
+            .fortune-card {
+                background-color: #fff0f5;
+                border: 2px solid #ff69b4;
+                border-radius: 15px;
+                padding: 20px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+                font-family: "Helvetica Neue", Arial, sans-serif;
+            }
+            /* タイトル部分 */
+            .fortune-header {
+                color: #c71585;
+                font-size: 22px;
+                font-weight: bold;
+                text-align: center;
+                border-bottom: 2px dashed #ff69b4;
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+            }
+            /* 本文部分 */
+            .fortune-content {
+                color: #333333;
+                font-size: 16px;
+                line-height: 1.8;
+                white-space: pre-wrap;
+            }
+            /* フッター */
+            .fortune-footer {
+                margin-top: 15px;
+                text-align: center;
+                font-size: 12px;
+                color: #888;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # 3. 画面描画
+        st.markdown(f"""
+        <div class="fortune-card">
+            <div class="fortune-header">🔮 鑑定結果 🔮</div>
+            <div class="fortune-content">
+                {full_response} 
+            </div>
+            <div class="fortune-footer">
+                screen shot this page to save<br>
+                Presented by {CONFIG.get('app_title', '運勢鑑定書')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.success("鑑定完了です！この画面をスクリーンショットして保存してください。")
+        
+        # テキスト保存ボタン（バックアップ用）
         st.download_button(
-            label=ui_config.get("pdf_download_button", "📥 PDFをダウンロード"),
-            data=st.session_state.pdf_data,
-            file_name=st.session_state.pdf_filename,
-            mime="application/pdf",
-            use_container_width=True,
-            type="primary"
+            label="📝 結果をテキストでダウンロード",
+            data=full_response,
+            file_name="uranai_result.txt",
+            mime="text/plain"
         )
 
 # ==========================================
