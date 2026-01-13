@@ -11,7 +11,7 @@
   "app_intro_text": "生年月日から導き出される数字と星回りで、<strong>2月のバレンタイン戦略</strong>を徹底分析。感情論ではなく、データに基づいた『勝算』を提示します。",
   "app_icon": "💘",
   "mode": "love",
-  "stripe_checkout_url": "https://buy.stripe.com/test_7sYaEX0xscOC4OR3NRcfK05",
+  "stripe_checkout_url": "https://buy.stripe.com/dRm5kDdke01QbdfckncfT2f",
   "stripe_price_id": "price_1SoYglFPzHf9rk9y8I1INC55",
   "stripe_product_ids": {
     "_comment": "⚠️ 以下を実際のStripe価格IDに置き換えてください",
