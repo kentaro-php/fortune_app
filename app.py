@@ -635,7 +635,7 @@ else:
         # 1. お祝いの演出
         st.balloons()
         
-        # 2. デザイン定義（CSS）
+        # 2. デザイン定義（CSS）- スマホ最適化
         st.markdown("""
         <style>
             /* 全体のカード枠 */
@@ -643,34 +643,49 @@ else:
                 background-color: #fff0f5;
                 border: 2px solid #ff69b4;
                 border-radius: 15px;
-                padding: 20px;
+                padding: 24px;
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                 margin-bottom: 20px;
-                font-family: "Helvetica Neue", Arial, sans-serif;
+                font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
             }
             /* タイトル部分 */
             .fortune-header {
                 color: #c71585;
-                font-size: 22px;
+                font-size: 26px;
                 font-weight: bold;
                 text-align: center;
                 border-bottom: 2px dashed #ff69b4;
-                padding-bottom: 10px;
-                margin-bottom: 15px;
+                padding-bottom: 12px;
+                margin-bottom: 18px;
             }
             /* 本文部分 */
             .fortune-content {
                 color: #333333;
-                font-size: 16px;
-                line-height: 1.8;
+                font-size: 18px;
+                line-height: 2.0;
                 white-space: pre-wrap;
+                word-break: break-word;
             }
             /* フッター */
             .fortune-footer {
-                margin-top: 15px;
+                margin-top: 20px;
                 text-align: center;
-                font-size: 12px;
+                font-size: 14px;
                 color: #888;
+            }
+            /* スマホ対応 */
+            @media (max-width: 600px) {
+                .fortune-card {
+                    padding: 18px;
+                    border-radius: 12px;
+                }
+                .fortune-header {
+                    font-size: 24px;
+                }
+                .fortune-content {
+                    font-size: 17px;
+                    line-height: 1.9;
+                }
             }
         </style>
         """, unsafe_allow_html=True)
