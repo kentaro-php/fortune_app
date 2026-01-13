@@ -116,7 +116,7 @@
     "preview_success_subtitle_template": "✨ あなたの恋の勝算は",
     "preview_section_title": "💘 気になる診断結果",
     "preview_warning": "🔒 詳しい戦略アドバイス（Xデー・具体的な作戦・タイミング分析など）をご覧になるには、完全版の購入が必要です。",
-    "preview_link_text": "↓ 完全版診断書を見る ↓",
+    "preview_link_text": "↓ 完全版を見る ↓",
     "name_required_error": "お名前を入力してください",
     "form_labels": {
       "name": "あなたのお名前（ニックネーム可）",
@@ -132,7 +132,7 @@
     "pdf_download_button": "📥 PDFをダウンロード",
     "pdf_generation_success": "完了しました！下のボタンからダウンロードできます。",
     "pdf_filename_template": "バレンタイン緊急攻略診断書_{name}.pdf",
-    "full_version_title": "💘 バレンタイン緊急攻略",
+    "full_version_title": "💘 バレンタイン緊急攻略 完全版",
     "full_version_subtitle": "(HTML保存可)"
   },
   "pdf": {
